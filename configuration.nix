@@ -44,4 +44,11 @@
   # Pacotes proprietários - Preciso para o ZeroTier 1 - Procurar substituto
   nixpkgs.config.allowUnfree = true;
 
+  # Habilitar a interação do GPG via pinentry TTY
+  services.pcscd.enable = true;
+  programs.gnupg.agent = {
+    enable = true;
+    pinentryPackage = pkgs.pinentry-curses;
+  };
+
 }

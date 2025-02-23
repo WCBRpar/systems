@@ -18,13 +18,16 @@
     histSize = 10000;
 
     shellAliases = {
+      cdhm = "cd ~/.config/home-manager";
+      cdnixos = "cd /etc/nixos";
+      hm-upg = "home-manager switch --flake .";
       lsan = "ls -an";
       lsl = "ls -l";
       nixos-upg = "sudo nixos-rebuild switch --upgrade";
       nixos-upd = "sudo nixos-rebuild switch";
       ssh-pegasus = "ssh -p 22 walter_wcbrpar_com@pegasus.wcbrpar.com";
       ssh-galactic = "ssh -p 22 walter_wcbrpar_com@galactica.wcbrpar.com";
-    };
+      };
     
     setOptions = [
       "AUTO_CD"
