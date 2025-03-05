@@ -16,7 +16,7 @@
     ./antispam.nix
   ];
 
-  mailserver = {
+  mailserver = lib.mkIf ( config.networking.hostName == "galactica" ) {
     enable = true;
     fqdn = "mail.wcbrpar.com";
     domains = [ "wcbrpar.com" "redcom.digital" "ẅalcor.com.br" "wqueiroz.adv.br" ];

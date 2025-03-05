@@ -19,6 +19,7 @@
     magic-wormhole 
     nixpkgs-fmt 
     neovim 
+    npins
     unzip
   ];
 

@@ -15,7 +15,7 @@ in
 
 {
 
-  services.radicale = {
+  services.radicale = lib.mkIf ( config.networking.hostName == "galactica" ) {
     enable = true;
     config = ''
       [auth]
@@ -25,7 +25,7 @@ in
     '';
   };
 
-  services.nginx = {
+  services.nginx = lib.mkIf ( config.networking.hostName == "galactica" ) {
     enable = true;
     virtualHosts = {
       "cal.wcbrpar.com" = {
