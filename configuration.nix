@@ -1,4 +1,10 @@
 { config, pkgs, ... }:
+
+let
+  sources = import ./npins;
+  pkgs = import sources.nixpkgs {};
+in
+
 {
   imports = [
     <agenix/modules/age.nix>

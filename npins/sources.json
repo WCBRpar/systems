@@ -1,0 +1,25 @@
+{
+  "pins": {
+    "nixpkgs": {
+      "type": "Channel",
+      "name": "nixpkgs-unstable",
+      "url": "https://releases.nixos.org/nixpkgs/nixpkgs-25.05pre762233.02032da4af07/nixexprs.tar.xz",
+      "hash": "0wx6vnq02n9c5x1df3dpzi1xk8aj5vvzzjhbb9dq04871hqs5wzs"
+    },
+    "wp4nix": {
+      "type": "GitRelease",
+      "repository": {
+        "type": "Git",
+        "url": "https://git.helsinki.tools/helsinki-systems/wp4nix.git"
+      },
+      "pre_releases": false,
+      "version_upper_bound": null,
+      "release_prefix": null,
+      "version": "v1.0.0",
+      "revision": "0c6d17e70c38d40e90ad37d50317e0b420abe122",
+      "url": null,
+      "hash": "177b0jqp93rk0cy8wyh0alkn791jfzym0bcir4wazbqcamw5x6sq"
+    }
+  },
+  "version": 3
+}
