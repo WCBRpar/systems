@@ -1,6 +1,11 @@
 { config, lib, pkgs, ... }:
 
 {
+
+  nixpkgs.config.permittedInsecurePackages = [
+    "kanidm-1.4.6"
+  ];
+
   networking.firewall = {
     enable = true;
     allowedTCPPorts = [ 80 443 636 ];
