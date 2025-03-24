@@ -10,7 +10,6 @@
     ./nginx
     ./office
     ./shell
-    ./wordpress
   ];
 }
 
