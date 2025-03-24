@@ -1,8 +1,5 @@
-
-{ lib, ... }: 
-
 {
-  sites = lib.mkOptions {
+  sites = {
       "RED" = {
         sumdomain = "";
         domain = "redcom.digital";
@@ -24,27 +21,3 @@
     };
  }
 
-
-# Quando era JSON!
-# 
-# {
-#   "sites": {
-#     "redcom.digital": {
-#       "subdomain": "",
-#       "domain": "redcom.digital",
-#       "organization": "wcbrpar.com",
-#       "type": {
-#         "type": "wordpress",
-#         "plugins": [
-#           "co-authors-plus",
-#           "google-site-kit"
-#         ],
-#         "themes": [
-#           "astra",
-#           "twentytwentythree"
-#         ],
-#         "languages": "pt_BR"
-#       }
-#     }
-#   }
-# }
