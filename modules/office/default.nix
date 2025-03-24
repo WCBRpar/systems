@@ -7,9 +7,9 @@
   # Habilitar o Docker
   virtualisation.docker.enable = true;
 
-  # services.onlyoffice = {
-  #   enable = true;
-  #   hostname = "office.wcbrpar.com";
-  # };
+  services.onlyoffice = {
+    enable = true;
+    hostname = "office.wcbrpar.com";
+  };
 
 }
