@@ -1,6 +1,11 @@
 { config, lib, pkgs, ... }:
 
 {
+
+  nixpkgs.config.permittedInsecurePackages = [
+    "kanidm-1.4.6"
+  ];
+
   networking.firewall = {
     enable = true;
     allowedTCPPorts = [ 80 443 636 ];
@@ -93,6 +98,7 @@
     certs."iam.wcbrpar.com" = {
       domain = "iam.wcbrpar.com";
       extraDomainNames = [ "ldap.wcbrpar.com" ];
+      webroot = "/lib/var/acme/iam.wcbrpar.com/";
       group = "nginx";
       reloadServices = [ "nginx.service" ];
     };

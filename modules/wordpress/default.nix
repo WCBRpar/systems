@@ -2,17 +2,21 @@
 
 let
 
-wp4nix = pkgs.callPackage sources.wp4nix { };
-  sites = import ./sites.nix { inherit lib; };
+  # sites = import ./sites { inherit lib; };
+
+  sources = import ../../npins;
+  wp4nix = pkgs.callPackage sources.wp4nix {};
+
+  imports = [ ./sites ];
 
 in
 
 {
-  security.acme = lib.mkIf ( config.networking.hostName == "pegasus" )  {
-    certs."${site.domain}"= {
-      extraDomainNames = [ "*.${site.domain}" "*.${site.domain}" ];
-    };
-  };
+
+  environment.systemPackages = with pkgs; [ php ];
+  environment.variables.WP_VERSION = "6.4";
+    
+
 }
 
 
