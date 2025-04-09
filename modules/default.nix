@@ -7,6 +7,7 @@
     ./editor
     ./iam
     ./mail
+    ./meeting
     ./nginx
     ./office
     ./shell

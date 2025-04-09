@@ -1,0 +1,31 @@
+{
+  "pins": {
+    "nixpkgs": {
+      "type": "Git",
+      "repository": {
+        "type": "GitHub",
+        "owner": "nixos",
+        "repo": "nixpkgs"
+      },
+      "branch": "nixos-24.11",
+      "revision": "a880f49904d68b5e53338d1e8c7bf80f59903928",
+      "url": "https://github.com/nixos/nixpkgs/archive/a880f49904d68b5e53338d1e8c7bf80f59903928.tar.gz",
+      "hash": "0gs1hkm6piwknanfa3qncm2i2g81blqx2rxp5d629396wla670d3"
+    },
+    "wp4nix": {
+      "type": "GitRelease",
+      "repository": {
+        "type": "Git",
+        "url": "https://git.helsinki.tools/helsinki-systems/wp4nix"
+      },
+      "pre_releases": false,
+      "version_upper_bound": null,
+      "release_prefix": null,
+      "version": "v1.0.0",
+      "revision": "0c6d17e70c38d40e90ad37d50317e0b420abe122",
+      "url": null,
+      "hash": "177b0jqp93rk0cy8wyh0alkn791jfzym0bcir4wazbqcamw5x6sq"
+    }
+  },
+  "version": 3
+}

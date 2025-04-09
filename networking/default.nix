@@ -8,8 +8,8 @@ in
 {
   # Configuração de rede
   networking = {
-    hostId = "8bf0a2a5"; # cut -c-8 </proc/sys/kernel/random/uuid
-    hostName = "pegasus"; # Define your hostname.
+    hostId = "8bf0dda5"; # cut -c-8 </proc/sys/kernel/random/uuid
+    hostName = "galactica"; # Define your hostname.
     domain = "wcbrpar.com";
     nameservers = [ "84.200.69.80" "84.200.70.40" ]; # CloudFlare / DNS Watch
 
@@ -61,6 +61,9 @@ in
       PasswordAuthentication = true;
     };
   };
+
+  #  Habilita Builds Remotas via SSH
+  nix.settings.trusted-users = ["root" "wjjunyor"];
 
   # ZEROTIER (comentado, mas mantido para referência)
   # services.zerotierone.enable = true;
