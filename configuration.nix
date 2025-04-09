@@ -1,11 +1,17 @@
 { config, pkgs, ... }:
 
 let
+
   sources = import ./npins;
-  pkgs = import sources.nixpkgs {};
+
 in
 
 {
+  nixpkgs.config.permittedInsecurePackages = [ 
+    "jitsi-meet-1.0.8043"
+    "kanidm-1.4.6"
+  ];
+
   imports = [
     <agenix/modules/age.nix>
     <home-manager/nixos>

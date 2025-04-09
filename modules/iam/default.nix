@@ -2,10 +2,6 @@
 
 {
 
-  nixpkgs.config.permittedInsecurePackages = [
-    "kanidm-1.4.6"
-  ];
-
   networking.firewall = {
     enable = true;
     allowedTCPPorts = [ 80 443 636 ];
@@ -76,7 +72,7 @@
     virtualHosts."iam.wcbrpar.com" = {
       addSSL = true;
       enableACME = true;
-      acmeRoot = null;
+      # acmeRoot = null;
 
       locations."/" = {
         proxyPass = "https://127.0.0.1:8443";
