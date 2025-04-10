@@ -7,7 +7,7 @@
     defaults.email = "gcp-devops@wcbrpar.com";
 
     certs."wcbrpar.com" = {
-      webroot = "/var/lib/acme/wcbrpar.com";
+      # webroot = "/var/lib/acme/wcbrpar.com";
       email = "gcp-devops@wcbrpar.com";
       # Ensure that the web server you use can read the generated certs
       # Take a look at the group option for the web server you choose.
@@ -16,6 +16,7 @@
       # we can generate certs for anything!
       # Just make sure your DNS resolves them.
       extraDomainNames = [ "redcom.digital" "walcor.com.br" "wqueiroz.adv.br" ];
+      dnsProvider = "cloudflare";
     };
   };
 

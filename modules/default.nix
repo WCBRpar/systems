@@ -11,6 +11,7 @@
     ./nginx
     ./office
     ./shell
+    ./webserving
     ./wordpress
   ];
 }
