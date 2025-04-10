@@ -34,7 +34,7 @@
       tls_key = "/var/lib/acme/iam.wcbrpar.com/key.pem";
     };
 
-    unixSettings = {
+    unixSettings = lib.mkIf ( config.networking.hostName == "galactica" ) {
       hsm_type = "soft";
       default_shell = "/bin/zsh";
       home_attr = "uuid";
@@ -42,7 +42,7 @@
       pam_allowed_login_groups = [ "users" "admins" ];
     };
 
-    enablePam = true;
+    enablePam = lib.mkIf ( config.networking.hostName == "galactica" ) true;
 
     provision = lib.mkIf ( config.networking.hostName == "galactica" ) {
       enable = true;
@@ -64,7 +64,7 @@
     };
   };
 
-  services.nginx = {
+  services.nginx = lib.mkIf ( config.networking.hostName == "galactica" ) {
     enable = true;
     recommendedProxySettings = true;
     recommendedTlsSettings = true;
@@ -90,7 +90,7 @@
     };
   };
 
-  security.acme = {
+  security.acme = lib.mkIf ( config.networking.hostName == "galactica" ) {
     certs."iam.wcbrpar.com" = {
       domain = "iam.wcbrpar.com";
       extraDomainNames = [ "ldap.wcbrpar.com" ];

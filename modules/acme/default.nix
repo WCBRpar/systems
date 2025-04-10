@@ -17,6 +17,9 @@
       # Just make sure your DNS resolves them.
       extraDomainNames = [ "redcom.digital" "walcor.com.br" "wqueiroz.adv.br" ];
       dnsProvider = "cloudflare";
+      dnsResolver = "1.1.1.1:53";
+      environmentFile = "/var/lib/cloudflare/cloudflare.s";
+
     };
   };
 
