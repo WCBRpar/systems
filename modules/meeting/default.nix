@@ -6,17 +6,36 @@
     enable = true;
     hostName = "meet.redcom.digital";
     interfaceConfig = {
-      APP_NAME = "Jitsi Meet";
+      APP_NAME = "redcom.digital";
+      DEFAULT_REMOTE_DISPLAY_NAME = "Convidado";
+      BRAND_WATERMARK_LINK = "https://meet.redcom.digital";
+      DEFAULT_LOGO_URL = /var/lib/www/shared/images/icon.svg;
+      DEFAULT_WELCOME_PAGE_LOGO_URL = "/var/lib/www/shared/images/watermark.svg";
+
+
+
       AUDIO_LEVEL_PRIMARY_COLOR = "rgba(221,42,42,0.4)";
       AUDIO_LEVEL_SECONDARY_COLOR = "rgba(238,149,150,0.2)";
-      DEFAULT_WELCOME_PAGE_LOGO_URL = "images/watermark.svg";
     };
 
     config = {
-      wnableWelcomePage = false;
-      prejoinPageEnable = true;
+      enableWelcomePage = true;
+      prejoinPageEnable = false;
       disableModeratorIndicator = false;
+      disableThirdPartyRequests = true;
       defaultLang = "pt-BR";
+
+      enableAuthentication = true;
+      authenticationType = "oauth";
+      oauth = {
+        clientId = "jitsi-meet";
+        clientSecret = "7g1PD469rbkp6vFzbx3M5ysVkRUtk5ph8UMsx2jsyp4Rzbrz";
+        authUrl = "https://iam.wcbrpar.com/oauth2/authorize";
+        tokenUrl = "https://iam.wcbrpar.com/oauth2/token";
+        userInfoUrl = "https://iam.wcbrpar.com/oauth2/userinfo";
+        scope = "openid profile email";
+        userInfoNameField = "name";
+      };
     };
     
     secureDomain.enable = true;
@@ -24,8 +43,8 @@
     jibri = {
       enable = true; 
     };
-    # caddy.enable = true;
-    nginx.enable = true;
+    caddy.enable = true;
+    # nginx.enable = true; 
   };
 
   services.jibri = {
@@ -48,9 +67,7 @@
     "d ${config.services.jibri.config.recording.recordings-directory} 0750 jibri jibri -"
   ];
   
-  services.nginx.virtualHosts."meet.redcom.digital" = {
-    # enableAcme = true;
-    forceSSL = false;
+  services.caddy.virtualHosts."meet.redcom.digital" = {
   };
 
   services.nginx.virtualHosts."meet.wcbrpar.com" = {

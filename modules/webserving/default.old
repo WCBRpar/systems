@@ -1,0 +1,20 @@
+{ config, pkgs, lib, ... }:
+
+{
+
+  # Nginx webserver
+  services.caddy = {
+    virtualHosts = {
+      # Servidor de arquivos e imagens estáticas  para as ferramentas hospedadas
+      "img.redcom.digital" = {
+        serverName = "redcom.digital";
+	serverAliases = [ "img.wcbrpar.com" ];
+	extraConfig = ''
+	  root * /var/lib/www/shared/images
+	'';
+      };
+    };
+  };
+
+}
+
