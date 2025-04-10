@@ -1,10 +1,10 @@
-{ pkgs, ... }:
+{ config, lib, pkgs, ... }:
+
 
 {
 
-  lib.mkIf ( config.networking.hostName == "pegasus" ) imports = 
-    [
-      # Importa os arquivos de cada site na hospedagem
+  imports = 
+    [ # Importa os arquivos de cada site na hospedagem
 
       ## ./sites.nix
 

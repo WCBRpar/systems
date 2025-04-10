@@ -9,14 +9,18 @@ let
 
   # imports = [ ./aux-functions.nix ];
 
+  sources = import ../../../npins;
+  wp4nix = pkgs.callPackage sources.wp4nix {};
+
 in
 
-{
+lib.mkIf ( config.networking.hostName == "pegasus" ) {
 
   security.acme = {
     certs."${organization}" = {
       extraDomainNames = [ "*.${domain}" ];
-      webroot = "/var/lib/acme/${organization}";
+      # webroot = "/var/lib/acme/${organization}";
+      dnsProvider = "cloudflare";
       group = "nginx";
     };
   };
@@ -31,7 +35,7 @@ in
       webserver = "nginx";
       sites = {
         "${domain}" = {
-          package = pkgs.wordpress6_4;
+          package = pkgs.wordpress_6_7;
           database = {
             createLocally = true;
             name = "wpdb_${name}";
@@ -47,7 +51,7 @@ in
               disable-xml-rpc
               jetpack
               jetpack-lite
-              mailpoet
+              # mailpoet
               opengraph
               simple-login-captcha
               simple-mastodon-verification
@@ -58,14 +62,15 @@ in
               wp-gdpr-compliance
               wp-mail-smtp
               wp-statistics
-              wp-user-avatars
-            # inherit (wp4nix.plugins)
+              wp-user-avatars;
+            inherit (wp4nix.plugins)
               google-site-kit;
           };
           themes = {
-            inherit (wp4nix.themes) astra twentytwentythree;
+            inherit (wp4nix.themes) astra;
+	    inherit (pkgs.wordpressPackages.themes) twentytwentythree;
           };
-          languages = [ pkgs.wordpressPackages.language-pt_BR ];
+          languages = [ wp4nix.languages.pt_BR ];
           settings = {
             WP_DEFAULT_THEME = "twentytwentythree";
             WP_MAIL_FROM = "gcp-devops@wcbrpar.com";
@@ -100,39 +105,39 @@ in
         };
       };
     };
-    # nginx.virtualHosts = {
+    nginx.virtualHosts = {
 
-      # "${domain}" = {
-        # useACMEHost = "${organization}";
-        # addSSL = true;
-        # locations."/.well-known/acme-challenge" = {
-          # root = "/var/lib/acme/${organization}";
-        # };
-        # locations."/" = {
-          # root = "/var/lib/www/${domain}";
-          # extraConfig = ''
-            # fastcgi_split_path_info ^(.+\.php)(/.+)$;
-            # fastcgi_pass unix:${config.services.phpfpm.pools."wordpress-${domain}".socket};
-            # include ${pkgs.nginx}/conf/fastcgi_params;
-            # include ${pkgs.nginx}/conf/fastcgi.conf;
-          # '';
-        # };
-      # };
+      "${domain}" = {
+        useACMEHost = "${organization}";
+        addSSL = true;
+        locations."/.well-known/acme-challenge" = {
+          root = "/var/lib/acme/${organization}";
+        };
+        locations."/" = {
+          root = "/var/lib/www/${domain}";
+          extraConfig = ''
+            fastcgi_split_path_info ^(.+\.php)(/.+)$;
+            fastcgi_pass unix:${config.services.phpfpm.pools."wordpress-${domain}".socket};
+            include ${pkgs.nginx}/conf/fastcgi_params;
+            include ${pkgs.nginx}/conf/fastcgi.conf;
+          '';
+        };
+      };
 
-      # "${domain}80" = {
-        # serverName = "${domain}";
-        # locations."/.well-known/acme-challenge" = {
-          # root = "/var/lib/acme/${domain}";
-          # extraConfig = ''
-            # auth_basic off;
-          # '';
-        # };
-        # locations."/" = { return = "301 https://$host$request_uri"; };
-      # };
+      "${domain}80" = {
+        serverName = "${domain}";
+        locations."/.well-known/acme-challenge" = {
+          root = "/var/lib/acme/${domain}";
+          extraConfig = ''
+            auth_basic off;
+          '';
+        };
+        locations."/" = { return = "301 https://$host$request_uri"; };
+      };
 
-      # "${app}.${domain}" = {
-        # globalRedirect = "${domain}";:
-      # };
+      "${app}.${domain}" = {
+        globalRedirect = "${domain}";
+      };
     };
   };
 

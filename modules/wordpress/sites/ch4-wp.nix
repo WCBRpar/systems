@@ -8,10 +8,13 @@ let
   organization = "oposicaopararenovarandes.com.br";
 
   # imports = [ ./aux-functions.nix ];
+  
+  sources = import ../../../npins;
+  wp4nix = pkgs.callPackage sources.wp4nix {};
 
 in
 
-{
+lib.mkIf ( config.networking.hostName == "pegasus" ) {
 
   security.acme = {
     certs."${organization}" = {
@@ -31,10 +34,10 @@ in
       webserver = "nginx";
       sites = {
         "${domain}" = {
-          package = pkgs.wordpress6_4;
+          package = pkgs.wordpress_6_7;
           database = {
             createLocally = true;
-            name = "wordpress_${name}";
+            name = "wpdb_${name}";
           };
           plugins = {
             inherit (pkgs.wordpressPackages.plugins)
@@ -47,7 +50,7 @@ in
               disable-xml-rpc
               jetpack
               jetpack-lite
-              mailpoet
+              # mailpoet
               opengraph
               simple-login-captcha
               simple-mastodon-verification
@@ -58,14 +61,15 @@ in
               wp-gdpr-compliance
               wp-mail-smtp
               wp-statistics
-              wp-user-avatars
-            # inherit (wp4nix.plugins)
+              wp-user-avatars;
+            inherit (wp4nix.plugins)
               google-site-kit;
           };
           themes = {
-            inherit (wp4nix.themes) astra twentytwentythree;
+	    inherit (pkgs.wordpressPackages.themes) twentytwentythree;
+            inherit (wp4nix.themes) astra;
           };
-          languages = [ pkgs.wordpressPackages.language-pt_BR ];
+          languages = [ wp4nix.languages.pt_BR ];
           settings = {
             WP_DEFAULT_THEME = "twentytwentythree";
             WP_MAIL_FROM = "gcp-devops@wcbrpar.com";
