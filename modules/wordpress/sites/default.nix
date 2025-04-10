@@ -2,7 +2,7 @@
 
 {
 
-  imports = 
+  lib.mkIf ( config.networking.hostName == "pegasus" ) imports = 
     [
       # Importa os arquivos de cada site na hospedagem
 
@@ -16,7 +16,7 @@
       # ./mdn-wp.nix
       ## ./prf-wp.nix
       # ./prs-wp.nix
-      ## ./red-wp.nix
+      ./red-wp.nix
       # ./sbz-wp.nix
       ## ./str-ws.nix
       ## ./ufm-ws.nix

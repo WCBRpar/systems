@@ -1,8 +1,8 @@
-{ config, pkgs, ... }:
+{ config, lib, pkgs, ... }:
 
 {
 
-  services.jitsi-meet = {
+  services.jitsi-meet = lib.mkIf ( config.networking.hostName == "galactica" ) {
     enable = true;
     hostName = "meet.redcom.digital";
     interfaceConfig = {
@@ -47,7 +47,7 @@
     # nginx.enable = true; 
   };
 
-  services.jibri = {
+  services.jibri = lib.mkIf ( config.networking.hostName == "galactica" ) {
     config = {
       recording = {
 	recordings-directory = "/var/lib/jitsi-meet/-recordings";
@@ -58,19 +58,19 @@
     };
   };
 
-  services.jitsi-videobridge.openFirewall = true;
+  services.jitsi-videobridge.openFirewall = lib.mkIf ( config.networking.hostName == "galactica" ) true;
 
   # This is required if the recordings directory can’t be created by Jibri itself
   # e.g. due to missing permissions.
   # If it is under /tmp/ (like the default), this is not needed.
-  systemd.tmpfiles.rules = [
+  systemd.tmpfiles.rules = lib.mkIf ( config.networking.hostName == "galactica" ) [
     "d ${config.services.jibri.config.recording.recordings-directory} 0750 jibri jibri -"
   ];
   
-  services.caddy.virtualHosts."meet.redcom.digital" = {
+  services.caddy.virtualHosts."meet.redcom.digital" = lib.mkIf ( config.networking.hostName == "galactica" ) {
   };
 
-  services.nginx.virtualHosts."meet.wcbrpar.com" = {
+  services.nginx.virtualHosts."meet.wcbrpar.com" = lib.mkIf ( config.networking.hostName == "galactica" ) {
     globalRedirect = "meet.redcom.digital";
     forceSSL = false;
   };

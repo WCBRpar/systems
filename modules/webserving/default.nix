@@ -3,7 +3,7 @@
 {
 
   # Nginx webserver
-  services.nginx = {
+  services.nginx = lib.mkIf ( config.networking.hostName == "galactica" ) {
     virtualHosts = {
       # Servidor de arquivos e imagens estáticas  para as ferramentas hospedadas
       "img.redcom.digital" = {
