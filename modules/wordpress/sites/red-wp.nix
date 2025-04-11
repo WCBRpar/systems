@@ -78,7 +78,7 @@ lib.mkIf ( config.networking.hostName == "pegasus" ) {
             WP_HOME = "https://${domain}";
             WPLANG = "pt_BR";
             AUTOMATIC_UPDATER_DISABLED = true;
-            # FORCE_SSL_ADMIN = true;
+            # FORCE_SSL_ADMIN = false;
           };
           poolConfig = {
             "pm" = "dynamic";
