@@ -1,6 +1,7 @@
 { config, lib, pkgs, ... }:
 
 let
+
   inherit (lib) mkOption types;
 
   sources = import ../../../npins;
@@ -10,12 +11,13 @@ let
     let
       parts = lib.splitString "." domain;
       root = if lib.length parts > 2 
-             then lib.elemAt parts (lib.length parts - 2)
-             else lib.head parts;
+             then lib.head parts
+             else lib.elemAt parts (lib.length parts - 2);
     in
       lib.toLower root;
 
 in 
+
 {
   options.wp-sites = mkOption {
     type = types.attrsOf (types.submodule {
@@ -70,7 +72,7 @@ in
 
         virtualHost = {
           hostName = site.domain;
-          serverName = site.domain;
+	  useACMEHost = site.domain;
           forceSSL = true;
           enableACME = true;
           robotsEntries = ''
@@ -83,7 +85,10 @@ in
             Disallow: /xmlrpc.php
             Disallow: /wp-
           '';
-        } // (site.settings.virtualHost or {});
+	  sslServerCert = "null";
+	  sslServerKey = "null";
+        }
+	// (site.settings.virtualHost or {});
 
         settings = (site.settings or {}) // {
           poolConfig = ''
