@@ -17,64 +17,57 @@ let
 
 in 
 {
-  options = {
-    wp-sites = {
-      sites = mkOption {
-        type = types.listOf (types.submodule {
-          options = {
-            name = mkOption {
-              type = types.str;
-              description = "Nome do site WordPress";
-            };
-            domain = mkOption {
-              type = types.str;
-              description = "Domínio completo do site";
-            };
-            themes = mkOption {
-              type = types.attrsOf types.package;
-              default = {};
-              description = "Temas WordPress";
-            };
-            plugins = mkOption {
-              type = types.attrsOf types.package;
-              default = {};
-              description = "Plugins WordPress";
-            };
-            languages = mkOption {
-              type = types.listOf types.package;
-              default = [ wp4nix.languages.pt_BR ];
-              description = "Pacotes de idiomas WordPress";
-            };
-            extraConfig = mkOption {
-              type = types.lines;
-              default = "";
-              description = "Configurações extras do wp-config.php";
-            };
-            settings = mkOption {
-              type = types.attrs;
-              default = {};
-              description = "Configurações adicionais";
-            };
-          };
-        });
-        default = [];
-        description = "Lista de sites WordPress";
+  options.wp-sites = mkOption {
+    type = types.attrsOf (types.submodule {
+      options = {
+        domain = mkOption {
+          type = types.str;
+          example = "nomedosite.com.br";
+          description = "Domínio completo do site";
+        };
+        themes = mkOption {
+          type = types.attrsOf types.package;
+          default = {};
+          description = "Temas WordPress";
+        };
+        plugins = mkOption {
+          type = types.attrsOf types.package;
+          default = {};
+          description = "Plugins WordPress";
+        };
+        languages = mkOption {
+          type = types.listOf types.package;
+          default = [ wp4nix.languages.pt_BR ];
+          description = "Pacotes de idiomas WordPress";
+        };
+        extraConfig = mkOption {
+          type = types.lines;
+          default = "";
+          description = "Configurações extras do wp-config.php";
+        };
+        settings = mkOption {
+          type = types.attrs;
+          default = {};
+          description = "Configurações adicionais";
+        };
       };
-    };
+    });
+    default = {};
+    description = "Sites WordPress configurados";
   };
 
   config = lib.mkIf (
     config.networking.hostName == "pegasus" &&
-    (builtins.length config.wp-sites.sites > 0)
+    (builtins.length (lib.attrValues config.wp-sites) > 0)
   ) {
     services.wordpress.webserver = "nginx";
     security.acme.acceptTerms = true;
 
-    services.wordpress.sites = lib.listToAttrs (map (site: {
-      name = builtins.replaceStrings ["."] ["-"] site.domain;  # Alteração aqui
+    services.wordpress.sites = lib.mapAttrs' (name: site: {
+      name = site.domain;  # Mantém o domínio completo sem modificações
       value = {
         package = pkgs.wordpress;
-        
+
         virtualHost = {
           hostName = site.domain;
           serverName = site.domain;
@@ -104,7 +97,7 @@ in
         };
 
         database = {
-          name = "wpdb_${extractDomainRoot site.domain}";
+          name = "wpdb_${extractDomainRoot site.domain}";  # Mantido exatamente como estava
           host = "localhost";
           createLocally = true;
         };
@@ -118,6 +111,6 @@ in
           ${site.extraConfig}
         '';
       };
-    }) config.wp-sites.sites);
+    }) config.wp-sites;
   };
 }

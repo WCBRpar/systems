@@ -14,7 +14,7 @@ in
   environment.systemPackages = with pkgs; [ php ];
   environment.variables.WP_VERSION = "6.4";
   
-  wp-sites.sites = {
+  wp-sites = {
     "RED" = {
       domain = "redcom.digital";
       themes = {
@@ -28,11 +28,6 @@ in
       extraConfig = ''
         define('WP_DEBUG', true);
       '';
-      virtualHost = {
-        extraConfig = ''
-	  # Configurações especĩficas para o weserver
-	'';
-      };
     };
 
     "CH4" = {
