@@ -25,14 +25,7 @@ in
   # Pacotes e variáveis necessárias ao sistema
   environment.systemPackages = with pkgs; [ 
     (pkgs.callPackage <agenix/pkgs/agenix.nix> {})
-    git 
-    gh 
-    home-manager 
-    magic-wormhole 
-    nixpkgs-fmt 
-    neovim 
-    npins
-    unzip
+    home-manager
   ];
 
   systemd.extraConfig = ''
@@ -40,7 +33,7 @@ in
   '';
 
   # Fuso horário do sistema
-  time.timeZone = "Europe/Amsterdam";
+  time.timeZone = "America/Campo_Grande";
 
   # Compatibilidade da versão do sistema
   system.stateVersion = "24.11";
@@ -61,9 +54,8 @@ in
     SystemMaxUse=2G
   '';
 
-  # Ativar Flakes e Home Manager
+  # Ativar Flakes
   nix.settings.experimental-features = ["nix-command" "flakes"];
-  home-manager.useGlobalPkgs = true;
 
   # Pacotes proprietários - Preciso para o ZeroTier 1 - Procurar substituto
   nixpkgs.config.allowUnfree = true;
