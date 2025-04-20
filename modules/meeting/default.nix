@@ -6,16 +6,15 @@
     enable = true;
     hostName = "meet.redcom.digital";
     interfaceConfig = {
-      APP_NAME = "redcom.digital";
+      APP_NAME = "Meet@RED";
       DEFAULT_REMOTE_DISPLAY_NAME = "Convidado";
-      BRAND_WATERMARK_LINK = "https://meet.redcom.digital";
-      DEFAULT_LOGO_URL = /var/lib/www/shared/images/icon.svg;
-      DEFAULT_WELCOME_PAGE_LOGO_URL = "/var/lib/www/shared/images/watermark.svg";
-
-
+      BRAND_WATERMARK_LINK = "";
+      DEFAULT_LOGO_URL = "https://img.redcom.digital/icon.svg" ;
+      DEFAULT_WELCOME_PAGE_LOGO_URL = "https://img.redcom.digital/icon.svg";
 
       AUDIO_LEVEL_PRIMARY_COLOR = "rgba(221,42,42,0.4)";
       AUDIO_LEVEL_SECONDARY_COLOR = "rgba(238,149,150,0.2)";
+
     };
 
     config = {
