@@ -5,8 +5,7 @@
 
   # Configuração do SSH Agent
   programs.ssh = {
-    # enable = true;
-    startAgent = true;  # Inicia o ssh-agent automaticamente
+    startAgent = false;  # Inicia o ssh-agent automaticamente
     extraConfig = ''
       Host github.com
         IdentityFile /root/.ssh/id_ed25519
