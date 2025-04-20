@@ -1,4 +1,5 @@
 { config, pkgs, ... }:
+<<<<<<< HEAD
 
 let
 
@@ -6,6 +7,8 @@ let
 
 in
 
+=======
+>>>>>>> main
 {
   nixpkgs.config.permittedInsecurePackages = [ 
     "jitsi-meet-1.0.8043"
