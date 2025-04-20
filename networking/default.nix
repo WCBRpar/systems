@@ -8,8 +8,11 @@ in
 {
   # Configuração de rede
   networking = {
-    hostId = "8bf0a2a5"; # cut -c-8 </proc/sys/kernel/random/uuid
-    hostName = "pegasus"; # Define your hostname.
+    # hostId = "13960a97"; # Galactica            # cut -c-8 < /proc/sys/kernel/random/uuid    
+    hostId = "8bf0dda5"; # Pegasus
+    # hostname = "galactica";
+    hostName = "pegasus";
+
     domain = "wcbrpar.com";
     nameservers = [ "84.200.69.80" "84.200.70.40" ]; # CloudFlare / DNS Watch
 

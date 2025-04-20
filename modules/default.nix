@@ -13,13 +13,9 @@
     ./meeting
     ./nginx
     ./office
-    ./shell
-<<<<<<< HEAD
     ./terminal
     ./webserving
     ./wordpress
-=======
->>>>>>> main
   ];
 }
 

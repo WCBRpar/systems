@@ -1,16 +1,22 @@
 {
   "pins": {
-    "nixos-24.11": {
-      "type": "Channel",
-      "name": "nixos-24.11",
-      "url": "https://releases.nixos.org/nixos/24.11/nixos-24.11.716793.a880f49904d6/nixexprs.tar.xz",
-      "hash": "0mpndcj70gc8fnzlymfdidvdywlrizrng0x4r6jnhw73b794fpnv"
+    "nixpkgs": {
+      "type": "Git",
+      "repository": {
+        "type": "GitHub",
+        "owner": "nixos",
+        "repo": "nixpkgs"
+      },
+      "branch": "nixos-24.11",
+      "revision": "a880f49904d68b5e53338d1e8c7bf80f59903928",
+      "url": "https://github.com/nixos/nixpkgs/archive/a880f49904d68b5e53338d1e8c7bf80f59903928.tar.gz",
+      "hash": "0gs1hkm6piwknanfa3qncm2i2g81blqx2rxp5d629396wla670d3"
     },
     "wp4nix": {
       "type": "GitRelease",
       "repository": {
         "type": "Git",
-        "url": "https://git.helsinki.tools/helsinki-systems/wp4nix.git"
+        "url": "https://git.helsinki.tools/helsinki-systems/wp4nix"
       },
       "pre_releases": false,
       "version_upper_bound": null,
