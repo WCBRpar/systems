@@ -1,9 +1,7 @@
 { config, lib, pkgs, ... }:
 
 let
-
   inherit (lib) mkOption types;
-
   sources = import ../../../npins;
   wp4nix = pkgs.callPackage sources.wp4nix {};
 
@@ -14,11 +12,9 @@ let
              then lib.head parts
              else lib.elemAt parts (lib.length parts - 2);
     in
-      lib.toLower root;
+    lib.toLower root;
 
-in 
-
-{
+in {
   options.wp-sites = mkOption {
     type = types.attrsOf (types.submodule {
       options = {
@@ -66,15 +62,39 @@ in
     security.acme.acceptTerms = true;
 
     services.wordpress.sites = lib.mapAttrs' (name: site: {
-      name = site.domain;  # Mantém o domínio completo sem modificações
+      name = site.domain;
       value = {
         package = pkgs.wordpress;
 
         virtualHost = {
           hostName = site.domain;
-	  useACMEHost = site.domain;
+          useACMEHost = site.domain;
           forceSSL = true;
           enableACME = true;
+          extraConfig = ''
+            access_log /var/log/nginx/${site.domain}.access.log;
+            error_log /var/log/nginx/${site.domain}.error.log;
+
+            # Security headers (complementares aos globais)
+            # add_header X-XSS-Protection "1; mode=block";
+            # add_header Permissions-Policy "geolocation=(), midi=(), sync-xhr=(), microphone=(), camera=(), magnetometer=(), gyroscope=(), fullscreen=(self), payment=()";
+
+          '';
+          locations = {
+            "/" = {
+	      index = "index.php index.html index.htm";
+              tryFiles = "$uri $uri/ /index.php?$args";
+            };
+            "~ \.php$" = {
+              extraConfig = ''
+                include ${pkgs.nginx}/conf/fastcgi_params;
+                fastcgi_pass unix:${config.services.phpfpm.pools.wordpress.socket};
+                fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+                fastcgi_param HTTPS $http_x_forwarded_proto;
+                fastcgi_param HTTP_X_FORWARDED_PROTO $http_x_forwarded_proto;
+              '';
+            };
+          };
           robotsEntries = ''
             User-agent: *
             Disallow: /feed/
@@ -85,13 +105,10 @@ in
             Disallow: /xmlrpc.php
             Disallow: /wp-
           '';
-	  sslServerCert = "null";
-	  sslServerKey = "null";
-        }
-	// (site.settings.virtualHost or {});
+        } // (site.settings.virtualHost or {});
 
         settings = (site.settings or {}) // {
-          poolConfig = ''
+          poolSettings = ''
             pm = dynamic
             pm.max_children = 64
             pm.max_requests = 500
@@ -102,7 +119,7 @@ in
         };
 
         database = {
-          name = "wpdb_${extractDomainRoot site.domain}";  # Mantido exatamente como estava
+          name = "wpdb_${extractDomainRoot site.domain}";
           host = "localhost";
           createLocally = true;
         };
@@ -113,6 +130,14 @@ in
 
         extraConfig = ''
           define('WPLANG', 'pt_BR');
+          define('WP_HOME', 'https://${site.domain}');
+          define('WP_SITEURL', 'https://${site.domain}');
+	  @init_set('display_errors', 0);
+          
+          // Cloudflare compatibility
+          if (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https') {
+            $_SERVER['HTTPS'] = 'on';
+          }
           ${site.extraConfig}
         '';
       };
