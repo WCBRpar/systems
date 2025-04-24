@@ -12,7 +12,7 @@ let
              then lib.head parts
              else lib.elemAt parts (lib.length parts - 2);
     in
-    lib.toLower root;
+      lib.toLower root;
 
 in {
   options.wp-sites = mkOption {
@@ -68,54 +68,55 @@ in {
 
         virtualHost = {
           hostName = site.domain;
-          useACMEHost = site.domain;
-          forceSSL = true;
+          forceSSL = false;
           enableACME = true;
           extraConfig = ''
-            access_log /var/log/nginx/${site.domain}.access.log;
-            error_log /var/log/nginx/${site.domain}.error.log;
+	    # Cloudflare
+            # real_ip_header CF-Connecting-IP;
 
-            # Security headers (complementares aos globais)
-            # add_header X-XSS-Protection "1; mode=block";
-            # add_header Permissions-Policy "geolocation=(), midi=(), sync-xhr=(), microphone=(), camera=(), magnetometer=(), gyroscope=(), fullscreen=(self), payment=()";
-
+            if ($http_x_forwarded_proto = "https") {
+              set $https_redirect "off";
+            }
           '';
+
           locations = {
             "/" = {
-	      index = "index.php index.html index.htm";
+              index = "index.php index.html index.htm";
               tryFiles = "$uri $uri/ /index.php?$args";
             };
             "~ \.php$" = {
               extraConfig = ''
+	        fastcgi_split_path_info ^(.+\.php)(/.+)$;
                 include ${pkgs.nginx}/conf/fastcgi_params;
-                fastcgi_pass unix:${config.services.phpfpm.pools.wordpress.socket};
+                include ${pkgs.nginx}/conf/fastcgi.conf;
+                fastcgi_pass unix:${config.services.phpfpm.pools."wordpress-${site.domain}".socket};
+                
+                # Configurações críticas para HTTPS
                 fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
                 fastcgi_param HTTPS $http_x_forwarded_proto;
                 fastcgi_param HTTP_X_FORWARDED_PROTO $http_x_forwarded_proto;
               '';
             };
           };
-          robotsEntries = ''
-            User-agent: *
-            Disallow: /feed/
-            Disallow: /trackback/
-            Disallow: /wp-admin/
-            Disallow: /wp-content/
-            Disallow: /wp-includes/
-            Disallow: /xmlrpc.php
-            Disallow: /wp-
-          '';
-        } // (site.settings.virtualHost or {});
+        };
 
         settings = (site.settings or {}) // {
-          poolSettings = ''
-            pm = dynamic
-            pm.max_children = 64
-            pm.max_requests = 500
-            pm.max_spare_servers = 4
-            pm.min_spare_servers = 2
-            pm.start_servers = 2
-          '';
+          WP_SITEURL = "https://${site.domain}";
+          WP_HOME = "https://${site.domain}";
+          WPLANG = "pt_BR";
+          AUTOMATIC_UPDATER_DISABLED = true;
+          FORCE_SSL_ADMIN = true;
+        };
+
+        poolConfig = {
+          "pm" = "dynamic";
+          "pm.max_children" = 32;
+          "pm.start_servers" = 4;
+          "pm.min_spare_servers" = 4;
+          "pm.max_spare_servers" = 8;
+          "pm.max_requests" = 500;
+          "php_admin_value[error_log]" = "stderr";
+          "php_admin_flag[log_errors]" = true;
         };
 
         database = {
@@ -129,15 +130,8 @@ in {
         languages = site.languages;
 
         extraConfig = ''
-          define('WPLANG', 'pt_BR');
-          define('WP_HOME', 'https://${site.domain}');
-          define('WP_SITEURL', 'https://${site.domain}');
-	  @init_set('display_errors', 0);
-          
-          // Cloudflare compatibility
-          if (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https') {
-            $_SERVER['HTTPS'] = 'on';
-          }
+          $_SERVER['HTTPS'] = 'on';
+          $_SERVER['SERVER_PORT'] = 443;
           ${site.extraConfig}
         '';
       };

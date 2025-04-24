@@ -57,9 +57,6 @@
       # Disable embedding as a frame
       add_header X-Frame-Options DENY;
   
-      # Disable embedding as a frame
-      add_header X-Frame-Options DENY;
-
       # Prevent injection of code in other mime types (XSS Attacks)
       add_header X-Content-Type-Options nosniff;
 

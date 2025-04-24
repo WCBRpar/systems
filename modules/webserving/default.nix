@@ -9,8 +9,7 @@
         
         # Forçar HTTPS
         forceSSL = true;
-        enableACME = true;
-	# useACMEHost = "redcom.digital";
+        useACMEHost = "redcom.digital";
 
 	extraConfig = ''
           # Segurança

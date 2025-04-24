@@ -1,10 +1,5 @@
 { ... }:
 
-let
-  privateZeroTierInterfaces = [
-    "zt-wan01" # WCBRpar VPN
-  ];
-in
 {
   # Configuração de rede
   networking = {
@@ -14,7 +9,10 @@ in
     hostName = "pegasus";
 
     domain = "wcbrpar.com";
-    nameservers = [ "84.200.69.80" "84.200.70.40" ]; # CloudFlare / DNS Watch
+    nameservers = [ "84.200.69.80" "84.200.70.40" "1.1.1.1" "8.8.8.8" ]; # CloudFlare / DNS Watch
+
+    resolvconf = {
+    };
 
     # Configurações de firewall
     firewall = {
@@ -35,7 +33,7 @@ in
   # mDNS (Avahi)
   services.avahi = {
     enable = true;
-    allowInterfaces = privateZeroTierInterfaces;
+    # allowInterfaces = privateZeroTierInterfaces;
     nssmdns4 = true;
     publish = {
       addresses = true;
@@ -58,19 +56,21 @@ in
     openFirewall = true;     # SSH accessible on all interfaces
     allowSFTP = true;
     settings = {
-      # PermitRootLogin = "prohibit-password";
+      PermitRootLogin = "prohibit-password";
       DenyUsers = [ "root" ];
       AllowUsers = [ "wjjunyor" ];
       PasswordAuthentication = true;
     };
   };
 
+  # Netbird
+  services.netbird = {
+    enable = true;
+  };
+
+
+
   #  Habilita Builds Remotas via SSH
   nix.settings.trusted-users = ["root" "wjjunyor"];
 
-  # ZEROTIER (comentado, mas mantido para referência)
-  # services.zerotierone.enable = true;
-  # services.zerotierone.joinNetworks = [
-  #   "abfd31bd47447701" # WCBRpar PRIVATE
-  # ];
 }
