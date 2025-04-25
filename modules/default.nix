@@ -15,7 +15,7 @@
     ./office
     ./terminal
     ./webserving
-    ./wordpress
+    ./websites
   ];
 }
 

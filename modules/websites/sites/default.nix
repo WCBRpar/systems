@@ -15,7 +15,7 @@ let
       lib.toLower root;
 
 in {
-  options.wp-sites = mkOption {
+  options.mkSites = mkOption {
     type = types.attrsOf (types.submodule {
       options = {
         domain = mkOption {
@@ -56,7 +56,7 @@ in {
 
   config = lib.mkIf (
     config.networking.hostName == "pegasus" &&
-    (builtins.length (lib.attrValues config.wp-sites) > 0)
+    (builtins.length (lib.attrValues config.mkSites) > 0)
   ) {
     services.wordpress.webserver = "nginx";
     security.acme.acceptTerms = true;

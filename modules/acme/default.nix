@@ -2,7 +2,7 @@
 
 {
   # TLS using ACME
-  security.acme = {
+  security.acme = lib.mkIf ( config.networking.hostName != "yashuman" ) {
     acceptTerms = true;
     defaults = {
       email = "gcp-devops@wcbrpar.com";

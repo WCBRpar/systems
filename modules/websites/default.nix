@@ -14,9 +14,10 @@ in
   environment.systemPackages = with pkgs; [ php ];
   environment.variables.WP_VERSION = "6.4";
   
-  wp-sites = {
+  mkSites = {
     "RED" = {
       domain = "redcom.digital";
+      type = "wordpress";
       themes = {
         inherit (pkgs.wordpressPackages.themes) twentytwentythree;
         inherit (wp4nix.themes) astra;

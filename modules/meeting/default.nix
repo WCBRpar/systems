@@ -68,6 +68,9 @@
   services.nginx = lib.mkIf ( config.networking.hostName == "galactica" ) {
     virtualHosts = {
       "meet.redcom.digital" = {
+        enableACME = true;
+	forceSSL = true;
+	# useACMEHost = "redcom.digital";
       };
       "meet.wcbrpar.com" = {
         globalRedirect = "meet.redcom.digital" ;
