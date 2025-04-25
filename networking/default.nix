@@ -3,10 +3,10 @@
 {
   # Configuração de rede
   networking = {
-    # hostId = "13960a97"; # Galactica            # cut -c-8 < /proc/sys/kernel/random/uuid    
-    hostId = "8bf0dda5"; # Pegasus
-    # hostName = "galactica";
-    hostName = "pegasus";
+    hostId = "13960a97"; # Galactica            # cut -c-8 < /proc/sys/kernel/random/uuid    
+    # hostId = "8bf0dda5"; # Pegasus
+    hostName = "galactica";
+    # hostName = "pegasus";
 
     domain = "wcbrpar.com";
     nameservers = [ "84.200.69.80" "84.200.70.40" "1.1.1.1" "8.8.8.8" ]; # CloudFlare / DNS Watch

@@ -6,7 +6,7 @@
     enable = true;
     hostName = "meet.redcom.digital";
     interfaceConfig = {
-      APP_NAME = "Meet@RED";
+      APP_NAME = "meet@redcom.digital";
       DEFAULT_REMOTE_DISPLAY_NAME = "Convidado";
       BRAND_WATERMARK_LINK = "";
       DEFAULT_LOGO_URL = "https://img.redcom.digital/icon.svg" ;
@@ -42,8 +42,7 @@
     jibri = {
       enable = true; 
     };
-    caddy.enable = true;
-    # nginx.enable = true; 
+    nginx.enable = true; 
   };
 
   services.jibri = lib.mkIf ( config.networking.hostName == "galactica" ) {
@@ -66,12 +65,15 @@
     "d ${config.services.jibri.config.recording.recordings-directory} 0750 jibri jibri -"
   ];
   
-  services.caddy.virtualHosts."meet.redcom.digital" = lib.mkIf ( config.networking.hostName == "galactica" ) {
-  };
-
-  services.nginx.virtualHosts."meet.wcbrpar.com" = lib.mkIf ( config.networking.hostName == "galactica" ) {
-    globalRedirect = "meet.redcom.digital";
-    forceSSL = false;
+  services.nginx = lib.mkIf ( config.networking.hostName == "galactica" ) {
+    virtualHosts = {
+      "meet.redcom.digital" = {
+      };
+      "meet.wcbrpar.com" = {
+        globalRedirect = "meet.redcom.digital" ;
+	forceSSL = false;
+      };
+    };
   };
 
 }
