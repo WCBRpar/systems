@@ -1,5 +1,11 @@
 { ... }:
 
+let
+  privateZeroTierInterfaces = [
+    "ztr1s0" # vpn
+  ];
+in
+
 {
   # Configuração de rede
   networking = {
@@ -23,7 +29,7 @@
     firewall = {
       enable = true;
       allowedTCPPorts = [ 80 443 ]; # HTTP and HTTPS
-      trustedInterfaces = [ "venet0" ];
+      trustedInterfaces = [ "venet0" "ztr1s0" "ztc25hlssg" ];
     };
 
     # Hosts da rede
@@ -31,22 +37,47 @@
       127.0.0.1       localhost
       192.168.13.10   galactica.wcbrpar.com
       192.168.13.20   pegasus.wcbrpar.com
+      192.168.13.130  yashuman.wcbrpar.com
     '';
 
   };
 
-  # mDNS (Avahi)
-  services.avahi = {
-    enable = true;
-    # allowInterfaces = privateZeroTierInterfaces;
-    nssmdns4 = true;
-    publish = {
-      addresses = true;
-      domain = true;
+  services = {
+
+    # mDNS Avahi
+    avahi = {
       enable = true;
-      userServices = true;
-      workstation = true;
+      allowInterfaces = privateZeroTierInterfaces;
+      nssmdns4 = true;
+      publish = {
+        addresses = true;
+        domain = true;
+        enable = true;
+        userServices = true;
+        workstation = true;
+      };
     };
+
+    openssh = {
+      enable = true;
+      openFirewall = true;     # SSH accessible on all interfaces
+      allowSFTP = true;
+      settings = {
+        PermitRootLogin = "prohibit-password";
+        DenyUsers = [ "root" ];
+        AllowUsers = [ "wjjunyor" ];
+        PasswordAuthentication = true;
+      };
+    };
+
+    # ZEROTIER
+    zerotierone = {
+      enable = true;
+      joinNetworks = [
+        "abfd31bd47447701" # vpn                (PRIVATE)
+      ];
+    };
+
   };
 
   # OpenSSH
@@ -55,24 +86,6 @@
     enable = true;
     enableSSHSupport = true;
   };
-
-  services.openssh = {
-    enable = true;
-    openFirewall = true;     # SSH accessible on all interfaces
-    allowSFTP = true;
-    settings = {
-      PermitRootLogin = "prohibit-password";
-      DenyUsers = [ "root" ];
-      AllowUsers = [ "wjjunyor" ];
-      PasswordAuthentication = true;
-    };
-  };
-
-  # Netbird
-  services.netbird = {
-    enable = true;
-  };
-
 
 
   #  Habilita Builds Remotas via SSH
