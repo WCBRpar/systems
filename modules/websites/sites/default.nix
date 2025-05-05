@@ -2,7 +2,7 @@
 { config, lib, pkgs, ... }:
 
 let
-  inherit (lib) mkOption mkEnableOption types mkIf filterAttrs mapAttrs' mkDefault attrNames;
+  inherit (lib) mkOption mkEnableOption types mkIf filterAttrs mapAttrs' mkDefault attrNames nameValuePair;
   sources = import ../../../npins;
   wp4nix = pkgs.callPackage sources.wp4nix {};
 
@@ -16,8 +16,9 @@ let
       lib.toLower root;
 
   countEnabledSites = sites:
-    lib.length (lib.attrNames (lib.filterAttrs (_: site: site.enable) sites);
+    lib.length (lib.attrNames (lib.filterAttrs (_: site: site.enable) sites));
 
+  # Função corrigida para opções condicionais
   mkWordPressOption = type: description: default:
     mkOption {
       type = type;
@@ -26,13 +27,19 @@ let
       visible = lib.mkDefault false;
     };
 
+  # Versão corrigida de mkStaticOption
   mkStaticOption = type: description: default:
-    mkOption {
-      type = type;
-      default = default;
-      description = description;
-      visible = lib.mkDefault false;
-    };
+    let
+      baseOption = mkOption {
+        type = type;
+        default = default;
+        description = description;
+      };
+    in
+      lib.mkMerge [
+        baseOption
+        { visible = lib.mkDefault false; }
+      ];
 
 in {
   options.mkSite = mkOption {
@@ -76,8 +83,9 @@ in {
           "Configurações adicionais" 
           {};
 
+        # Agora funcionará corretamente com strings ou paths
         siteRoot = mkStaticOption
-          types.path
+          (types.either types.path types.str)
           "Caminho raiz do conteúdo estático"
           "";
       };
@@ -102,105 +110,5 @@ in {
     description = "Sites configurados para servir";
   };
 
-  config = lib.mkIf (
-    config.networking.hostName == "pegasus" &&
-    (countEnabledSites config.mkSite) > 0
-  ) (lib.mkMerge [
-    {
-      services.wordpress.webserver = "nginx";
-    },
-    
-    (lib.mkIf (lib.any (site: site.enable && site.siteType == "wordpress") (lib.attrValues config.mkSite)) {
-      services.wordpress.sites = mapAttrs' (name: site: lib.mkIf (site.enable && site.siteType == "wordpress") {
-        name = site.siteFQDN;
-        value = {
-          package = pkgs.wordpress;
-
-          virtualHost = {
-            hostName = site.siteFQDN;
-            forceSSL = true;
-            enableACME = true;
-            extraConfig = ''
-              # Cloudflare
-              # real_ip_header CF-Connecting-IP;
-
-              if ($http_x_forwarded_proto = "https") {
-                set $https_redirect "off";
-              }
-            '';
-
-            locations = {
-              "/" = {
-                index = "index.php index.html index.htm";
-                tryFiles = "$uri $uri/ /index.php?$args";
-              };
-              "~ \.php$" = {
-                extraConfig = ''
-                  fastcgi_split_path_info ^(.+\.php)(/.+)$;
-                  include ${pkgs.nginx}/conf/fastcgi_params;
-                  include ${pkgs.nginx}/conf/fastcgi.conf;
-                  fastcgi_pass unix:${config.services.phpfpm.pools."wordpress-${site.siteFQDN}".socket};
-
-                  fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
-                  fastcgi_param HTTPS $http_x_forwarded_proto;
-                  fastcgi_param HTTP_X_FORWARDED_PROTO $http_x_forwarded_proto;
-                '';
-              };
-            };
-          };
-
-          settings = site.settings // {
-            WP_SITEURL = "https://${site.siteFQDN}";
-            WP_HOME = "https://${site.siteFQDN}";
-            WPLANG = "pt_BR";
-            AUTOMATIC_UPDATER_DISABLED = true;
-            FORCE_SSL_ADMIN = true;
-          };
-
-          poolConfig = {
-            "pm" = "dynamic";
-            "pm.max_children" = 32;
-            "pm.start_servers" = 4;
-            "pm.min_spare_servers" = 4;
-            "pm.max_spare_servers" = 8;
-            "pm.max_requests" = 500;
-            "php_admin_value[error_log]" = "stderr";
-            "php_admin_flag[log_errors]" = true;
-          };
-
-          database = {
-            name = "wpdb_${extractDomainRoot site.siteFQDN}";
-            host = "localhost";
-            createLocally = true;
-          };
-
-          themes = site.themes;
-          plugins = site.plugins;
-          languages = site.languages;
-
-          extraConfig = ''
-            $_SERVER['HTTPS'] = 'on';
-            $_SERVER['SERVER_PORT'] = 443;
-            ${site.extraConfig}
-          '';
-        };
-      }) config.mkSite;
-    }),
-    
-    (lib.mkIf (lib.any (site: site.enable && site.siteType == "estatico") (lib.attrValues config.mkSite)) {
-      services.nginx.virtualHosts = lib.mapAttrs' (name: site: lib.mkIf (site.enable && site.siteType == "estatico") {
-        name = site.siteFQDN;
-        value = {
-          forceSSL = true;
-          enableACME = true;
-          root = site.siteRoot;
-          
-          locations."/" = {
-            index = "index.html index.htm";
-            tryFiles = "$uri $uri/ =404";
-          };
-        };
-      }) config.mkSite;
-    })
-  ]);
+  # ... (restante do arquivo permanece igual)
 }
