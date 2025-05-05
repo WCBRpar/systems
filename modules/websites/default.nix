@@ -14,10 +14,11 @@ in
   environment.systemPackages = with pkgs; [ php ];
   environment.variables.WP_VERSION = "6.4";
   
-  mkSites = {
+  mkSite = {
     "RED" = {
-      domain = "redcom.digital";
-      type = "wordpress";
+      enable = true;
+      siteFQDN = "redcom.digital";
+      siteType = "wordpress";
       themes = {
         inherit (pkgs.wordpressPackages.themes) twentytwentythree;
         inherit (wp4nix.themes) astra;
@@ -32,7 +33,9 @@ in
     };
 
     "CH4" = {
-      domain = "oposicaopararenocarandes.com.br";
+      enable = true;
+      siteFQDN = "oposicaopararenovarandes.com.br";
+      siteType = "wordpress";
       themes = {
         inherit (pkgs.wordpressPackages.themes) twentytwentythree;
         inherit (wp4nix.themes) astra;
@@ -42,6 +45,14 @@ in
         inherit (wp4nix.plugins) woocommerce;
       };
     };
+    "STR" = {
+      enable = true;
+      siteFQDN = "setra.com.br";
+      siteType = "estatico";
+      siteRoot = "/var/lib/www/STR";
+    };
+    
+ 
   };
 
 }

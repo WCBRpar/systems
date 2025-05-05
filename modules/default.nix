@@ -6,7 +6,7 @@
     ./agenix
     # ./cloudflare - IMPLEMENTAR
     ./editor
-    ./gitsync
+    # ./gitsync
     ./home-manager
     ./iam
     ./mail

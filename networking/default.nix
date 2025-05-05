@@ -63,10 +63,12 @@ in
       openFirewall = true;     # SSH accessible on all interfaces
       allowSFTP = true;
       settings = {
-        PermitRootLogin = "prohibit-password";
-        DenyUsers = [ "root" ];
+        # PermitRootLogin = "prohibit-password";
+        # DenyUsers = [ "root" ];
         AllowUsers = [ "wjjunyor" ];
+	# UsePAM = false;
         PasswordAuthentication = true;
+	# PubKeyAuthentication = true;
       };
     };
 
