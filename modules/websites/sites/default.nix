@@ -15,11 +15,9 @@ let
     in
       lib.toLower root;
 
-  # Função para contar sites ativos
   countEnabledSites = sites:
-    lib.length (lib.attrNames (lib.filterAttrs (_: site: site.enable) sites));
+    lib.length (lib.attrNames (lib.filterAttrs (_: site: site.enable) sites);
 
-  # Funções auxiliares para opções condicionais
   mkWordPressOption = type: description: default:
     mkOption {
       type = type;
@@ -53,7 +51,6 @@ in {
           description = "Domínio completo (FQDN) do site";
         };
 
-        # Opções específicas para WordPress
         themes = mkWordPressOption 
           (types.attrsOf types.package) 
           "Temas WordPress" 
@@ -79,7 +76,6 @@ in {
           "Configurações adicionais" 
           {};
 
-        # Opção específica para sites estáticos
         siteRoot = mkStaticOption
           types.path
           "Caminho raiz do conteúdo estático"
@@ -112,9 +108,8 @@ in {
   ) (lib.mkMerge [
     {
       services.wordpress.webserver = "nginx";
-    }
+    },
     
-    # Configuração para sites WordPress
     (lib.mkIf (lib.any (site: site.enable && site.siteType == "wordpress") (lib.attrValues config.mkSite)) {
       services.wordpress.sites = mapAttrs' (name: site: lib.mkIf (site.enable && site.siteType == "wordpress") {
         name = site.siteFQDN;
@@ -190,9 +185,8 @@ in {
           '';
         };
       }) config.mkSite;
-    }
+    }),
     
-    # Configuração para sites estáticos
     (lib.mkIf (lib.any (site: site.enable && site.siteType == "estatico") (lib.attrValues config.mkSite)) {
       services.nginx.virtualHosts = lib.mapAttrs' (name: site: lib.mkIf (site.enable && site.siteType == "estatico") {
         name = site.siteFQDN;
