@@ -42,22 +42,30 @@ in
   system.autoUpgrade.enable = true;
 
   # Limpeza automática do sistema
-  nix.gc.automatic = true;
-  nix.gc.dates = "weekly";
-  nix.gc.options = "--delete-older-than 30d";
-  nix.settings.auto-optimise-store = true;
-  nix.extraOptions = ''
-    min-free = ${toString (100 * 1024 * 1024)}
-    max-free = ${toString (1024 * 1024 * 1024)}
-  '';
   services.journald.extraConfig = ''
     SystemMaxUse=2G
   '';
 
-  # Ativar Flakes
-  nix.settings.experimental-features = ["nix-command" "flakes"];
+  nix = {
+    extraOptions = ''
+      min-free = ${toString (100 * 1024 * 1024)}
+      max-free = ${toString (1024 * 1024 * 1024)}
+    '';
+    gc = {
+      automatic = true;
+      dates = "weekly";
+      options = "--delete-older-than 30d";
+    };
+    settings = {
+      auto-optimise-store = true;
+      # Ativar Flakes
+      experimental-features = ["nix-command" "flakes"];
+      keep-derivations = true;
+      keep-outputs = true;
+    };
+  };
 
-  # Pacotes proprietários - Preciso para o ZeroTier 1 - Procurar substituto
+  # Pacotes proprietários - Preciso para o ZeroTier 1 -  Procurar substituto
   nixpkgs.config.allowUnfree = true;
 
 }

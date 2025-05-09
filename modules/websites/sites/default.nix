@@ -18,29 +18,6 @@ let
   countEnabledSites = sites:
     lib.length (lib.attrNames (lib.filterAttrs (_: site: site.enable) sites));
 
-  # Função corrigida para opções condicionais
-  mkWordPressOption = type: description: default:
-    mkOption {
-      type = type;
-      default = default;
-      description = description;
-      visible = lib.mkDefault false;
-    };
-
-  # Versão corrigida de mkStaticOption
-  mkStaticOption = type: description: default:
-    let
-      baseOption = mkOption {
-        type = type;
-        default = default;
-        description = description;
-      };
-    in
-      lib.mkMerge [
-        baseOption
-        { visible = lib.mkDefault false; }
-      ];
-
 in {
   options.mkSite = mkOption {
     type = types.attrsOf (types.submodule ({ name, config, ... }: {
@@ -58,57 +35,99 @@ in {
           description = "Domínio completo (FQDN) do site";
         };
 
-        themes = mkWordPressOption 
-          (types.attrsOf types.package) 
-          "Temas WordPress" 
-          {};
+        # Opções para WordPress
+        themes = mkOption {
+          type = types.attrsOf types.package;
+          default = {};
+          description = "Temas WordPress";
+          visible = lib.mkDefault (config.siteType == "wordpress");
+        };
 
-        plugins = mkWordPressOption 
-          (types.attrsOf types.package) 
-          "Plugins WordPress" 
-          {};
+        plugins = mkOption {
+          type = types.attrsOf types.package;
+          default = {};
+          description = "Plugins WordPress";
+          visible = lib.mkDefault (config.siteType == "wordpress");
+        };
 
-        languages = mkWordPressOption 
-          (types.listOf types.package) 
-          "Pacotes de idiomas WordPress" 
-          [wp4nix.languages.pt_BR];
+        languages = mkOption {
+          type = types.listOf types.package;
+          default = [ wp4nix.languages.pt_BR ];
+          description = "Pacotes de idiomas WordPress";
+          visible = lib.mkDefault (config.siteType == "wordpress");
+        };
 
-        extraConfig = mkWordPressOption 
-          types.lines 
-          "Configurações extras do wp-config.php" 
-          "";
+        extraConfig = mkOption {
+          type = types.lines;
+          default = "";
+          description = "Configurações extras do wp-config.php";
+          visible = lib.mkDefault (config.siteType == "wordpress");
+        };
 
-        settings = mkWordPressOption 
-          types.attrs 
-          "Configurações adicionais" 
-          {};
+        settings = mkOption {
+          type = types.attrs;
+          default = {};
+          description = "Configurações adicionais";
+          visible = lib.mkDefault (config.siteType == "wordpress");
+        };
 
-        # Agora funcionará corretamente com strings ou paths
-        siteRoot = mkStaticOption
-          (types.either types.path types.str)
-          "Caminho raiz do conteúdo estático"
-          "";
+        # Opção para sites estáticos
+        siteRoot = mkOption {
+          type = types.path;
+          description = "Caminho raiz do conteúdo estático";
+          visible = lib.mkDefault (config.siteType == "estatico");
+        };
       };
       
       config = lib.mkMerge [
         {
           settings.WP_SITEID = mkDefault name;
         }
-        (lib.mkIf (config.siteType == "wordpress") {
-          themes.visible = true;
-          plugins.visible = true;
-          languages.visible = true;
-          extraConfig.visible = true;
-          settings.visible = true;
-        })
-        (lib.mkIf (config.siteType == "estatico") {
-          siteRoot.visible = true;
-        })
       ];
     }));
     default = {};
     description = "Sites configurados para servir";
   };
 
-  # ... (restante do arquivo permanece igual)
+  config = lib.mkIf (
+    config.networking.hostName == "pegasus" &&
+    (countEnabledSites config.mkSite) > 0
+  ) (lib.mkMerge [
+    {
+      services.wordpress.webserver = "nginx";
+    }
+    
+    # Configuração para sites WordPress
+    (lib.mkIf (lib.any (site: site.enable && site.siteType == "wordpress") (lib.attrValues config.mkSite)) {
+      services.wordpress.sites = 
+        let
+          enabledSites = lib.filterAttrs (_: site: site.enable && site.siteType == "wordpress") config.mkSite;
+        in
+          lib.listToAttrs (lib.mapAttrsToList (_: site:
+            lib.nameValuePair site.siteFQDN {
+              package = pkgs.wordpress;
+              # ... (restante da configuração WordPress)
+            }
+          ) enabledSites);
+    })
+    
+    # Configuração para sites estáticos
+    (lib.mkIf (lib.any (site: site.enable && site.siteType == "estatico") (lib.attrValues config.mkSite)) {
+      services.nginx.virtualHosts = 
+        let
+          enabledSites = lib.filterAttrs (_: site: site.enable && site.siteType == "estatico") config.mkSite;
+        in
+          lib.listToAttrs (lib.mapAttrsToList (_: site:
+            lib.nameValuePair site.siteFQDN {
+              forceSSL = true;
+              enableACME = true;
+              root = site.siteRoot;
+              locations."/" = {
+                index = "index.html index.htm";
+                tryFiles = "$uri $uri/ =404";
+              };
+            }
+          ) enabledSites);
+    })
+  ]);
 }
