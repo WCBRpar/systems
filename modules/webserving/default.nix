@@ -6,7 +6,9 @@
       "img.redcom.digital" = {
         serverAliases = [ "img.wcbrpar.com" ];
         root = "/var/lib/www/shared/images";
-        
+
+	listen = [ { addr = "0.0.0.0"; port = 8081; } ]; 
+
         # Forçar HTTPS
         forceSSL = true;
         useACMEHost = "redcom.digital";

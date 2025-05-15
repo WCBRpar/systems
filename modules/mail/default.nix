@@ -2,7 +2,7 @@
 
 {
 
-  imports = [
+  # imports = [
     (builtins.fetchTarball {
       # Pick a release version you are interested in and set its hash, e.g.
       url = "https://gitlab.com/simple-nixos-mailserver/nixos-mailserver/-/archive/nixos-24.11/nixos-mailserver-nixos-24.11.tar.gz";
@@ -12,8 +12,8 @@
     })
 
     # calDAV e AntiSpam
-    ./agenda.nix
-    ./antispam.nix
+    # ./agenda.nix
+    # ./antispam.nix
   ];
 
   mailserver = lib.mkIf ( config.networking.hostName == "galactica" ) {

@@ -11,7 +11,7 @@
     };
 
     certs."wcbrpar.com" = {
-      email = "gcp-devops@wcbrpar.com";
+      email = "devops@wcbrpar.com";
       # Ensure that the web server you use can read the generated certs
       # Take a look at the group option for the web server you choose.
       group = "nginx";

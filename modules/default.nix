@@ -9,10 +9,11 @@
     # ./gitsync
     ./home-manager
     ./iam
-    ./mail
+    # ./mail
     ./meeting
     ./nginx
     ./office
+    ./reverse-proxy
     ./terminal
     ./webserving
     ./websites
