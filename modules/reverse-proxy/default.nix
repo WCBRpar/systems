@@ -36,6 +36,7 @@
       	    #   "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384"
 	    # ];
 	    # minVersion = "VersionTLS12";
+	    # sniStrict = true;
 	  };
         };
       };
@@ -61,13 +62,23 @@
       http = {
         routers = {
           dashboard = {
-            rule = "Host(`traefik.wcbrpar.com`) && (PathPrefix(`/api`) || PathPrefix(`/dashboard`))";
+	    rule = "Host(`traefik.wcbrpar.com`) && (PathPrefix(`/`) || PathPrefix(`/dashboard`) || PathPrefix(`/api`))";
             service = "api@internal";
             entrypoints = ["websecure"];
             tls = {
               certResolver = "cloudflare";
             };
 	    # IMPLEMENTAR MIDDLEWARE W/ KANIDM ***************
+	    middlewares = ["dashboard-redirect"];
+          };
+        };
+        middlewares = {
+          "dashboard-redirect" = {
+            redirectRegex = {
+              regex = "^https://traefik.wcbrpar.com$";
+              replacement = "https://traefik.wcbrpar.com/dashboard/";
+              permanent = true;
+            };
           };
         };
       };

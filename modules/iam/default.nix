@@ -4,7 +4,14 @@
 
   networking.firewall = {
     enable = true;
-    allowedTCPPorts = [ 80 443 636 ];
+    allowedTCPPorts = [ 80 443 ];
+    allowedTCPPortRanges = [
+      { from = 80; to = 443; }
+    ];
+    extraCommands = ''
+      iptables -A INPUT -p tcp --dport 8443 -s 127.0.0.1 -j ACCEPT
+      iptables -A INPUT -p tcp --dport 8443 -j DROP
+    '';
   };
 
   environment.systemPackages = with pkgs; [ kanidm nginx ];
@@ -13,42 +20,48 @@
     http = {
       routers = {
         iam = {
-          rule = "Host(`iam.wcbrpar.com`)";
+	  rule = "Host(`iam.wcbrpar.com`) && (PathPrefix(`/`))";
           service = "kanidm-service";
           entrypoints = ["websecure"];
-          tls.certResolver = "cloudflare";
-          # Adicione isto para evitar loops:
-          middlewares = ["fix-kanidm-headers"];
+          tls = {
+	    certResolver = "cloudflare";
+	  };
+          middlewares = ["fix-kanidm-headers" ];
+
         };
       };
 
       services = {
         kanidm-service = {
           loadBalancer = {
-            servers = [{ url = "https://localhost:8443"; }];
+            servers = [{ url = "https://127.0.0.1:8443"; }];
             # Importante para lidar com redirecionamentos:
             passHostHeader = true;
           };
         };
       };
 
+
+
       middlewares = {
-        "strip-prefix" = {
+        "fix-kanidm-headers" = {
+          headers = {
+            customRequestHeaders = {
+              X-Forwarded-Proto = "https";
+	      X-Forwarded-Host = "iam.wcbrpar.com";
+              X-Real-IP = "$remote_addr";
+            };
+            sslRedirect = false;
+          };
+        };
+        "strip-kanidm-prefix" = {
           stripPrefix = {
             prefixes = ["/ui"];
             forceSlash = false;
           };
-	  "fix-kanidm-headers" = {
-	    headers = {
-	      customRequestHeaders = {
-	        X-Forwarded-Proto = "https";
-		X-Real-IP = "$remote_addr";
-	      };
-	    sslRedirect = false;
-	    };
-	  };
         };
       };
+
     };
   };
 
@@ -71,8 +84,8 @@
     serverSettings = lib.mkIf ( config.networking.hostName == "galactica" ) {
       domain = "wcbrpar.com";
       origin = "https://iam.wcbrpar.com";
-      bindaddress = "127.0.0.1:8443";
-      ldapbindaddress = "127.0.0.1:636";
+      bindaddress = "0.0.0.0:8443";
+      ldapbindaddress = "0.0.0.0:636";
       tls_chain = "/var/lib/acme/wcbrpar.com/cert.pem";
       tls_key = "/var/lib/acme/wcbrpar.com/key.pem";
     };
