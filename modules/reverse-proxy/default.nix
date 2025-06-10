@@ -1,5 +1,7 @@
+{ config, lib, ...}:
+
 {
-  services.traefik = {
+  services.traefik = lib.mkIf ( config.networking.hostName == "galactica" ) {
     enable = true;
     dataDir = "/var/lib/traefik";	    # Diretório para dados persistentes do Traefik (como acme.json)
     environmentFiles = [ "/var/lib/cloudflare/cloudflare.s" ];

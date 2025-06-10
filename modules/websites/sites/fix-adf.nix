@@ -13,13 +13,13 @@ in
 
 {
 
-  security.acme = {
-    certs."${domain}" = {
-      extraDomainNames = [ "*.${domain}" ];
-      webroot = "/var/lib/acme/${domain}";
-      group = "nginx";
-    };
-  };
+  # security.acme = {
+  #   certs."${domain}" = {
+  #     extraDomainNames = [ "*.${domain}" ];
+  #     webroot = "/var/lib/acme/${domain}";
+  #     group = "nginx";
+  #   };
+  # };
 
   services = {
     phpfpm.pools."wordpress-${domain}".phpOptions = ''

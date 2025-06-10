@@ -9,12 +9,13 @@ let
 in
 
 {
-  imports = [ ./sites ];
+  imports = [ ./sites ./sites/fix-adf.nix];
 
   environment.systemPackages = with pkgs; [ php ];
   environment.variables.WP_VERSION = "6.4";
   
   mkSite = {
+
     "RED" = {
       enable = true;
       siteFQDN = "redcom.digital";
@@ -45,14 +46,14 @@ in
         inherit (wp4nix.plugins) woocommerce;
       };
     };
+
     "STR" = {
       enable = true;
       siteFQDN = "setra.com.br";
       siteType = "estatico";
-      siteRoot = "/var/lib/www/STR";
+      siteRoot = "/var/lib/www/setra.com.br";
     };
     
- 
   };
 
 }

@@ -6,13 +6,12 @@
     ./agenix
     # ./cloudflare - IMPLEMENTAR
     ./editor
-    # ./gitsync
+    # ./gitsync = REFORMAR
     ./home-manager
     ./iam
     # ./mail
-    ./meeting
-    ./nginx
-    ./office
+    # ./meeting
+    # ./office
     ./reverse-proxy
     ./terminal
     ./webserving

@@ -2,7 +2,7 @@
 
 {
   # TLS using ACME
-  security.acme = lib.mkIf ( config.networking.hostName != "yashuman" ) {
+  security.acme = {
     acceptTerms = true;
     defaults = {
       email = "gcp-devops@wcbrpar.com";
@@ -18,11 +18,7 @@
       # Since we have a wildcard vhost to handle port 80,
       # we can generate certs for anything!
       # Just make sure your DNS resolves them.
-      extraDomainNames = [ 
-        "redcom.digital"
-        "walcor.com.br" 
-	"wqueiroz.adv.br"
-      ];
+      extraDomainNames = [ " *.wcbrpar.com" ]; 
       dnsProvider = "cloudflare";
       dnsResolver = "1.1.1.1:53";
       environmentFile = "/var/lib/cloudflare/cloudflare.s";

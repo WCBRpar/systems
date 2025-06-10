@@ -2,7 +2,7 @@
 
 {
 
-  networking.firewall = {
+  networking.firewall = lib.mkIf ( config.networking.hostName == "galactica" ) {
     enable = true;
     allowedTCPPorts = [ 80 443 ];
     allowedTCPPortRanges = [
@@ -16,7 +16,7 @@
 
   environment.systemPackages = with pkgs; [ kanidm nginx ];
 
-  services.traefik.dynamicConfigOptions = {
+  services.traefik.dynamicConfigOptions = lib.mkIf ( config.networking.hostName == "galactica" ) {
     http = {
       routers = {
         iam = {
@@ -120,5 +120,9 @@
     };
   };
 
+  users.users.kanidm.isSystemUser = true;
   users.users.kanidm.extraGroups = [ "traefik" "acme" "nginx" ];
+  users.users.kanidm.group = "kanidm";
+  users.groups.kanidm = {};
+
 }
