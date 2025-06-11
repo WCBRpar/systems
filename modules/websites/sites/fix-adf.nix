@@ -1,17 +1,39 @@
 { config, pkgs, lib, inputs, options, ... }:
 
 let
-
   sources = import ../../../npins;
   wp4nix = pkgs.callPackages sources.wp4nix {};
 
   app = "red";
   name = "adufms";
   domain = "${name}.org.br";
-
 in
-
 {
+  services = {
+    traefik.dynamicConfigOptions = lib.mkIf (config.networking.hostName == "galactica") {
+      http = {
+        routers = {
+          WP-ADF = {
+            rule = "Host(`adufms.org.br`) && (PathPrefix(`/`))";
+            service = "adufms-site";
+            entrypoints = ["websecure"];
+            tls = {
+              certResolver = "cloudflare";
+            };
+          };
+        };
+
+        services = {
+          adufms-site = {
+            loadBalancer = {
+              servers = [{ url = "https://pegasus.wcbrpar.com"; }];
+              # Importante para lidar com redirecionamentos:
+              passHostHeader = true;
+            };
+          };
+        };
+      };
+    };
 
   # security.acme = {
   #   certs."${domain}" = {
@@ -21,13 +43,16 @@ in
   #   };
   # };
 
-  services = {
-    phpfpm.pools."wordpress-${domain}".phpOptions = ''
-      upload_max_filesize = 128M
-      post_max_size = 128M
-      memory_limit = 256M
-    '';
-    wordpress = {
+  
+    phpfpm.pools = lib.mkIf (config.networking.hostName == "pegasus") {
+      "wordpress-${domain}".phpOptions = ''
+        upload_max_filesize = 128M
+        post_max_size = 128M
+        memory_limit = 256M
+      '';
+    };
+
+    wordpress = lib.mkIf (config.networking.hostName == "pegasus") {
       webserver = "nginx";
       sites = {
         "${domain}" = {
@@ -44,11 +69,11 @@ in
               async-javascript
               breeze
               code-syntax-block
-	      custom-post-type-ui
+              custom-post-type-ui
               # co-authors-plus
               disable-xml-rpc
               google-site-kit
-	      gutenberg
+              gutenberg
               jetpack
               jetpack-lite
               # mailpoet
@@ -68,7 +93,7 @@ in
             inherit (pkgs.wordpressPackages.themes)
               twentytwentythree;
             inherit (wp4nix.themes) 
-	      astra;
+              astra;
           };
           # languages = [ pkgs.wordpressPackages.languages.pt_BR ];
           settings = {
@@ -103,13 +128,12 @@ in
               Disallow: /wp-
             '';
             # addSSL = true;
-     
           };
         };
       };
     };
-    nginx.virtualHosts = {
 
+    nginx.virtualHosts = lib.mkIf (config.networking.hostName == "pegasus") {
       "${domain}" = {
         enableACME = true;
         # useACMEHost = "${domain}";
@@ -161,11 +185,6 @@ in
       "${app}.${domain}" = {
         globalRedirect = "${domain}";
       };
-
     };
   };
 }
-  
-
-
-
