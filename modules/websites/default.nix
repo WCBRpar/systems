@@ -9,7 +9,7 @@ let
 in
 
 {
-  imports = [ ./sites ./sites/fix-adf.nix];
+  imports = [ ./sites ./sites/fix-adf.nix ./sites/fix-ham.nix ];
 
   environment.systemPackages = with pkgs; [ php ];
   environment.variables.WP_VERSION = "6.4";

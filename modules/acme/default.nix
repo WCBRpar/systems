@@ -10,7 +10,7 @@
       keyType = "ec256";
     };
 
-    certs."wcbrpar.com" = lib.mkIf (config.networking.hostName == "pegasus") {
+    certs."wcbrpar.com" = lib.mkIf (config.networking.hostName == "yashuman") {
       email = "devops@wcbrpar.com";
       # Ensure that the web server you use can read the generated certs
       # Take a look at the group option for the web server you choose.
@@ -26,7 +26,7 @@
     };
 
     # Certificado wildcard para redcom.digital
-    certs."redcom.digital" = lib.mkIf (config.networking.hostName == "pegasus") {
+    certs."redcom.digital" = lib.mkIf (config.networking.hostName == "yashuman") {
       group = "nginx";
       extraDomainNames = [ "*.redcom.digital" ];
       dnsProvider = "cloudflare";
@@ -35,7 +35,7 @@
     };
 
     # Certificado wildcard para walcor.com.br
-    certs."walcor.com.br" = lib.mkIf (config.networking.hostName == "pegasus") {
+    certs."walcor.com.br" = lib.mkIf (config.networking.hostName == "yashuman") {
       group = "nginx";
       extraDomainNames = [ "*.walcor.com.br" ];
       dnsProvider = "cloudflare";
@@ -43,7 +43,7 @@
     };
 
     # Certificado wildcard para wqueiroz.adv.br
-    certs."wqueiroz.adv.br" = lib.mkIf (config.networking.hostName == "pegasus") {
+    certs."wqueiroz.adv.br" = lib.mkIf (config.networking.hostName == "yashuman") {
       group = "nginx";
       extraDomainNames = [ "*.wqueiroz.adv.br" ];
       dnsProvider = "cloudflare";
