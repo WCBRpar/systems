@@ -67,25 +67,17 @@ in
               add-widget-after-content
               antispam-bee
               async-javascript
-              breeze
               code-syntax-block
               custom-post-type-ui
               # co-authors-plus
               disable-xml-rpc
               google-site-kit
               gutenberg
-              jetpack
-              jetpack-lite
-              # mailpoet
+	      official-facebook-pixel
               opengraph
-              simple-login-captcha
-              # simple-mastodon-verification
+	      rss-importer
               static-mail-sender-configurator
               # webp-converter-for-media
-              # wordpress-importer
-              # wp-gdpr-compliance
-              # wp-mail-smtp
-              wp-statistics
               wp-user-avatars;
             # inherit (google-site-kit custom-post-type-ui);
           };
@@ -155,8 +147,8 @@ in
         };
         locations."~* (.*\.pdf)" = {
           extraConfig = ''
-            types { application/octet-stream .pdf; }
-            default_type application/octet-stream;
+	    types { application/octet-stream .pdf; }
+	    default_type application/octet-stream;
           '';
         };
 
