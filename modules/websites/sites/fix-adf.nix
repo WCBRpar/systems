@@ -69,7 +69,7 @@ in
               async-javascript
               code-syntax-block
               custom-post-type-ui
-              # co-authors-plus
+              co-authors-plus
               disable-xml-rpc
               google-site-kit
               gutenberg
@@ -147,8 +147,16 @@ in
         };
         locations."~* (.*\.pdf)" = {
           extraConfig = ''
-	    types { application/octet-stream .pdf; }
-	    default_type application/octet-stream;
+	    types { application/pdf .pdf; }
+	    default_type application/pdf;
+	    more_set_headers Content-Disposition "inline" always;
+    	    more_set_headers X-Content-Type-Options "nosniff";
+    	    expires 30d;
+    	    more_set_headers Cache-Control "public, no-transform" always;
+	    proxy_hide_header Content-Disposition;
+    	    proxy_hide_header X-Content-Type-Options;
+	    proxy_ignore_headers Set-Cookie;
+	    proxy_set_header Connection "";
           '';
         };
 
