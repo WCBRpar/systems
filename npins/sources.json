@@ -4,13 +4,13 @@
       "type": "Git",
       "repository": {
         "type": "GitHub",
-        "owner": "nixos",
+        "owner": "WCBRpar",
         "repo": "nixpkgs"
       },
-      "branch": "nixos-24.11",
-      "revision": "a880f49904d68b5e53338d1e8c7bf80f59903928",
-      "url": "https://github.com/nixos/nixpkgs/archive/a880f49904d68b5e53338d1e8c7bf80f59903928.tar.gz",
-      "hash": "0gs1hkm6piwknanfa3qncm2i2g81blqx2rxp5d629396wla670d3"
+      "branch": "onlyoffice-fix",
+      "revision": "4d5f23cef8d6a763b41709de84ab738f7607168a",
+      "url": "https://github.com/WCBRpar/nixpkgs/archive/4d5f23cef8d6a763b41709de84ab738f7607168a.tar.gz",
+      "hash": "0jv6sd3rlsjrhw4fmcmv3agjr2kadg7zn3wfsra1lfnbkz2zabay"
     },
     "wp4nix": {
       "type": "GitRelease",

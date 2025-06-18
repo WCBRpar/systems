@@ -1,16 +1,39 @@
-{ config, pkgs, ... }:
+{ config, lib, pkgs, ... }:
 
 {
 
   environment.systemPackages = with pkgs; [ onlyoffice-documentserver ];
 
-  # Habilitar o Docker
-  virtualisation.docker.enable = true;
+  services = lib.mkIf ( config.networking.hostName == "galactica" ) {
 
-  services = {
+    traefik = {
+      dynamicConfigOptions = {
+        http = {
+	  routers = {
+	    onlyoffice = {
+	      rule = "Host(`office.wcbrpar.com`)";
+	      service = "onlyoffice-service";
+	      entrypoints = ["websecure"];
+	      tls = {
+		certResolver = "cloudflare";
+	      };
+	    };
+	  };
+	  services = {
+	    onlyoffice-service = {
+	      loadbalancer = {
+	        servers = [{ url = "https://127.0.0.1:8009"; }];
+		passHostHeader = true;
+	      };
+	    };
+	  };
+	};
+      };
+    };
+
     onlyoffice = {
       port = 8008;
-      enable = false;
+      enable = true;
       hostname = "office.wcbrpar.com";
     };
     nginx.virtualHosts."office.wcbrpar.com" = {

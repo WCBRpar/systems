@@ -11,7 +11,7 @@
     ./iam
     # ./mail
     # ./meeting
-    # ./office
+    ./office
     ./reverse-proxy
     ./terminal
     ./webserving
