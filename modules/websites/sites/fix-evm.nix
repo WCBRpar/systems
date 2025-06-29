@@ -86,7 +86,7 @@ in
           };
           themes = {
             inherit (pkgs.wordpressPackages.themes)
-              twentytwentythree;
+              twentytwentythree
 	      twentytwentyfive;
             inherit (wp4nix.themes) 
               astra;
