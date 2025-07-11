@@ -62,24 +62,30 @@ in
             name = "wpdb_${name}";
           };
           plugins = {
-            # inherit (pkgs.wordpressPackages.plugins)
+            inherit (pkgs.wordpressPackages.plugins)
+	      # simple-popup-block
+	      ;
             inherit (wp4nix.plugins)
               add-widget-after-content
               antispam-bee
               async-javascript
               code-syntax-block
               custom-post-type-ui
-              co-authors-plus
+              # co-authors-plus   Temporariamente indisponivel
               disable-xml-rpc
               google-site-kit
               gutenberg
+	      notification
 	      official-facebook-pixel
               opengraph
 	      rss-importer
+	      # simple-popup-block
               static-mail-sender-configurator
               # webp-converter-for-media
-              wp-user-avatars;
-            # inherit (google-site-kit custom-post-type-ui);
+	      wp-popups-lite
+              wp-user-avatars
+	      wp-rss-aggregator
+	      ;
           };
           themes = {
             inherit (pkgs.wordpressPackages.themes)
@@ -98,7 +104,7 @@ in
             FORCE_SSL_ADMIN = true;
             WP_DEBUG = true;
             WP_DEBUG_LOG = true;
-            # WP_DEBUG_DISPLAY = true;
+            WP_DEBUG_DISPLAY = false;
           };
           poolConfig = {
             "pm" = "dynamic";
