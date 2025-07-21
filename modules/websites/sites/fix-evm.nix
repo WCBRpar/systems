@@ -5,17 +5,22 @@ let
   wp4nix = pkgs.callPackages sources.wp4nix {};
 
   app = "red";
-  name = "adufms";
-  domain = "${name}.org.br";
+  name = "esperancavermelha";
+  domain = "${name}.com.br";
+  organization = "${domain}";
+  acronimo = "EVM";
+
 in
+
 {
+
   services = {
     traefik.dynamicConfigOptions = lib.mkIf (config.networking.hostName == "galactica") {
       http = {
         routers = {
-          WP-ADF = {
-            rule = "Host(`adufms.org.br`)";
-            service = "adufms-site";
+          "WP-${acronimo}" = {
+            rule = "Host(`${domain}`)";
+            service = "${domain}-site";
             entrypoints = ["websecure"];
             tls = {
               certResolver = "cloudflare";
@@ -24,9 +29,9 @@ in
         };
 
         services = {
-          adufms-site = {
+          "${name}-site" = {
             loadBalancer = {
-              servers = [{ url = "https://pegasus.wcbrpar.com:8001"; }];
+              servers = [{ url = "https://192.168.13.20:7770"; }];
               # Importante para lidar com redirecionamentos:
               passHostHeader = true;
             };
@@ -62,34 +67,27 @@ in
             name = "wpdb_${name}";
           };
           plugins = {
-            inherit (pkgs.wordpressPackages.plugins)
-	      # simple-popup-block
-	      ;
+            # inherit (pkgs.wordpressPackages.plugins)
             inherit (wp4nix.plugins)
               add-widget-after-content
               antispam-bee
               async-javascript
               code-syntax-block
               custom-post-type-ui
-              # co-authors-plus   Temporariamente indisponivel
               disable-xml-rpc
               google-site-kit
               gutenberg
-	      notification
 	      official-facebook-pixel
               opengraph
-	      rss-importer
-	      # simple-popup-block
               static-mail-sender-configurator
               # webp-converter-for-media
-	      wp-popups-lite
-              wp-user-avatars
-	      wp-rss-aggregator
-	      ;
+              wp-user-avatars;
+            # inherit (google-site-kit custom-post-type-ui);
           };
           themes = {
             inherit (pkgs.wordpressPackages.themes)
-              twentytwentythree;
+              twentytwentythree
+	      twentytwentyfive;
             inherit (wp4nix.themes) 
               astra;
           };
@@ -97,14 +95,14 @@ in
           settings = {
             WP_DEFAULT_THEME = "twentytwentythree";
             WP_MAIL_FROM = "gcp-devops@wcbrpar.com";
-            WP_SITEURL = "https://adufms.org.br";
-            WP_HOME = "https://adufms.org.br";
+            WP_SITEURL = "https://${domain}";
+            WP_HOME = "https://${domain}";
             WPLANG = "pt_BR";
             AUTOMATIC_UPDATER_DISABLED = true;
             FORCE_SSL_ADMIN = true;
             WP_DEBUG = true;
             WP_DEBUG_LOG = true;
-            WP_DEBUG_DISPLAY = false;
+            # WP_DEBUG_DISPLAY = true;
           };
           poolConfig = {
             "pm" = "dynamic";
@@ -125,13 +123,14 @@ in
               Disallow: /xmlrpc.php
               Disallow: /wp-
             '';
-            # addSSL = true;
+            addSSL = false;
           };
         };
       };
     };
 
     nginx.virtualHosts = lib.mkIf (config.networking.hostName == "pegasus") {
+
       "${domain}" = {
         enableACME = true;
         # useACMEHost = "${domain}";
@@ -146,23 +145,16 @@ in
             fastcgi_split_path_info ^(.+\.php)(/.*)$;
             try_files $uri $uri/ index.php /index.php$is_args$args;
             include ${pkgs.nginx}/conf/fastcgi_params;
-            fastcgi_pass 127.0.0.1:9000;
+	    include ${pkgs.nginx}/conf/fastcgi.conf;
+            fastcgi_pass 127.0.0.1:9002;
             fastcgi_param SCRIPT_FILENAME $request_filename;
             fastcgi_param APP_ENV dev;
           '';
         };
         locations."~* (.*\.pdf)" = {
           extraConfig = ''
-	    types { application/pdf .pdf; }
-	    default_type application/pdf;
-	    more_set_headers Content-Disposition "inline" always;
-    	    more_set_headers X-Content-Type-Options "nosniff";
-    	    expires 30d;
-    	    more_set_headers Cache-Control "public, no-transform" always;
-	    proxy_hide_header Content-Disposition;
-    	    proxy_hide_header X-Content-Type-Options;
-	    proxy_ignore_headers Set-Cookie;
-	    proxy_set_header Connection "";
+            types { application/octet-stream .pdf; }
+            default_type application/octet-stream;
           '';
         };
 
@@ -177,20 +169,20 @@ in
         };
       };
 
-      "${domain}80" = {
-        serverName = "${domain}";
-        locations."/.well-known/acme-challenge" = {
-          root = "/var/lib/acme/${domain}";
-          extraConfig = ''
-            auth_basic off;
-          '';
-        };
-        # locations."/" = { return = "301 https://$host$request_uri"; };
-      };
+      # "${domain}80" = {
+      #   serverName = "${domain}";
+      #   locations."/.well-known/acme-challenge" = {
+      #     root = "/var/lib/acme/${domain}";
+      #     extraConfig = ''
+      #       auth_basic off;
+      #     '';
+      #   };
+      #   # locations."/" = { return = "301 https://$host$request_uri"; };
+      # };
 
-      "${app}.${domain}" = {
-        globalRedirect = "${domain}";
-      };
+      # "${app}.${domain}" = {
+      #   globalRedirect = "${domain}";
+      # };
     };
   };
 }

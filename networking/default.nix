@@ -4,20 +4,17 @@ let
   privateZeroTierInterfaces = [
     "ztr1s0" # vpn
   ];
+
+  getHost = import ./hosts.nix;
+
 in
 
 {
   # Configuração de rede
   networking = {
     
-    hostId = "13960a97"; # Galactica            # cut -c-8 < /proc/sys/kernel/random/uuid    
-    hostName = "galactica";
-    
-    # hostId = "8bf0dda5"; # Pegasus
-    # hostName = "pegasus";
-
-    # hostId = "e491eb5c";
-    # hostName = "yashuman";
+    hostId = getHost.hostId;
+    hostName = getHost.hostName;
 
     domain = "wcbrpar.com";
     nameservers = [ "84.200.69.80" "84.200.70.40" "1.1.1.1" "8.8.8.8" ]; # CloudFlare / DNS Watch
