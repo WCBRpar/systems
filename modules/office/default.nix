@@ -11,20 +11,31 @@
         http = {
 	  routers = {
 	    onlyoffice = {
-	      rule = "Host(`office.wcbrpar.com`)";
+	      rule = "Host(`office.wcbrpar.com`) && (PathPrefix(`/`))";
 	      service = "onlyoffice-service";
 	      entrypoints = ["websecure"];
 	      tls = {
 		certResolver = "cloudflare";
 	      };
+	      # middlewares = ["onlyoffice-prefix"];
 	    };
 	  };
 	  services = {
 	    onlyoffice-service = {
-	      loadbalancer = {
-	        servers = [{ url = "https://127.0.0.1:8009"; }];
+	      loadBalancer = {
+	        servers = [{ url = "http://127.0.0.1:8008"; }];
 		passHostHeader = true;
+		healthCheck = {
+		  path = "/healthcheck/";
+		  interval = "10s";
+		  timeout = "3s";
+		};
 	      };
+	    };
+	  };
+	  middlewares = {
+	    onlyoffice-prefix = {
+	      stripPrefix.prefixes = ["/"];
 	    };
 	  };
 	};
@@ -41,7 +52,7 @@
         # Force nginx to return relative redirects. This lets the browser
         # figure out the full URL. This ends up working better because it's in
         # front of the reverse proxy and has the right protocol, hostname & port.
-        absolute_redirect off;
+        # absolute_redirect off;
       '';
       listen = [
         {
