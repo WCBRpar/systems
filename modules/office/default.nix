@@ -1,12 +1,13 @@
-{ config, lib, pkgs, ... }:
-
 {
-
-  environment.systemPackages = with pkgs; [ onlyoffice-documentserver ];
+  config,
+  lib,
+  pkgs,
+  ...
+}: {
+  environment.systemPackages = with pkgs; [onlyoffice-documentserver];
 
   services = {
-
-    traefik = lib.mkIf ( config.networking.hostName == "galactica" ) {
+    traefik = lib.mkIf (config.networking.hostName == "galactica") {
       dynamicConfigOptions = {
         http = {
           routers = {
@@ -24,7 +25,7 @@
           services = {
             onlyoffice-service = {
               loadBalancer = {
-                servers = [{ url = "http://192.168.13.20:8008"; }];
+                servers = [{url = "http://192.168.13.20:8008";}];
                 passHostHeader = true;
                 healthCheck = {
                   path = "/healthcheck/";
@@ -43,14 +44,15 @@
       };
     };
 
-    onlyoffice = lib.mkIf ( config.networking.hostName == "pegasus" )  {
+    onlyoffice = lib.mkIf (config.networking.hostName == "pegasus") {
       port = 8008;
       enable = true;
       hostname = "office.wcbrpar.com";
       enableExampleServer = true;
+      examplePort = 8009;
     };
 
-    nginx.virtualHosts."office.wcbrpar.com" = lib.mkIf ( config.networking.hostName == "pegasus" ) {
+    nginx.virtualHosts."office.wcbrpar.com" = lib.mkIf (config.networking.hostName == "pegasus") {
       extraConfig = ''
         # Force nginx to return relative redirects. This lets the browser
         # figure out the full URL. This ends up working better because it's in
@@ -65,5 +67,4 @@
       ];
     };
   };
-
 }
