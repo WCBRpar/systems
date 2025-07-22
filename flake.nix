@@ -2,7 +2,7 @@
   description = "Configurações NixOS para os hosts WCBRpar";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-23.11"; # Versão estável
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.11"; # Versão estável
   };
 
   outputs = {
