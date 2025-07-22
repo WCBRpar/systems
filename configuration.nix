@@ -1,20 +1,16 @@
-{ config, pkgs, ... }:
-
-let
-
-  sources = import ./npins;
-
-in
-
 {
-  nixpkgs.config.permittedInsecurePackages = [ 
+  config,
+  pkgs,
+  ...
+}: let
+  sources = import ./npins;
+in {
+  nixpkgs.config.permittedInsecurePackages = [
     "jitsi-meet-1.0.8043"
     "kanidm-1.4.6"
   ];
 
   imports = [
-    <agenix/modules/age.nix>
-    <home-manager/nixos>
     ./vpsadminos.nix
     ./modules
     ./networking
@@ -23,9 +19,9 @@ in
   ];
 
   # Pacotes e variáveis necessárias ao sistema
-  environment.systemPackages = with pkgs; [ 
-    (pkgs.callPackage <agenix/pkgs/agenix.nix> {})
-    home-manager
+  environment.systemPackages = with pkgs; [
+    inputs.agenix.packages.${pkgs.system}.default # Substitui <agenix/pkgs/agenix.nix>
+    inputs.home-manager.packages.${pkgs.system}.home-manager
   ];
 
   systemd.extraConfig = ''
@@ -67,5 +63,4 @@ in
 
   # Pacotes proprietários - Preciso para o ZeroTier 1 -  Procurar substituto
   nixpkgs.config.allowUnfree = true;
-
 }

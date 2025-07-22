@@ -1,21 +1,19 @@
-{ config, lib, pkgs, sources, ... }:
-
-
-let 
-
-  sources = import ../../npins;
-  wp4nix = pkgs.callPackage sources.wp4nix {};
-
-in
-
 {
-  imports = [ ./sites ./sites/fix-adf.nix ./sites/fix-ham.nix ./sites/fix-evm.nix ];
+  config,
+  lib,
+  pkgs,
+  sources,
+  ...
+}: let
+  sources = import ./npins {inherit inputs;}; # Passa inputs para npins
+  wp4nix = pkgs.callPackage sources.wp4nix {};
+in {
+  imports = [./sites ./sites/fix-adf.nix ./sites/fix-ham.nix ./sites/fix-evm.nix];
 
-  environment.systemPackages = with pkgs; [ php ];
+  environment.systemPackages = with pkgs; [php];
   environment.variables.WP_VERSION = "6.4";
-  
-  mkSite = {
 
+  mkSite = {
     "RED" = {
       enable = true;
       siteFQDN = "redcom.digital";
@@ -53,9 +51,5 @@ in
       siteType = "estatico";
       siteRoot = "/var/lib/www/setra.com.br";
     };
-    
   };
-
 }
-
-
