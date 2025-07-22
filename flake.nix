@@ -9,7 +9,7 @@
     };
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.11";
     npins = {
-      url = "github:Mic92/npins";
+      url = "github:andir/npins";
       flake = false; # npins não é um flake
     };
   };
