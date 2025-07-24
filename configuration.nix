@@ -2,15 +2,21 @@
   config,
   pkgs,
   ...
-}: let
+}:
+
+let
   sources = import ./npins;
-in {
-  nixpkgs.config.permittedInsecurePackages = [
+in
+{
+
+nixpkgs.config.permittedInsecurePackages = [
     "jitsi-meet-1.0.8043"
     "kanidm-1.4.6"
   ];
 
   imports = [
+    <agenix/modules/age.nix>
+    <home-manager/nixos>
     ./vpsadminos.nix
     ./modules
     ./networking
@@ -20,8 +26,8 @@ in {
 
   # Pacotes e variáveis necessárias ao sistema
   environment.systemPackages = with pkgs; [
-    inputs.agenix.packages.${pkgs.system}.default # Substitui <agenix/pkgs/agenix.nix>
-    inputs.home-manager.packages.${pkgs.system}.home-manager
+    # inputs.agenix.packages.${pkgs.system}.default # Substitui <agenix/pkgs/agenix.nix>
+    # inputs.home-manager.packages.${pkgs.system}.home-manager
   ];
 
   systemd.extraConfig = ''
