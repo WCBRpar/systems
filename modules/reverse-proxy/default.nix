@@ -10,6 +10,43 @@
     staticConfigOptions = {
       log = {
         level = "DEBUG";
+	filePath = "/var/log/traefik/traefik.log";  # Logs do Traefik
+      };
+
+      # Access Logs
+      accessLog = {
+        filePath = "/var/log/traefik/access.log";
+        format = "json";  # Pode ser "common" ou "json"
+        bufferingSize = 100;
+        filters = {
+          statusCodes = ["200-299" "300-399" "400-499" "500-599"];
+          retryAttempts = true;
+          minDuration = "10ms";
+        };
+      };
+
+      # Métricas (Prometheus)
+      metrics = {
+        prometheus = {
+          entryPoint = "metrics";
+          addServicesLabels = true;
+          addEntryPointsLabels = true;
+          addRoutersLabels = true;
+        };
+      };
+
+      # Tracing (OpenTelemetry)
+      tracing = {
+        otel = {
+          serviceName = "traefik";
+          sampler = "always_on";
+          exporter = {
+            otlp = {
+              endpoint = "http://localhost:4317";
+              insecure = true;
+            };
+          };
+        };
       };
 
       api = {
@@ -28,6 +65,7 @@
 	    permanent = false;
           };
         };
+
         websecure = {
           address = ":443";
 	  http.tls = {
@@ -41,6 +79,12 @@
 	    # sniStrict = true;
 	  };
         };
+
+        metrics = {
+          address = ":8082";
+        };
+
+
       };
 
       certificatesResolvers = {
@@ -63,6 +107,7 @@
     dynamicConfigOptions = {
       http = {
         routers = {
+
           dashboard = {
 	    rule = "Host(`traefik.wcbrpar.com`) && (PathPrefix(`/`) || PathPrefix(`/dashboard`) || PathPrefix(`/api`))";
             service = "api@internal";
@@ -73,6 +118,14 @@
 	    # IMPLEMENTAR MIDDLEWARE W/ KANIDM ***************
 	    middlewares = ["dashboard-redirect"];
           };
+
+          metrics = {
+            rule = "Host(`traefik.wcbrpar.com`) && PathPrefix(`/metrics`)";
+            service = "prometheus@internal";
+            entrypoints = ["websecure"];
+            tls.certResolver = "cloudflare";
+          };
+
         };
         middlewares = {
           "dashboard-redirect" = {
@@ -93,6 +146,19 @@
   systemd.tmpfiles.rules = [
     "d /var/lib/traefik 0750 traefik traefik -"
     "f /var/lib/traefik/acme.json 0750 traefik traefik -"
+    "d /var/log/traefik 0750 traefik traefik -"
   ];
+  
+  # Configuração de rotação de logs
+  services.logrotate.settings.traefik = {
+    files = ["/var/log/traefik/*.log"];
+    frequency = "daily";
+    rotate = 7;
+    compress = true;
+    missingok = true;
+    copytruncate = true;
+  };
+
+
 }
 
