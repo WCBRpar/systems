@@ -5,7 +5,7 @@ let
     "ztr1s0" # vpn
   ];
 
-  # getHost = import ./hosts.nix;
+  getHost = import ./hosts.nix;
 
 in
 
@@ -13,8 +13,8 @@ in
   # Configuração de rede
   networking = {
     
-    hostId = config.networking.hostId;
-    hostName = config.networking.hostName;
+    hostId = getHost.hostId;
+    hostName = getHost.hostName;
 
     domain = "wcbrpar.com";
     nameservers = [ "84.200.69.80" "84.200.70.40" "1.1.1.1" "8.8.8.8" ]; # CloudFlare / DNS Watch
