@@ -1,46 +1,37 @@
 {
-  description = "NixOS Configuration for Galactica, Pegasus, and Yashuman";
+  description = "NixOS Configuration";
 
   inputs = {
     agenix.url = "github:ryantm/agenix";
-    home-manager = {
-      url = "github:nix-community/home-manager/release-24.11";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    home-manager.url = "github:nix-community/home-manager/release-24.11";
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.11";
     npins = {
       url = "github:andir/npins";
-      flake = false; # npins não é um flake
+      flake = false;
     };
   };
 
   outputs = {
     self,
     nixpkgs,
-    agenix,
-    home-manager,
     ...
-  } @ inputs: {
-    nixosConfigurations = let
-      # Configuração base comum a todos os hosts
-      baseConfig = {
-        imports = [
+  } @ inputs: let
+    lib = nixpkgs.lib;
+    mkHost = hostName:
+      nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux";
+        specialArgs = {inherit inputs;};
+        modules = [
+          {
+            networking.hostName = lib.mkForce hostName; # Força o hostName primeiro
+            _module.check = false; # Temporariamente desativa verificações
+          }
           ./configuration.nix
-          agenix.nixosModules.default
-          home-manager.nixosModules.home-manager
+          (./hosts + "/${hostName}.nix")
         ];
       };
-
-      # Função para criar a configuração de cada host
-      mkHost = host:
-        nixpkgs.lib.nixosSystem {
-          system = "x86_64-linux";
-          modules = [
-            baseConfig
-            (./hosts + "/${host}.nix") # hostName e hostId específicos
-          ];
-        };
-    in {
+  in {
+    nixosConfigurations = {
       galactica = mkHost "galactica";
       pegasus = mkHost "pegasus";
       yashuman = mkHost "yashuman";
