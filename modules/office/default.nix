@@ -59,12 +59,6 @@
         # front of the reverse proxy and has the right protocol, hostname & port.
         # absolute_redirect off;
       '';
-      listen = [
-        {
-          port = 8008;
-          addr = "127.0.0.1";
-        }
-      ];
     };
   };
 }
