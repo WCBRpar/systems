@@ -40,7 +40,6 @@
       # Tracing (OpenTelemetry)
       tracing = {
         otlp = {
-          serviceName = "traefik";
           sampler = "always_on";
           http = {
             endpoint = "http://localhost:4317";
