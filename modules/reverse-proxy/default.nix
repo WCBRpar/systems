@@ -40,10 +40,8 @@
       # Tracing (OpenTelemetry)
       tracing = {
         otlp = {
-          sampler = "always_on";
           http = {
-            endpoint = "http://localhost:4317";
-            # insecure = true;
+            endpoint = "http://localhost:4318";
           };
         };
       };
