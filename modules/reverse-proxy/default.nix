@@ -1,22 +1,24 @@
-{ config, lib, ...}:
-
 {
-  services.traefik = lib.mkIf ( config.networking.hostName == "galactica" ) {
+  config,
+  lib,
+  ...
+}: {
+  services.traefik = lib.mkIf (config.networking.hostName == "galactica") {
     enable = true;
-    dataDir = "/var/lib/traefik";	    # Diretório para dados persistentes do Traefik (como acme.json)
-    environmentFiles = [ "/var/lib/cloudflare/cloudflare.s" ];
+    dataDir = "/var/lib/traefik"; # Diretório para dados persistentes do Traefik (como acme.json)
+    environmentFiles = ["/var/lib/cloudflare/cloudflare.s"];
     group = "nginx";
 
     staticConfigOptions = {
       log = {
         level = "DEBUG";
-	filePath = "/var/log/traefik/traefik.log";  # Logs do Traefik
+        filePath = "/var/log/traefik/traefik.log"; # Logs do Traefik
       };
 
       # Access Logs
       accessLog = {
         filePath = "/var/log/traefik/access.log";
-        format = "json";  # Pode ser "common" ou "json"
+        format = "json"; # Pode ser "common" ou "json"
         bufferingSize = 100;
         filters = {
           statusCodes = ["200-299" "300-399" "400-499" "500-599"];
@@ -52,8 +54,8 @@
       api = {
         dashboard = true;
         insecure = true; # CUIDADO: Permite acesso ao dashboard sem autenticação na porta 8080.
-                         # Para produção, você DEVE proteger o dashboard.
-                         # Veja a seção de proteção do dashboard abaixo.
+        # Para produção, você DEVE proteger o dashboard.
+        # Veja a seção de proteção do dashboard abaixo.
       };
 
       entryPoints = {
@@ -62,29 +64,27 @@
           http.redirections.entryPoint = {
             to = "websecure";
             scheme = "https";
-	    permanent = false;
+            permanent = false;
           };
         };
 
         websecure = {
           address = ":443";
-	  http.tls = {
-	    certResolver = "cloudflare";
-	    options = "mytls";
-	    # cipherSuites = [
-	    #   "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384"
-      	    #   "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384"
-	    # ];
-	    # minVersion = "VersionTLS12";
-	    # sniStrict = true;
-	  };
+          http.tls = {
+            certResolver = "cloudflare";
+            options = "mytls";
+            # cipherSuites = [
+            #   "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384"
+            #   "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384"
+            # ];
+            # minVersion = "VersionTLS12";
+            # sniStrict = true;
+          };
         };
 
         metrics = {
           address = ":8082";
         };
-
-
       };
 
       certificatesResolvers = {
@@ -107,16 +107,15 @@
     dynamicConfigOptions = {
       http = {
         routers = {
-
           dashboard = {
-	    rule = "Host(`traefik.wcbrpar.com`) && (PathPrefix(`/`) || PathPrefix(`/dashboard`) || PathPrefix(`/api`))";
+            rule = "Host(`traefik.wcbrpar.com`) && (PathPrefix(`/`) || PathPrefix(`/dashboard`) || PathPrefix(`/api`))";
             service = "api@internal";
             entrypoints = ["websecure"];
             tls = {
               certResolver = "cloudflare";
             };
-	    # IMPLEMENTAR MIDDLEWARE W/ KANIDM ***************
-	    middlewares = ["dashboard-redirect"];
+            # IMPLEMENTAR MIDDLEWARE W/ KANIDM ***************
+            middlewares = ["dashboard-redirect"];
           };
 
           metrics = {
@@ -125,7 +124,6 @@
             entrypoints = ["websecure"];
             tls.certResolver = "cloudflare";
           };
-
         };
         middlewares = {
           "dashboard-redirect" = {
@@ -147,8 +145,9 @@
     "d /var/lib/traefik 0750 traefik traefik -"
     "f /var/lib/traefik/acme.json 0750 traefik traefik -"
     "d /var/log/traefik 0750 traefik traefik -"
+    "f /var/log/traefik/access.log 0750 traefik traefik -"
   ];
-  
+
   # Configuração de rotação de logs
   services.logrotate.settings.traefik = {
     files = ["/var/log/traefik/*.log"];
@@ -158,7 +157,4 @@
     missingok = true;
     copytruncate = true;
   };
-
-
 }
-
