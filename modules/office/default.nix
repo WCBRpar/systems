@@ -61,4 +61,8 @@
       '';
     };
   };
+  # Necessário para que o Only Office possa reconhecer as fontes instaladas
+  fonts.fontDir = lib.mkIf (config.networking.hostName == "pegasus") { 
+    enable = true; 
+  };
 }
