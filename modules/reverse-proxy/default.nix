@@ -39,7 +39,7 @@
 
       # Tracing (OpenTelemetry)
       tracing = {
-        otel = {
+        otlp = {
           serviceName = "traefik";
           sampler = "always_on";
           exporter = {
