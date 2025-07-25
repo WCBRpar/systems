@@ -42,11 +42,9 @@
         otlp = {
           serviceName = "traefik";
           sampler = "always_on";
-          exporter = {
-            otlp = {
-              endpoint = "http://localhost:4317";
-              insecure = true;
-            };
+          http = {
+            endpoint = "http://localhost:4317";
+            # insecure = true;
           };
         };
       };
