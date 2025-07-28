@@ -54,25 +54,7 @@
       enableExampleServer = true;
       examplePort = 8009;
 
-      # Configuração crítica para corrigir caminhos
-      extraConfig = {
-        common = {
-          baseUrl = "https://office.wcbrpar.com";
-        };
-        services.CoAuthoring = {
-          server = {
-            port = 8008;
-            siteUrl = "https://office.wcbrpar.com";
-          };
-          requestDefaults = {
-            headers = {
-              "X-Forwarded-Proto" = "https";
-              "X-Forwarded-Host" = "office.wcbrpar.com";
-            };
-          };
-        };
       };
-    };
 
     nginx.virtualHosts."office.wcbrpar.com" = lib.mkIf (config.networking.hostName == "pegasus") {
       extraConfig = ''
