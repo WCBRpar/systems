@@ -13,7 +13,7 @@
           routers = {
             onlyoffice = {
               # rule = "Host(`office.wcbrpar.com`)";
-              rule = "Host(`office.wcbrpar.com`) && (PathPrefix(`/`))";
+              rule = "Host(`office.wcbrpar.com`)";
               service = "onlyoffice-service";
               entrypoints = ["websecure"];
               tls = {
@@ -37,7 +37,10 @@
           };
           middlewares = {
             onlyoffice-prefix = {
-              stripPrefix.prefixes = ["/"];
+              stripPrefix = {
+                prefixes = ["/"];
+                forceSlash = true;
+              };
             };
           };
         };
@@ -45,11 +48,30 @@
     };
 
     onlyoffice = lib.mkIf (config.networking.hostName == "pegasus") {
-      port = 8008;
       enable = true;
+      port = 8008;
       hostname = "office.wcbrpar.com";
       enableExampleServer = true;
       examplePort = 8009;
+
+      # Configuração crítica para corrigir caminhos
+      extraConfig = {
+        common = {
+          baseUrl = "https://office.wcbrpar.com";
+        };
+        services.CoAuthoring = {
+          server = {
+            port = 8008;
+            siteUrl = "https://office.wcbrpar.com";
+          };
+          requestDefaults = {
+            headers = {
+              "X-Forwarded-Proto" = "https";
+              "X-Forwarded-Host" = "office.wcbrpar.com";
+            };
+          };
+        };
+      };
     };
 
     nginx.virtualHosts."office.wcbrpar.com" = lib.mkIf (config.networking.hostName == "pegasus") {
@@ -57,12 +79,14 @@
         # Force nginx to return relative redirects. This lets the browser
         # figure out the full URL. This ends up working better because it's in
         # front of the reverse proxy and has the right protocol, hostname & port.
-        # absolute_redirect off;
+        absolute_redirect off;
       '';
     };
   };
+
   # Necessário para que o Only Office possa reconhecer as fontes instaladas
   fonts.fontDir = lib.mkIf (config.networking.hostName == "pegasus") { 
     enable = true; 
   };
+
 }
