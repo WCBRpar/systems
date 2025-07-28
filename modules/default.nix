@@ -11,6 +11,7 @@
     ./iam
     # ./mail
     # ./meeting
+    ./monitoring
     ./office
     ./reverse-proxy
     ./terminal
