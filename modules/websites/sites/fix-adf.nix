@@ -56,36 +56,37 @@ in
       webserver = "nginx";
       sites = {
         "${domain}" = {
-          package = pkgs.wordpress_6_7;
+          package = pkgs.wordpress;
           database = {
             createLocally = true;
             name = "wpdb_${name}";
           };
           plugins = {
             inherit (pkgs.wordpressPackages.plugins)
-	      # simple-popup-block
-	      ;
+	            co-authors-plus
+              gutenberg
+              # simple-popup-block
+	            ;
             inherit (wp4nix.plugins)
               add-widget-after-content
               antispam-bee
               async-javascript
+              classic-editor
               code-syntax-block
               custom-post-type-ui
-              # co-authors-plus   Temporariamente indisponivel
               disable-xml-rpc
               google-site-kit
-              gutenberg
-	      notification
-	      official-facebook-pixel
+	            notification
+	            official-facebook-pixel
               opengraph
-	      rss-importer
-	      # simple-popup-block
+	            rss-importer
+	            # simple-popup-block
               static-mail-sender-configurator
               # webp-converter-for-media
-	      wp-popups-lite
+	            wp-popups-lite
               wp-user-avatars
-	      wp-rss-aggregator
-	      ;
+	            wp-rss-aggregator
+	            ;
           };
           themes = {
             inherit (pkgs.wordpressPackages.themes)
