@@ -30,9 +30,9 @@ nixpkgs.config.permittedInsecurePackages = [
     # inputs.home-manager.packages.${pkgs.system}.home-manager
   ];
 
-  systemd.extraConfig = ''
-    DefaultTimeoutStartSec=900s
-  '';
+  systemd.settings.Manager = {
+    DefaultTimeoutStartSec = "900s";
+  };
 
   # Fuso horário do sistema
   time.timeZone = "America/Campo_Grande";

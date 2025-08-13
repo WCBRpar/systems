@@ -67,6 +67,7 @@
 
   services.kanidm = {
     enableClient = true;
+    package = pkgs.kanidm;
 
     # Configurações do cliente Kanidm (usando objeto Nix)
     clientSettings = {

@@ -7,10 +7,10 @@
         "owner": "WCBRpar",
         "repo": "nixpkgs"
       },
-      "branch": "nixos-24.11",
-      "revision": "edb0191cb7de57b7272e13212faeb15ec6370c8d",
-      "url": "https://github.com/WCBRpar/nixpkgs/archive/edb0191cb7de57b7272e13212faeb15ec6370c8d.tar.gz",
-      "hash": "153l14z5wg02hgb6icjq4fxilijmgxf6f0nbr0kxiz4szsb8il30"
+      "branch": "master",
+      "revision": "3edb016e2f379c28b1fd71e926393a9e6e1e47d7",
+      "url": "https://github.com/WCBRpar/nixpkgs/archive/3edb016e2f379c28b1fd71e926393a9e6e1e47d7.tar.gz",
+      "hash": "101mr59c712hl0l9m95sfd5gym9jcz22xzk7pl40nfnkxqb8d0v9"
     },
     "wp4nix": {
       "type": "GitRelease",
