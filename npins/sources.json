@@ -8,6 +8,7 @@
         "repo": "nixpkgs"
       },
       "branch": "master",
+      "submodules": false,
       "revision": "3edb016e2f379c28b1fd71e926393a9e6e1e47d7",
       "url": "https://github.com/WCBRpar/nixpkgs/archive/3edb016e2f379c28b1fd71e926393a9e6e1e47d7.tar.gz",
       "hash": "101mr59c712hl0l9m95sfd5gym9jcz22xzk7pl40nfnkxqb8d0v9"
@@ -21,11 +22,12 @@
       "pre_releases": false,
       "version_upper_bound": null,
       "release_prefix": null,
+      "submodules": false,
       "version": "v1.0.0",
       "revision": "0c6d17e70c38d40e90ad37d50317e0b420abe122",
       "url": null,
       "hash": "177b0jqp93rk0cy8wyh0alkn791jfzym0bcir4wazbqcamw5x6sq"
     }
   },
-  "version": 3
+  "version": 5
 }
