@@ -64,12 +64,14 @@ in
           plugins = {
             inherit (pkgs.wordpressPackages.plugins)
 	            co-authors-plus
-              # gutenberg
+              gutenberg
               # simple-popup-block
 	            ;
             inherit (wp4nix.plugins)
+              add-widget-after-content
               antispam-bee
               async-javascript
+              classic-editor
               code-syntax-block
               custom-post-type-ui
               disable-xml-rpc
@@ -82,20 +84,19 @@ in
               static-mail-sender-configurator
               # webp-converter-for-media
 	            # wp-popups-lite
-              wp-gdpr-compliance
               wp-user-avatars
 	            wp-rss-aggregator
 	            ;
           };
           themes = {
-            inherit (pkgs.wordpressPackages.themes)
-              twentytwentythree
-              ;
+            # inherit (pkgs.wordpressPackages.themes)
+            #   twentytwentythree;
             inherit (wp4nix.themes) 
               astra
+              twentytwentythree
               ;
           };
-          languages = [ wp4nix.languages.pt_BR ];
+          # languages = [ pkgs.wordpressPackages.languages.pt_BR ];
           settings = {
             WP_DEFAULT_THEME = "twentytwentythree";
             WP_MAIL_FROM = "gcp-devops@wcbrpar.com";
@@ -103,15 +104,11 @@ in
             WP_HOME = "https://adufms.org.br";
             WPLANG = "pt_BR";
             AUTOMATIC_UPDATER_DISABLED = true;
-            FORCE_SSL_ADMIN = false;
+            FORCE_SSL_ADMIN = true;
             WP_DEBUG = true;
             WP_DEBUG_LOG = true;
-            WP_DEBUG_DISPLAY = true;
+            WP_DEBUG_DISPLAY = false;
           };
-          extraConfig = ''
-            @ini_set( 'error_log', '/var/log/wordpress/${domain}/debug.log' );
-            @ini_set( 'display_errors', 1 );
-          '';
           poolConfig = {
             "pm" = "dynamic";
             "pm.max_children" = 64;
@@ -142,11 +139,9 @@ in
         enableACME = true;
         # useACMEHost = "${domain}";
         addSSL = true;
-
         locations."/.well-known/acme-challenge" = {
           root = "/var/lib/acme/${domain}";
         };
-
         locations."~ \.php$" = {
           root = "/var/www/${domain}";
           extraConfig = ''
@@ -157,23 +152,20 @@ in
             fastcgi_pass 127.0.0.1:9000;
             fastcgi_param SCRIPT_FILENAME $request_filename;
             fastcgi_param APP_ENV dev;
-            # Configuração CSP específica para PHP
-            more_set_headers "Content-Security-Policy: default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https: data: blob:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https: *.gravatar.com; font-src 'self' https: data:; connect-src 'self' https:;";
           '';
         };
-
         locations."~* (.*\.pdf)" = {
           extraConfig = ''
-	          types { application/pdf .pdf; }
-	          default_type application/pdf;
-	          more_set_headers Content-Disposition "inline" always;
-    	      more_set_headers X-Content-Type-Options "nosniff";
-    	      expires 30d;
-    	      more_set_headers Cache-Control "public, no-transform" always;
-	          proxy_hide_header Content-Disposition;
-    	      proxy_hide_header X-Content-Type-Options;
-	          proxy_ignore_headers Set-Cookie;
-	          proxy_set_header Connection "";
+	    types { application/pdf .pdf; }
+	    default_type application/pdf;
+	    more_set_headers Content-Disposition "inline" always;
+    	    more_set_headers X-Content-Type-Options "nosniff";
+    	    expires 30d;
+    	    more_set_headers Cache-Control "public, no-transform" always;
+	    proxy_hide_header Content-Disposition;
+    	    proxy_hide_header X-Content-Type-Options;
+	    proxy_ignore_headers Set-Cookie;
+	    proxy_set_header Connection "";
           '';
         };
 
@@ -184,13 +176,6 @@ in
             fastcgi_pass unix:${config.services.phpfpm.pools."wordpress-${domain}".socket};
             include ${pkgs.nginx}/conf/fastcgi_params;
             include ${pkgs.nginx}/conf/fastcgi.conf;
-          '';
-        };
-
-        locations."~ ^/(wp-admin|wp-login\.php)" = {
-          extraConfig = ''
-            # Substitui o cabeçalho CSP existente apenas para a área administrativa
-            more_set_headers "Content-Security-Policy: default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https: *.gravatar.com; font-src 'self' https: data:; connect-src 'self' https:;";
           '';
         };
       };
