@@ -66,6 +66,10 @@ in
 	            co-authors-plus
               # gutenberg
               # simple-popup-block
+              simple-mastodon-verification
+              surge
+              wordpress-seo
+              webp-converter-for-media
 	            ;
             inherit (wp4nix.plugins)
               antispam-bee
@@ -80,11 +84,13 @@ in
 	            rss-importer
 	            # simple-popup-block
               static-mail-sender-configurator
-              # webp-converter-for-media
+              webp-express
 	            # wp-popups-lite
+              wpforms-lite
               wp-gdpr-compliance
               wp-user-avatars
 	            wp-rss-aggregator
+              wp-swiper
 	            ;
           };
           themes = {
@@ -106,7 +112,7 @@ in
             FORCE_SSL_ADMIN = false;
             WP_DEBUG = true;
             WP_DEBUG_LOG = true;
-            WP_DEBUG_DISPLAY = true;
+            WP_DEBUG_DISPLAY = false;
           };
           extraConfig = ''
             @ini_set( 'error_log', '/var/log/wordpress/${domain}/debug.log' );
