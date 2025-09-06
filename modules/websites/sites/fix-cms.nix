@@ -13,7 +13,7 @@ in
     traefik.dynamicConfigOptions = lib.mkIf (config.networking.hostName == "galactica") {
       http = {
         routers = {
-          WP-ADF = {
+          WP-CMS = {
             rule = "Host(`cutms.org.br`)";
             service = "cutms-site";
             entrypoints = ["websecure"];
