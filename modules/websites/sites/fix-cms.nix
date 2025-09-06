@@ -24,7 +24,7 @@ in
         };
 
         services = {
-          adufms-site = {
+          cutms-site = {
             loadBalancer = {
               servers = [{ url = "https://pegasus.wcbrpar.com:8001"; }];
               # Importante para lidar com redirecionamentos:
