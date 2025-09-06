@@ -34,7 +34,7 @@
       services = {
         kanidm-service = {
           loadBalancer = {
-            servers = [{ url = "https://127.0.0.1:8443"; }];
+            servers = [{ url = "${toString config.services.kanidm.serverSettings.origin}:8443"; }];
             # Importante para lidar com redirecionamentos:
             passHostHeader = true;
           };
@@ -48,7 +48,7 @@
           headers = {
             customRequestHeaders = {
               X-Forwarded-Proto = "https";
-	      X-Forwarded-Host = "iam.wcbrpar.com";
+	            X-Forwarded-Host = "iam.wcbrpar.com";
               X-Real-IP = "$remote_addr";
             };
             sslRedirect = false;
