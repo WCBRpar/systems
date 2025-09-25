@@ -10,7 +10,7 @@
     ./home-manager
     ./iam
     # ./mail
-    # ./meeting
+    ./meeting
     ./monitoring
     ./office
     ./reverse-proxy

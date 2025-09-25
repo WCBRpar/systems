@@ -1,4 +1,4 @@
-{ pkgs, lib, ... }:
+{ config, pkgs, lib, ... }:
 
 {
 
@@ -68,6 +68,38 @@
 
     clientMaxBodySize = "20M";
 
+    # Host comum para imagens estáticas auxiliaŕes a alguns módulos
+    virtualHosts = {
+      "img.redcom.digital" = lib.mkIf (config.networking.hostName == "pegasus") {
+        serverAliases = [ "img.wcbrpar.com" ];
+        root = "/var/lib/www/shared/images";
+        listen = [ 
+          { addr = "0.0.0.0"; port = 80; }   # HTTP
+          { addr = "0.0.0.0"; port = 443; ssl = true; } # HTTPS
+        ];
+        forceSSL = true;
+        # useACMEHost = "redcom.digital";
+
+        extraConfig = ''
+          add_header Referrer-Policy "origin-when-cross-origin" always;
+          add_header X-Frame-Options "DENY" always;
+          add_header X-Content-Type-Options "nosniff" always;
+          add_header Cache-Control "public";
+        '';
+
+        locations."= /" = {
+          return = "301 https://redcom.digital";
+        };
+
+        locations."/" = {
+          tryFiles = "$uri =404";
+          extraConfig = ''
+            expires 30d;
+            access_log off;
+          '';
+        };
+      };
+    };
   };
 
 }

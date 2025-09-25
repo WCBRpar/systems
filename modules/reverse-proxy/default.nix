@@ -102,7 +102,7 @@
     dynamicConfigOptions = {
       http = {
         routers = {
-          dashboard = {
+          TK-DASHBOARD = {
             rule = "Host(`traefik.wcbrpar.com`) && (PathPrefix(`/`) || PathPrefix(`/dashboard`) || PathPrefix(`/api`))";
             service = "api@internal";
             entrypoints = ["websecure"];

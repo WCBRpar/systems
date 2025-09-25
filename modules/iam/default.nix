@@ -19,7 +19,7 @@
   services.traefik.dynamicConfigOptions = lib.mkIf ( config.networking.hostName == "galactica" ) {
     http = {
       routers = {
-        iam = {
+        KN-ALL = {
 	  rule = "Host(`iam.wcbrpar.com`) && (PathPrefix(`/`))";
           service = "kanidm-service";
           entrypoints = ["websecure"];
@@ -67,7 +67,7 @@
 
   services.kanidm = {
     enableClient = true;
-    package = pkgs.kanidm;
+    package = pkgs.kanidm_1_7;
 
     # Configurações do cliente Kanidm (usando objeto Nix)
     clientSettings = {

@@ -11,9 +11,9 @@
       dynamicConfigOptions = {
         http = {
           routers = {
-            onlyoffice = {
+            OO-ALL = {
               # rule = "Host(`office.wcbrpar.com`)";
-              rule = "Host(`office.wcbrpar.com`)";
+              rule = "Host(`office.wcbrpar.com`) || Host(`office.redcom.digital`)" ";
               service = "onlyoffice-service";
               entrypoints = ["websecure"];
               tls = {
@@ -25,7 +25,7 @@
           services = {
             onlyoffice-service = {
               loadBalancer = {
-                servers = [{url = "http://192.168.13.20:8008";}];
+                servers = [{url = "http://pegasus.wcbrpar.com:8008";}];
                 passHostHeader = true;
                 healthCheck = {
                   path = "/healthcheck/";

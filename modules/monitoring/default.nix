@@ -9,7 +9,7 @@
       dynamicConfigOptions = {
         http = {
 	        routers = {
-	          grafana = {
+	          GF-ALL = {
 	            rule = "Host(`grafana.wcbrpar.com`)";
 	            service = "grafana-service";
 	            entrypoints = ["websecure"];
@@ -21,7 +21,7 @@
 	        services = {
 	          grafana-service = {
 	            loadbalancer = {
-	              servers = [{ url = "http://${toString config.services.grafana.addr}:${toString config.services.grafana.port}"; }];
+	              servers = [{ url = "http://${toString config.services.grafana.settings.server.http_addr}:${toString config.services.grafana.settings.http_port}"; }];
 		            passHostHeader = true;
               };
 	          };
@@ -34,9 +34,13 @@
       # declarativePlugins = with pkgs.grafanaPlugins; [ ... ];
 
       enable = true;
-      domain = "grafana.wcbrpar.com";
-      port = 3000;
-      addr = "192.168.13.10";
+      settings = { 
+        server = { 
+          domain = "grafana.wcbrpar.com";
+          http_port = 3000;
+          http_addr = "192.168.13.10";
+        };
+      };
 
       provision = {
         enable = true;
