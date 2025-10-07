@@ -23,10 +23,10 @@
           
           services = {
             # Serviço principal do Odoo
-            odoo-service.loadBalancer.servers = [{ url = "http://pegasus.wcbrpar.com:8011"; }];
+            odoo-service.loadBalancer.servers = [{ url = "http://192.168.13.20:8011"; }];
             
             # Serviço de long polling
-            odoo-longpolling-service.loadBalancer.servers = [{ url = "http://pegasus.wcbrpar.com:8072"; }];
+            odoo-longpolling-service.loadBalancer.servers = [{ url = "http://192.168.13.20:8072"; }];
           };
         };
       };
@@ -36,7 +36,9 @@
       enable = true;
       domain = "crm.redcom.digital";
       settings = {
-        http_port = 8011;
+        options = {
+          http_port = 8011;
+        };
       };
     };
   };

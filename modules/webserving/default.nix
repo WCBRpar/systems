@@ -77,7 +77,7 @@
           { addr = "0.0.0.0"; port = 80; }   # HTTP
           { addr = "0.0.0.0"; port = 443; ssl = true; } # HTTPS
         ];
-        forceSSL = true;
+        # forceSSL = true;
         # useACMEHost = "redcom.digital";
 
         extraConfig = ''
