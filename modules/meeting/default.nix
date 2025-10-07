@@ -11,8 +11,19 @@
               rule = "Host(`meet.wcbrpar.com`) || Host(`meet.redcom.digital`)";
               service = "meet-service";
               entrypoints = ["websecure"];
+              middlewares = [ "jitsi-headers"];
               tls = {
                 certResolver = "cloudflare";
+              };
+            };
+          };
+          middlewares = {
+            jitsi-headers = {
+              customRequestHeaders = {
+                "X-Forwarded-Proto" = "https";
+              };
+              customRespondeHeaders = {
+                "Strict-Transport-Security" = "max-age=31536000; includeSubDomains";
               };
             };
           };
@@ -20,7 +31,7 @@
             "meet-service" = {
               loadBalancer = {
                 servers = [
-                  { url = "http://galactica.wcbrpar.com:80"; } # Jitsi-Meet na porta padrão
+                  { url = "http://galactica.wcbrpar.com:8010"; } # Jitsi-Meet na porta padrão
                 ];
                 passHostHeader = true;
               };

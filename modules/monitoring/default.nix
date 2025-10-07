@@ -10,7 +10,7 @@
         http = {
 	        routers = {
 	          GF-ALL = {
-	            rule = "Host(`grafana.wcbrpar.com`)";
+	            rule = "Host(`grafana.wcbrpar.com`) || Host(`grafana.redcom.digital`) ";
 	            service = "grafana-service";
 	            entrypoints = ["websecure"];
 	            tls = {
@@ -21,7 +21,7 @@
 	        services = {
 	          grafana-service = {
 	            loadbalancer = {
-	              servers = [{ url = "http://${toString config.services.grafana.settings.server.http_addr}:${toString config.services.grafana.settings.http_port}"; }];
+	              servers = [{ url = "http://${toString config.services.grafana.settings.server.http_addr}:${toString config.services.grafana.settings.server.http_port}"; }];
 		            passHostHeader = true;
               };
 	          };

@@ -4,7 +4,8 @@
   imports = [
     ./acme
     ./agenix
-    # ./cloudflare - IMPLEMENTAR
+    ./dns
+    ./crm
     ./editor
     # ./gitsync = REFORMAR
     ./home-manager

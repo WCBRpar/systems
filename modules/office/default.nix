@@ -13,7 +13,7 @@
           routers = {
             OO-ALL = {
               # rule = "Host(`office.wcbrpar.com`)";
-              rule = "Host(`office.wcbrpar.com`) || Host(`office.redcom.digital`)" ";
+              rule = "Host(`office.wcbrpar.com`) || Host(`office.redcom.digital`)";
               service = "onlyoffice-service";
               entrypoints = ["websecure"];
               tls = {

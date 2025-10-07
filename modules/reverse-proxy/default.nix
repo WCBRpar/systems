@@ -97,13 +97,27 @@
           };
         };
       };
+
+      # Cloudflare WildCard
+      cloudflare-wildcard = {
+        acme = {
+          email = "dev-ops@wcbrpar.com";
+          storage = "/var/lib/traefik/acme-wildcard.json";
+          dnsChallenge = {
+            provider = "cloudflare";
+            resolvers = ["1.1.1.1:53"];
+          };
+          # Configuração específica para wildcard
+          keyType = "RSA4096";
+        };
+      };
     };
 
     dynamicConfigOptions = {
       http = {
         routers = {
           TK-DASHBOARD = {
-            rule = "Host(`traefik.wcbrpar.com`) && (PathPrefix(`/`) || PathPrefix(`/dashboard`) || PathPrefix(`/api`))";
+            rule = "Host(`traefik.wcbrpar.com`) || Host(`traefik.redcom.digital`) && (PathPrefix(`/`) || PathPrefix(`/dashboard`) || PathPrefix(`/api`))";
             service = "api@internal";
             entrypoints = ["websecure"];
             tls = {
