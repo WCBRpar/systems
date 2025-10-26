@@ -6,10 +6,22 @@
     fsType = "nfs";
     options = [ "nofail" ];
   };
-  fileSystems."/mnt/export2394" = {
+  fileSystems."/home" = {
     device = "172.16.129.26:/nas/6116/users";
     fsType = "nfs";
-    options = [ "nofail" ];
+    options = [ 
+      "nofail"
+      "rw"
+      "sync"
+      "hard"
+      "timeo=600"
+      "retrans=2"
+      ];
+  };
+  
+  systemd.services."home-mount" = {
+    wants = [ "network-online.target" ];
+    after = [ "network-online.target" ];
   };
 }
 		
