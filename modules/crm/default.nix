@@ -1,5 +1,9 @@
-{ config, lib, ... }: {
+{ config, lib, ... }: 
+
+{
+
   services = {
+  
     traefik = lib.mkIf (config.networking.hostName == "galactica") {
       dynamicConfigOptions = {
         http = {

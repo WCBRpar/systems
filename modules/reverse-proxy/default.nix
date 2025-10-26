@@ -1,8 +1,6 @@
+{ config, lib, ... }:
+
 {
-  config,
-  lib,
-  ...
-}: {
   services.traefik = lib.mkIf (config.networking.hostName == "galactica") {
     enable = true;
     dataDir = "/var/lib/traefik"; # Diretório para dados persistentes do Traefik (como acme.json)
@@ -27,30 +25,10 @@
         };
       };
 
-      # Métricas (Prometheus)
-      metrics = {
-        prometheus = {
-          entryPoint = "metrics";
-          addServicesLabels = true;
-          addEntryPointsLabels = true;
-          addRoutersLabels = true;
-        };
-      };
-
-      # Tracing (OpenTelemetry)
-      tracing = {
-        otlp = {
-          http = {
-            endpoint = "http://localhost:4318";
-          };
-        };
-      };
-
       api = {
         dashboard = true;
         insecure = true; # CUIDADO: Permite acesso ao dashboard sem autenticação na porta 8080.
         # Para produção, você DEVE proteger o dashboard.
-        # Veja a seção de proteção do dashboard abaixo.
       };
 
       entryPoints = {
@@ -76,12 +54,11 @@
             # sniStrict = true;
           };
         };
-
         metrics = {
           address = ":8082";
         };
       };
-
+    
       certificatesResolvers = {
         cloudflare = {
           acme = {
@@ -98,17 +75,21 @@
         };
       };
 
-      # Cloudflare WildCard
-      cloudflare-wildcard = {
-        acme = {
-          email = "dev-ops@wcbrpar.com";
-          storage = "/var/lib/traefik/acme-wildcard.json";
-          dnsChallenge = {
-            provider = "cloudflare";
-            resolvers = ["1.1.1.1:53"];
+      # Métricas via Prometheus
+      metrics = {
+        prometheus = {
+          addServicesLabels = true;
+          addEntryPointsLabels = true;
+          addRoutersLabels = true;
+        };
+      };
+
+      # Tracing via OTL
+      tracing = {
+        otlp = {
+          http = {
+            endpoint = "http://logalhost:4318";
           };
-          # Configuração específica para wildcard
-          keyType = "RSA4096";
         };
       };
     };
@@ -156,6 +137,13 @@
     "d /var/log/traefik 0750 traefik traefik -"
     "f /var/log/traefik/access.log 0750 traefik traefik -"
   ];
+
+  systemd.services.traefik = {
+    serviceConfig = {
+      AmbientCapabilities = [ "CAP_NET_BIND_SERVICE" ];
+      CapabilityBoundingSet = [ "CAP_NET_BIND_SERVICE" ];
+    };
+  };
 
   # Configuração de rotação de logs
   services.logrotate.settings.traefik = {
