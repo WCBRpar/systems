@@ -9,11 +9,6 @@ let
 in
 {
 
-nixpkgs.config.permittedInsecurePackages = [
-    "jitsi-meet-1.0.8043"
-    "kanidm-1.4.6"
-  ];
-
   imports = [
     <agenix/modules/age.nix>
     <home-manager/nixos>
@@ -37,11 +32,13 @@ nixpkgs.config.permittedInsecurePackages = [
   # Fuso horário do sistema
   time.timeZone = "America/Campo_Grande";
 
-  # Compatibilidade da versão do sistema
-  system.stateVersion = "24.11";
+  system = {
+    # Compatibilidade da versão do sistema
+    stateVersion = "24.11";
 
-  # Atualizaçã́o automática?
-  system.autoUpgrade.enable = true;
+    # Atualizaçã́o automática?
+    autoUpgrade.enable = true;
+  };
 
   # Limpeza automática do sistema
   services.journald.extraConfig = ''
@@ -68,5 +65,13 @@ nixpkgs.config.permittedInsecurePackages = [
   };
 
   # Pacotes proprietários - Preciso para o ZeroTier 1 -  Procurar substituto
-  nixpkgs.config.allowUnfree = true;
+  nixpkgs.config = {
+    allowUnfree = true;
+
+    permittedInsecurePackages = [
+      "jitsi-meet-1.0.8043"
+      "kanidm-1.4.6"
+    ];
+  };
+
 }
