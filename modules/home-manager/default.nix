@@ -1,5 +1,9 @@
 { config, pkgs, lib, ... }:
 
+let
+  dotfilesDir = ./dotfiles;
+in
+
 {
 
   # Confugurções do Home-Manager

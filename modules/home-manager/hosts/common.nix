@@ -1,4 +1,10 @@
-{pkgs, ...}: {
+{pkgs, ...}:
+
+let
+  dotfilesDir = ../dotfiles;  
+in
+
+{
   # Home Manager needs a bit of information about you and the
   # paths it should manage.
 
@@ -21,13 +27,13 @@
     file = {
       ".p10k.zsh" = {
         enable = true;
-        source = ~/.config/home-manager/dotfiles/.zsh/.p10k.zsh;
+        source = "${dotfilesDir}/.zsh/.p10k.zsh";
         target = ".dotfiles/.p10k.zsh";
         executable = true;
       };
       ".zshrc" = {
         enable = true;
-        source = ~/.config/home-manager/dotfiles/.zsh/.zshrc;
+        source = "${dotfilesDir}/.zsh/.zshrc";
         target = ".dotfiles/.zsh/.zshrc";
         executable = true;
       };
