@@ -4,7 +4,9 @@
   # Define a user account. Don't forget to set a password with ‘passwd’.
   security.sudo.wheelNeedsPassword = false;
   
-  users.groups.admins = {};
+  users.groups.admins = {
+    guid = 1000;
+  };
 
   users.users.wjjunyor = {
     isNormalUser = true;

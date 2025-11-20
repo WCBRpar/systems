@@ -7,6 +7,7 @@
     ./dns
     ./crm
     ./editor
+    ./filesharing
     # ./gitsync = REFORMAR
     ./home-manager
     ./iam

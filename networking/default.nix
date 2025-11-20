@@ -1,9 +1,6 @@
 { config, ... }:
 
 let
-  privateZeroTierInterfaces = [
-    "ztr1s0" # vpn
-  ];
 
   getHost = import ./hosts.nix;
 
@@ -22,21 +19,29 @@ in
     resolvconf = {
     };
 
+    interfaces = {
+      ztc25hlssg = {
+        name = "ztr1s0";
+      };
+    };
+
     # Configurações de firewall
     firewall = {
       enable = true;
       allowedTCPPorts = [ 80 443 ]; # HTTP and HTTPS
-      trustedInterfaces = [ "venet0" "ztr1s0" "ztc25hlssg" ];
+      trustedInterfaces = [ "venet0" "ztc25hlssg" ];
+      extraCommands = ''
+      '';
     };
 
     # Hosts da rede
     extraHosts = ''
       127.0.0.1       localhost
+      172.16.129.0    nas.wcbrpar.com
       192.168.13.10   galactica.wcbrpar.com
       192.168.13.20   pegasus.wcbrpar.com
       192.168.13.130  yashuman.wcbrpar.com
     '';
-
   };
 
   services = {
@@ -44,7 +49,7 @@ in
     # mDNS Avahi
     avahi = {
       enable = true;
-      allowInterfaces = privateZeroTierInterfaces;
+      allowInterfaces = [ "ztc25hlssg" ];
       nssmdns4 = true;
       publish = {
         addresses = true;
