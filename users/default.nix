@@ -5,7 +5,7 @@
   security.sudo.wheelNeedsPassword = false;
   
   users.groups.admins = {
-    guid = 1000;
+    gid = 1000;
   };
 
   users.users.wjjunyor = {
