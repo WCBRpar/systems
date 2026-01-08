@@ -4,7 +4,7 @@
   # Define a user account. Don't forget to set a password with ‘passwd’.
   security.sudo.wheelNeedsPassword = false;
   
-  users.groups.new-admins = {
+  users.groups.admins = {
     gid = 1000;
   };
 
@@ -14,8 +14,8 @@
     home = "/home/wjjunyor";
     description = "Walter Queiroz";
     uid = 1000;
-    group = "new-admins";
-    extraGroups = [ "admins" "users" "wheel" "disk" "audio" "video" "networkmanager" "systemd-journal" "adbusers" "scanner" "lp" ];
+    group = "admins";
+    extraGroups = [ "users" "wheel" "disk" "audio" "video" "networkmanager" "systemd-journal" "adbusers" "scanner" "lp" ];
     useDefaultShell = true;
     openssh.authorizedKeys.keys = [
       # "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKzdmKZQGZOSI1denOeN3kso6Lf/OL92QXN5SHXA7EtG walter@wcbrpar.com"
