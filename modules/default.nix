@@ -5,7 +5,7 @@
     ./acme
     ./agenix
     ./dns
-    # ./crm
+    ./crm
     ./editor
     # ./filesharing
     # ./gitsync = REFORMAR
@@ -14,7 +14,7 @@
     # ./mail
     # ./meeting
     ./monitoring
-    # ./office
+    ./office
     ./reverse-proxy
     ./terminal
     ./webserving
