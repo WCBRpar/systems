@@ -54,7 +54,8 @@
       enableExampleServer = true;
       examplePort = 8009;
 
-      
+      securityNonceFile = config.age.secrets.onlyofficeDocumentServerKey.age;
+
       };
 
     nginx.virtualHosts."office.wcbrpar.com" = lib.mkIf (config.networking.hostName == "pegasus") {
