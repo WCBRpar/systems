@@ -68,10 +68,11 @@ in
         # PermitRootLogin = "prohibit-password";
         # DenyUsers = [ "root" ];
         AllowUsers = [ "wjjunyor" ];
-	# UsePAM = false;
+	      # UsePAM = false;
         PasswordAuthentication = true;
-	# PubKeyAuthentication = true;
+	      # PubKeyAuthentication = true;
       };
+      # hostKeys = [ getHost.hostKey ];
     };
 
     # ZEROTIER
