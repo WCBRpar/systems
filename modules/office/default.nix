@@ -54,7 +54,7 @@
       enableExampleServer = true;
       examplePort = 8009;
 
-      securityNonceFile = config.age.secrets.onlyofficeDocumentServerKey.age;
+      securityNonceFile = config.age.secrets.onlyoffice-nonce.path;
 
       };
 
