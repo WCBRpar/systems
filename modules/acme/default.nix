@@ -26,13 +26,13 @@
     };
 
     # Certificado wildcard para redcom.digital
-    certs."redcom.digital" = lib.mkIf (config.networking.hostName == "yashuman") {
-      group = "nginx";
-      extraDomainNames = [ "*.redcom.digital" ];
-      dnsProvider = "cloudflare";
-      environmentFile = "/var/lib/cloudflare/cloudflare.s";
-      dnsPropagationCheck = true;
-    };
+    # certs."redcom.digital" = lib.mkIf (config.networking.hostName == "yashuman") {
+    #   group = "nginx";
+    #   extraDomainNames = [ "*.redcom.digital" ];
+    #   dnsProvider = "cloudflare";
+    #   environmentFile = "/var/lib/cloudflare/cloudflare.s";
+    #   dnsPropagationCheck = true;
+    # };
 
     # Certificado wildcard para walcor.com.br
     certs."walcor.com.br" = lib.mkIf (config.networking.hostName == "yashuman") {

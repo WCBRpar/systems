@@ -26,7 +26,7 @@ nixpkgs.config.permittedInsecurePackages = [
 
   # Pacotes e variáveis necessárias ao sistema
   environment.systemPackages = with pkgs; [
-    # inputs.agenix.packages.${pkgs.system}.default # Substitui <agenix/pkgs/agenix.nix>
+    inputs.agenix.packages.${pkgs.system}.default # Substitui <agenix/pkgs/agenix.nix>
     # inputs.home-manager.packages.${pkgs.system}.home-manager
   ];
 
