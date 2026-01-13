@@ -96,7 +96,7 @@
       default_shell = "/bin/zsh";
       home_attr = "uuid";
       home_prefix = "/home/";
-      pam_allowed_login_groups = [ "users" "admins" ];
+      kanidm.pam_allowed_login_groups = [ "users" "admins" ];
     };
 
     enablePam = lib.mkIf ( config.networking.hostName == "galactica" ) true;

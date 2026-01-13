@@ -34,12 +34,13 @@
 
     odoo = lib.mkIf (config.networking.hostName == "pegasus") {
       enable = true;
-      domain = "crm.redcom.digital";
+      domain = "redcom.digital";
       settings = {
         options = {
           http_port = 8011;
         };
       };
+      autoInit = true;
     };
   };
 }
