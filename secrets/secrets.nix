@@ -19,5 +19,5 @@ in
   "alternative.age".publicKeys = users ++ systems;
   "ssh-key.age".publicKeys = systems;
   "onlyofficeDocumentServerKey.age".publicKeys = users ++ systems;
-  "odooDatabaseKey.age".publicKeys = user ++ systems;
+  "odooDatabaseKey.age".publicKeys = users ++ systems;
 }

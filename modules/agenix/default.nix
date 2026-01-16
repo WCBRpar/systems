@@ -8,4 +8,5 @@
     owner = "nginx";
     group = "nginx";
   };
+  age.secrets.odoo-databasekey.file = ../../secrets/odooDatabaseKey.age;
 }

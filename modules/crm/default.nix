@@ -1,4 +1,5 @@
-{ config, lib, ... }: {
+{ config, lib, pkgs, ... }: {
+ 
   services = {
     traefik = lib.mkIf (config.networking.hostName == "galactica") {
       dynamicConfigOptions = {
@@ -38,9 +39,19 @@
       settings = {
         options = {
           http_port = 8011;
+          db_host = "localhost";
+          db_port = 5432;
+          db_user = "odoo";
+          # db_password = config.age.secrets.odoo-databasekey.path; 
+          db_password = "odoo";
         };
       };
       autoInit = true;
+      # adminPasswd = config.age.secrets.odoo-databasekey.path;
+      addons = [
+        # pkgs.odoo_enterprise
+	pkgs.python314Packages.manifestoo
+        ];
     };
   };
 }
