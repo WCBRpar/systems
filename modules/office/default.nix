@@ -4,7 +4,7 @@
   pkgs,
   ...
 }: {
-  environment.systemPackages = with pkgs; [onlyoffice-documentserver];
+  environment.systemPackages = with pkgs; [onlyoffice-documentserver onlyoffice-workspace];
 
   services = {
     traefik = lib.mkIf (config.networking.hostName == "galactica") {
@@ -47,14 +47,14 @@
       };
     };
 
-    onlyoffice = lib.mkIf (config.networking.hostName == "pegasus") {
+    onlyoffice.workspace = lib.mkIf (config.networking.hostName == "pegasus") {
       enable = true;
       port = 8008;
-      hostname = "office.wcbrpar.com";
-      enableExampleServer = true;
-      examplePort = 8009;
+      # hostname = "office.wcbrpar.com";
+      # enableExampleServer = true;
+      # examplePort = 8009;
 
-      securityNonceFile = config.age.secrets.onlyoffice-nonce.path;
+      # securityNonceFile = config.age.secrets.onlyoffice-nonce.path;
 
       };
 
