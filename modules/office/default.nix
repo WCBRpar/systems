@@ -4,7 +4,10 @@
   pkgs,
   ...
 }: {
-  environment.systemPackages = with pkgs; [onlyoffice-documentserver onlyoffice-workspace];
+  environment.systemPackages = [
+    pkgs.onlyoffice-workspace.communityServer
+    pkgs.onlyoffice-workspace.documentServer
+  ];
 
   services = {
     traefik = lib.mkIf (config.networking.hostName == "galactica") {
@@ -12,7 +15,6 @@
         http = {
           routers = {
             OO-ALL = {
-              # rule = "Host(`office.wcbrpar.com`)";
               rule = "Host(`office.wcbrpar.com`) || Host(`office.redcom.digital`)";
               service = "onlyoffice-service";
               entrypoints = ["websecure"];
@@ -49,28 +51,19 @@
 
     onlyoffice.workspace = lib.mkIf (config.networking.hostName == "pegasus") {
       enable = true;
-      port = 8008;
-      # hostname = "office.wcbrpar.com";
-      # enableExampleServer = true;
-      # examplePort = 8009;
-
-      # securityNonceFile = config.age.secrets.onlyoffice-nonce.path;
-
-      };
+      domain = "office.wcbrpar.com";
+      enableBackup = true; # Ativa backups automáticos do MySQL e PostgreSQL
+    };
 
     nginx.virtualHosts."office.wcbrpar.com" = lib.mkIf (config.networking.hostName == "pegasus") {
       extraConfig = ''
-        # Force nginx to return relative redirects. This lets the browser
-        # figure out the full URL. This ends up working better because it's in
-        # front of the reverse proxy and has the right protocol, hostname & port.
         absolute_redirect off;
       '';
     };
   };
 
-  # Necessário para que o Only Office possa reconhecer as fontes instaladas
   fonts.fontDir = lib.mkIf (config.networking.hostName == "pegasus") { 
     enable = true; 
   };
-
 }
+

@@ -14,7 +14,7 @@
     # ./mail
     # ./meeting
     ./monitoring
-    ./office
+    # ./office
     ./reverse-proxy
     ./terminal
     ./webserving

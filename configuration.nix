@@ -10,7 +10,8 @@ let
 in
 {
 
-nixpkgs.config.permittedInsecurePackages = [
+  nixpkgs.config.permittedInsecurePackages = [
+    "dotnet-sdk-7.0.410"
     "jitsi-meet-1.0.8043"
     "kanidm-1.4.6"
   ];
