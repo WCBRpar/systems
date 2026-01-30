@@ -14,7 +14,7 @@ in
       http = {
         routers = {
           WP-RED = {
-            rule = "Host('redcom.digital`)";
+            rule = "Host(`redcom.digital`)";
             service = "redcom-site";
             entrypoints = ["websecure"];
             tls = {
