@@ -7,15 +7,20 @@ let
   app = "red";
   name = "redcom";
   domain = "${name}.digital";
+  organization = "${domain}";
+  acronimo = "RED";
+
 in
+
 {
+
   services = {
     traefik.dynamicConfigOptions = lib.mkIf (config.networking.hostName == "galactica") {
       http = {
         routers = {
-          WP-RED = {
-            rule = "Host(`redcom.digital`)";
-            service = "redcom-site";
+          "WP-${acronimo}" = {
+            rule = "Host(`${domain}`)";
+            service = "wordpress-server";
             entrypoints = ["websecure"];
             tls = {
               certResolver = "cloudflare";
@@ -24,7 +29,7 @@ in
         };
 
         services = {
-          redcom-site = {
+          "wordpress-server" = {
             loadBalancer = {
               servers = [{ url = "https://pegasus.wcbrpar.com:7770"; }];
               # Importante para lidar com redirecionamentos:
@@ -56,68 +61,48 @@ in
       webserver = "nginx";
       sites = {
         "${domain}" = {
-          package = pkgs.wordpress;
+          package = pkgs.wordpress_6_7;
           database = {
             createLocally = true;
             name = "wpdb_${name}";
           };
           plugins = {
-            inherit (pkgs.wordpressPackages.plugins)
-	            co-authors-plus
-              # gutenberg
-              # simple-popup-block
-              simple-mastodon-verification
-              surge
-              wordpress-seo
-              webp-converter-for-media
-	            ;
+            # inherit (pkgs.wordpressPackages.plugins)
             inherit (wp4nix.plugins)
+              add-widget-after-content
               antispam-bee
               async-javascript
               code-syntax-block
               custom-post-type-ui
               disable-xml-rpc
               google-site-kit
-	            notification
-	            official-facebook-pixel
+              gutenberg
+	      official-facebook-pixel
               opengraph
-	            rss-importer
-	            # simple-popup-block
               static-mail-sender-configurator
-              webp-express
-	            # wp-popups-lite
-              wpforms-lite
-              wp-gdpr-compliance
-              wp-user-avatars
-	            wp-rss-aggregator
-              wp-swiper
-	            ;
+              # webp-converter-for-media
+              wp-user-avatars;
+            # inherit (google-site-kit custom-post-type-ui);
           };
           themes = {
             inherit (pkgs.wordpressPackages.themes)
-              twentytwentythree
-              ;
+              twentytwentythree;
             inherit (wp4nix.themes) 
-              astra
-              ;
+              astra;
           };
-          languages = [ wp4nix.languages.pt_BR ];
+          # languages = [ pkgs.wordpressPackages.languages.pt_BR ];
           settings = {
             WP_DEFAULT_THEME = "twentytwentythree";
             WP_MAIL_FROM = "gcp-devops@wcbrpar.com";
-            WP_SITEURL = "https://redcom.digital";
-            WP_HOME = "https://redcom.digital";
+            WP_SITEURL = "https://${domain}";
+            WP_HOME = "https://${domain}";
             WPLANG = "pt_BR";
             AUTOMATIC_UPDATER_DISABLED = true;
-            FORCE_SSL_ADMIN = false;
+            FORCE_SSL_ADMIN = true;
             WP_DEBUG = true;
             WP_DEBUG_LOG = true;
-            WP_DEBUG_DISPLAY = false;
+            # WP_DEBUG_DISPLAY = true;
           };
-          extraConfig = ''
-            @ini_set( 'error_log', '/var/log/wordpress/${domain}/debug.log' );
-            @ini_set( 'display_errors', 1 );
-          '';
           poolConfig = {
             "pm" = "dynamic";
             "pm.max_children" = 64;
@@ -137,22 +122,21 @@ in
               Disallow: /xmlrpc.php
               Disallow: /wp-
             '';
-            # addSSL = true;
+            addSSL = false;
           };
         };
       };
     };
 
     nginx.virtualHosts = lib.mkIf (config.networking.hostName == "pegasus") {
+
       "${domain}" = {
-        enableACME = false;
+        # enableACME = true;
         # useACMEHost = "${domain}";
-        # adSSL = true;
-
-        locations."/.well-known/acme-challenge" = {
-          root = "/var/lib/acme/${domain}";
-        };
-
+        # addSSL = true;
+        # locations."/.well-known/acme-challenge" = {
+        #   root = "/var/lib/acme/${domain}";
+        # };
         locations."~ \.php$" = {
           root = "/var/www/${domain}";
           extraConfig = ''
@@ -160,26 +144,16 @@ in
             fastcgi_split_path_info ^(.+\.php)(/.*)$;
             try_files $uri $uri/ index.php /index.php$is_args$args;
             include ${pkgs.nginx}/conf/fastcgi_params;
-            fastcgi_pass 127.0.0.1:9000;
+	          include ${pkgs.nginx}/conf/fastcgi.conf;
+            fastcgi_pass 127.0.0.1:9002;
             fastcgi_param SCRIPT_FILENAME $request_filename;
             fastcgi_param APP_ENV dev;
-            # Configuração CSP específica para PHP
-            more_set_headers "Content-Security-Policy: default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https: data: blob:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https: *.gravatar.com; font-src 'self' https: data:; connect-src 'self' https:;";
           '';
         };
-
         locations."~* (.*\.pdf)" = {
           extraConfig = ''
-	          types { application/pdf .pdf; }
-	          default_type application/pdf;
-	          more_set_headers Content-Disposition "inline" always;
-    	      more_set_headers X-Content-Type-Options "nosniff";
-    	      expires 30d;
-    	      more_set_headers Cache-Control "public, no-transform" always;
-	          proxy_hide_header Content-Disposition;
-    	      proxy_hide_header X-Content-Type-Options;
-	          proxy_ignore_headers Set-Cookie;
-	          proxy_set_header Connection "";
+            types { application/octet-stream .pdf; }
+            default_type application/octet-stream;
           '';
         };
 
@@ -192,29 +166,22 @@ in
             include ${pkgs.nginx}/conf/fastcgi.conf;
           '';
         };
-
-        locations."~ ^/(wp-admin|wp-login\.php)" = {
-          extraConfig = ''
-            # Substitui o cabeçalho CSP existente apenas para a área administrativa
-            more_set_headers "Content-Security-Policy: default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https: *.gravatar.com; font-src 'self' https: data:; connect-src 'self' https:;";
-          '';
-        };
       };
 
-      "${domain}80" = {
-        serverName = "${domain}";
-        locations."/.well-known/acme-challenge" = {
-          root = "/var/lib/acme/${domain}";
-          extraConfig = ''
-            auth_basic off;
-          '';
-        };
-        # locations."/" = { return = "301 https://$host$request_uri"; };
-      };
+      # "${domain}80" = {
+      #   serverName = "${domain}";
+      #   locations."/.well-known/acme-challenge" = {
+      #     root = "/var/lib/acme/${domain}";
+      #     extraConfig = ''
+      #       auth_basic off;
+      #     '';
+      #   };
+      #   # locations."/" = { return = "301 https://$host$request_uri"; };
+      # };
 
-      "${app}.${domain}" = {
-        globalRedirect = "${domain}";
-      };
+      # "${app}.${domain}" = {
+      #   globalRedirect = "${domain}";
+      # };
     };
   };
 }
