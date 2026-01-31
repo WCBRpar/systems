@@ -26,7 +26,7 @@ in
         services = {
           redcom-site = {
             loadBalancer = {
-              servers = [{ url = "https://pegasus.wcbrpar.com:8001"; }];
+              servers = [{ url = "https://pegasus.wcbrpar.com:7770"; }];
               # Importante para lidar com redirecionamentos:
               passHostHeader = true;
             };
@@ -105,8 +105,8 @@ in
           settings = {
             WP_DEFAULT_THEME = "twentytwentythree";
             WP_MAIL_FROM = "gcp-devops@wcbrpar.com";
-            WP_SITEURL = "https://adufms.org.br";
-            WP_HOME = "https://adufms.org.br";
+            WP_SITEURL = "https://redcom.digital";
+            WP_HOME = "https://redcom.digital";
             WPLANG = "pt_BR";
             AUTOMATIC_UPDATER_DISABLED = true;
             FORCE_SSL_ADMIN = false;
