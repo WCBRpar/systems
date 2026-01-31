@@ -15,7 +15,7 @@ in
         routers = {
           WP-ADF = {
             rule = "Host(`adufms.org.br`)";
-            service = "adufms-site";
+            service = "wordpress-server";
             entrypoints = ["websecure"];
             tls = {
               certResolver = "cloudflare";
@@ -24,9 +24,9 @@ in
         };
 
         services = {
-          adufms-site = {
+          wordpress-server = {
             loadBalancer = {
-              servers = [{ url = "https://pegasus.wcbrpar.com:8001"; }];
+              servers = [{ url = "https://pegasus.wcbrpar.com:7770"; }];
               # Importante para lidar com redirecionamentos:
               passHostHeader = true;
             };
