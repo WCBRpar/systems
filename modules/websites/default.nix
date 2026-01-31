@@ -3,46 +3,77 @@
   inputs,
   lib,
   pkgs,
-  sources,
   ...
 }: let
-  sources = import ./npins {inherit inputs;}; # Passa inputs para npins
+  sources = import ../../npins;
   wp4nix = pkgs.callPackage sources.wp4nix {};
 in {
-  imports = [./sites ./sites/fix-adf.nix ./sites/fix-cms.nix ./sites/fix-ham.nix ./sites/fix-evm.nix ./sites/fix-red.nix ];
+  imports = [ ./sites ./sites/fix-adf.nix ];
 
   environment.systemPackages = with pkgs; [php];
-  environment.variables.WP_VERSION = "6.4";
+  environment.variables.WP_VERSION = "6.7";
 
   mkSite = {
     "RED" = {
-      enable = false;
+      enable = true;
       siteFQDN = "redcom.digital";
       siteType = "wordpress";
-      themes = {
-        inherit (pkgs.wordpressPackages.themes) twentytwentythree;
-        inherit (wp4nix.themes) astra;
+      wordpress = {
+        package = pkgs.wordpress_6_7;
+        themes = {
+          inherit (pkgs.wordpressPackages.themes) twentytwentythree;
+          inherit (wp4nix.themes) astra;
+        };
+        plugins = {
+          inherit (wp4nix.plugins)
+            add-widget-after-content
+            antispam-bee
+            async-javascript
+            code-syntax-block
+            custom-post-type-ui
+            disable-xml-rpc
+            google-site-kit
+            gutenberg
+            official-facebook-pixel
+            opengraph
+            static-mail-sender-configurator
+            wp-user-avatars;
+        };
+        settings = {
+          WP_DEBUG = true;
+          WP_DEBUG_LOG = true;
+        };
       };
-      plugins = {
-        # inherit (pkgs.wordpressPackages.plugins) akismet;
-        inherit (wp4nix.plugins) google-site-kit;
-      };
-      extraConfig = ''
-        define('WP_DEBUG', true);
-      '';
     };
 
-    "CH4" = {
+    "CMS" = {
       enable = true;
-      siteFQDN = "oposicaopararenovarandes.com.br";
+      siteFQDN = "cutms.org.br";
       siteType = "wordpress";
-      themes = {
-        inherit (pkgs.wordpressPackages.themes) twentytwentythree;
-        inherit (wp4nix.themes) astra;
-      };
-      plugins = {
-        # inherit (pkgs.wordpressPackages.plugins) akismet;
-        inherit (wp4nix.plugins) woocommerce;
+      # Usando porta diferente (sobrescrevendo o padrão)
+      proxy.backendUrl = "https://pegasus.wcbrpar.com:8001";
+      wordpress = {
+        plugins = {
+          inherit (pkgs.wordpressPackages.plugins)
+            co-authors-plus
+            simple-mastodon-verification
+            surge
+            wordpress-seo
+            webp-converter-for-media;
+          inherit (wp4nix.plugins)
+            antispam-bee
+            async-javascript
+            google-site-kit
+            official-facebook-pixel
+            wpforms-lite;
+        };
+        themes = {
+          inherit (pkgs.wordpressPackages.themes) twentytwentythree twentytwentyfive;
+          inherit (wp4nix.themes) astra;
+        };
+        settings = {
+          FORCE_SSL_ADMIN = false;
+        };
       };
     };
 
@@ -50,7 +81,8 @@ in {
       enable = true;
       siteFQDN = "setra.com.br";
       siteType = "estatico";
-      siteRoot = "/var/lib/www/setra.com.br";
+      proxy.enable = false;
     };
   };
 }
+

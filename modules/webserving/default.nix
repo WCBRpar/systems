@@ -70,12 +70,20 @@
 
     # Host comum para imagens estáticas auxiliaŕes a alguns módulos
     virtualHosts = {
+
+      # Configuração para evitar que um site seja usado como padrão
+      "_default" = {
+        listen = [ { addr = "0.0.0.0"; port = 7770; ssl = false; } ];
+        default = true;
+        locations."/" = { return = 444; };
+      };
+
       "img.redcom.digital" = lib.mkIf (config.networking.hostName == "pegasus") {
         serverAliases = [ "img.wcbrpar.com" ];
         root = "/var/lib/www/shared/images";
         listen = [ 
           { addr = "0.0.0.0"; port = 80; }   # HTTP
-          { addr = "0.0.0.0"; port = 443; ssl = true; } # HTTPS
+          # { addr = "0.0.0.0"; port = 443; } # HTTPS
         ];
         # forceSSL = true;
         # useACMEHost = "redcom.digital";
