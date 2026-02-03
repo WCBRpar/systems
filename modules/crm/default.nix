@@ -12,6 +12,13 @@
               entrypoints = ["websecure"];
               tls.certResolver = "cloudflare";
             };
+
+            OD-ADF = {
+              rule = "Host(`novo.adufms.org.br`)";
+              service = "odoo-service";
+              entrypoints = ["websecure"];
+              tls.certResolver = "cloudflare";
+            };
             
             # Long polling - notificações em tempo real
             OD-LONGPOLLING = {
@@ -24,10 +31,10 @@
           
           services = {
             # Serviço principal do Odoo
-            odoo-service.loadBalancer.servers = [{ url = "http://192.168.13.20:8011"; }];
+            odoo-service.loadBalancer.servers = [{ url = "http://pegasus.wcbrpar.com:8011"; }];
             
             # Serviço de long polling
-            odoo-longpolling-service.loadBalancer.servers = [{ url = "http://192.168.13.20:8072"; }];
+            odoo-longpolling-service.loadBalancer.servers = [{ url = "http://pegasus.wcbrpar.com:8072"; }];
           };
         };
       };
@@ -44,14 +51,16 @@
           db_user = "odoo";
           # db_password = config.age.secrets.odoo-databasekey.path; 
           db_password = "odoo";
+
+          dbFilter = "^(wcbrpar\\.com|redcom\\.digital)$ -> WCBRpar|^(adufms\\.org\\.br)$ -> adufms";
+
         };
       };
       autoInit = true;
-      # adminPasswd = config.age.secrets.odoo-databasekey.path;
       addons = [
         # pkgs.odoo_enterprise
-	pkgs.python314Packages.manifestoo
-        ];
+	      pkgs.python314Packages.manifestoo
+      ];
     };
   };
 }
