@@ -1,17 +1,10 @@
 { config, ... }:
 
-let
-
-  getHost = import ./hosts.nix;
-
-in
-
 {
   # Configuração de rede
   networking = {
-    
-    hostId = getHost.hostId;
-    hostName = getHost.hostName;
+    # hostId e hostName serão definidos no flake.nix ou nos arquivos de host específicos
+    # e não precisam ser importados aqui.
 
     domain = "wcbrpar.com";
     nameservers = [ "84.200.69.80" "84.200.70.40" "1.1.1.1" "8.8.8.8" ]; # CloudFlare / DNS Watch
@@ -21,7 +14,7 @@ in
 
     interfaces = {
       ztc25hlssg = {
-        name = "ztr1s0";
+        # name = "ztr1s0";
       };
     };
 
@@ -72,7 +65,7 @@ in
         PasswordAuthentication = true;
 	      # PubKeyAuthentication = true;
       };
-      # hostKeys = [ getHost.hostKey ];
+      # hostKeys = [ getHost.hostKey ]; # Remover ou ajustar se hostKey for usado
     };
 
     # ZEROTIER

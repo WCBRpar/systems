@@ -1,10 +1,11 @@
 # modules/websites/sites/default.nix
-{ config, lib, pkgs, ... }:
+{ config, inputs, lib, pkgs, ... }:
 
 let
   inherit (lib) mkOption mkEnableOption types mkIf filterAttrs mapAttrs' mkDefault attrNames nameValuePair listToAttrs mapAttrsToList;
   sources = import ../../../npins;
-  wp4nix = pkgs.callPackage sources.wp4nix {};
+  wp4nix = pkgs.callPackage inputs.wp4nix {};
+
 
   countEnabledSites = sites:
     lib.length (lib.attrNames (lib.filterAttrs (_: site: site.enable) sites));
