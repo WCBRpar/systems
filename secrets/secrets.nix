@@ -22,6 +22,6 @@ in
   
   "alternative.age".publicKeys = allUsers;
   "ssh-key.age".publicKeys = adminKeys;
-  "onlyofficeDocumentServerKey.age".publicKeys = adminKeys;
-  "odooDatabaseKey.age".publicKeys = adminKeys;
+  "onlyofficeDocumentServerKey.age".publicKeys = allUsers;
+  "odooDatabaseKey.age".publicKeys = allUsers;
 }
