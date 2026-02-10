@@ -1,0 +1,165 @@
+{
+  "nodes": {
+    "agenix": {
+      "inputs": {
+        "darwin": "darwin",
+        "home-manager": "home-manager",
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "systems": "systems"
+      },
+      "locked": {
+        "lastModified": 1770165109,
+        "narHash": "sha256-9VnK6Oqai65puVJ4WYtCTvlJeXxMzAp/69HhQuTdl/I=",
+        "owner": "ryantm",
+        "repo": "agenix",
+        "rev": "b027ee29d959fda4b60b57566d64c98a202e0feb",
+        "type": "github"
+      },
+      "original": {
+        "owner": "ryantm",
+        "repo": "agenix",
+        "type": "github"
+      }
+    },
+    "darwin": {
+      "inputs": {
+        "nixpkgs": [
+          "agenix",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1744478979,
+        "narHash": "sha256-dyN+teG9G82G+m+PX/aSAagkC+vUv0SgUw3XkPhQodQ=",
+        "owner": "lnl7",
+        "repo": "nix-darwin",
+        "rev": "43975d782b418ebf4969e9ccba82466728c2851b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "lnl7",
+        "ref": "master",
+        "repo": "nix-darwin",
+        "type": "github"
+      }
+    },
+    "home-manager": {
+      "inputs": {
+        "nixpkgs": [
+          "agenix",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1745494811,
+        "narHash": "sha256-YZCh2o9Ua1n9uCvrvi5pRxtuVNml8X2a03qIFfRKpFs=",
+        "owner": "nix-community",
+        "repo": "home-manager",
+        "rev": "abfad3d2958c9e6300a883bd443512c55dfeb1be",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-community",
+        "repo": "home-manager",
+        "type": "github"
+      }
+    },
+    "home-manager_2": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1770654520,
+        "narHash": "sha256-mg5WZMIPGsFu9MxSrUcuJUPMbfMsF77el5yb/7rc10k=",
+        "owner": "nix-community",
+        "repo": "home-manager",
+        "rev": "6c4fdbe1ad198fac36c320fd45c5957324a80b8e",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-community",
+        "ref": "master",
+        "repo": "home-manager",
+        "type": "github"
+      }
+    },
+    "nixos-home-manager": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1770165814,
+        "narHash": "sha256-6XnuTAmR7gW+4b0Yr/e+wFP2rLhhn8S3CpuL5yEbBWs=",
+        "ref": "refs/heads/main",
+        "rev": "54b14a34461e827f41652325d2d49402b5298665",
+        "revCount": 38,
+        "type": "git",
+        "url": "ssh://git@github.com/wjjunyor/nixos-home-manager"
+      },
+      "original": {
+        "type": "git",
+        "url": "ssh://git@github.com/wjjunyor/nixos-home-manager"
+      }
+    },
+    "nixpkgs": {
+      "locked": {
+        "lastModified": 1770665590,
+        "narHash": "sha256-9bAeNBhXnIyvfj4qWVUysDaaiWMD4mpqMufYCykMC+E=",
+        "owner": "WCBRpar",
+        "repo": "nixpkgs",
+        "rev": "d737f9391832f4201b5c79d80ba1549a7fb3f7ee",
+        "type": "github"
+      },
+      "original": {
+        "owner": "WCBRpar",
+        "ref": "master",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "root": {
+      "inputs": {
+        "agenix": "agenix",
+        "home-manager": "home-manager_2",
+        "nixos-home-manager": "nixos-home-manager",
+        "nixpkgs": "nixpkgs",
+        "wp4nix": "wp4nix"
+      }
+    },
+    "systems": {
+      "locked": {
+        "lastModified": 1681028828,
+        "narHash": "sha256-Vy1rq5AaRuLzOxct8nz4T6wlgyUR7zLU309k9mBC768=",
+        "owner": "nix-systems",
+        "repo": "default",
+        "rev": "da67096a3b9bf56a91d16901293e51ba5b49a27e",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-systems",
+        "repo": "default",
+        "type": "github"
+      }
+    },
+    "wp4nix": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1764015347,
+        "narHash": "sha256-12Ijn2n3q6lRYYllLq0X0HF6Ii30iijmjsLJ/8mAB0Y=",
+        "ref": "refs/heads/master",
+        "rev": "baacaf5b16c7ac8fb811b0f71deac25190496664",
+        "revCount": 1786,
+        "type": "git",
+        "url": "https://git.helsinki.tools/helsinki-systems/wp4nix"
+      },
+      "original": {
+        "type": "git",
+        "url": "https://git.helsinki.tools/helsinki-systems/wp4nix"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}

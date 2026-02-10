@@ -1,8 +1,9 @@
-{ pkgs, ... } :
+{ inputs, pkgs, ... } :
+
 
 {
 
-  environment.systemPackages = [ (pkgs.callPackage <agenix/pkgs/agenix.nix> {}) ];
+  environment.systemPackages = [ pkgs.ragenix ];
 
   age.identityPaths = [ "/home/wjjunyor/.ssh/id_ed25519" ];
 

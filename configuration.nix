@@ -5,9 +5,6 @@
   ...
 }:
 
-let
-  sources = import ./npins;
-in
 {
 
   nixpkgs.config.permittedInsecurePackages = [
@@ -17,8 +14,6 @@ in
   ];
 
   imports = [
-    <agenix/modules/age.nix>
-    <home-manager/nixos>
     ./vpsadminos.nix
     ./modules
     ./networking

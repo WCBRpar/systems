@@ -4,10 +4,15 @@
   lib,
   pkgs,
   ...
-}: let
-  sources = import ../../npins;
-  wp4nix = pkgs.callPackage sources.wp4nix {};
-in {
+}:
+
+let
+  wp4nix = pkgs.callPackage inputs.wp4nix {};
+
+in
+
+{
+
   imports = [ ./sites ./sites/fix-adf.nix ];
 
   environment.systemPackages = with pkgs; [php];

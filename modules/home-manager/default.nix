@@ -1,4 +1,4 @@
-{ config, pkgs, lib, ... }:
+{ config, inputs, pkgs, lib, ... }:
 
 {
 
@@ -12,10 +12,11 @@
   home-manager.users.wjjunyor = { pkgs, ... }: {
     imports = [
       # /home/wjjunyor/.config/home-manager/home.nix
-      (builtins.fetchGit {
-        url = "git@github.com:wjjunyor/nixos-home-manager.git";
-        ref = "main";  # Nome do branch
-      } + "/home.nix")  # Especifica o arquivo a ser importado
+      # (builtins.fetchGit {
+      #   url = "git@github.com:wjjunyor/nixos-home-manager.git";
+      #   ref = "main";  # Nome do branch
+      # } + "/home.nix")  # Especifica o arquivo a ser importado
+      "${inputs.nixos-home-manager}/home.nix"
     ];
   };
 
