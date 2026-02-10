@@ -14,7 +14,7 @@
 
     interfaces = {
       ztc25hlssg = {
-        name = "ztr1s0";
+        # name = "ztr1s0";
       };
     };
 
