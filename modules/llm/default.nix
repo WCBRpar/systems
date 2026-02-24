@@ -15,7 +15,7 @@
       channels = {
         telegram = {
           enable = true;
-          token = config.age.secrets.telegram-botkey;
+          token = builtins.readFile config.age.secrets.telegram-botkey;
           allow_from = [ 26396894 ];
         };
       };
