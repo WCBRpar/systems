@@ -25,4 +25,5 @@ in
   "onlyofficeDocumentServerKey.age".publicKeys = allUsers;
   "odooDatabaseKey.age".publicKeys = allUsers;
   "grafanaSecurityKey.age".publicKeys = allUsers;
+  "openrouterApiKey.age".publicKeys = allUsers;
 }
