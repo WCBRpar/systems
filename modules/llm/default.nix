@@ -12,6 +12,13 @@
       enable = true;
       model = "deepseek/deepseek-chat"; # ou outro modelo disponível no OpenRouter
       providers.openrouter.api_key = config.age.secrets.openrouter-apikey;
+      channels = {
+        telegram = {
+          enable = true;
+          token = config.age.secrets.telegram-botkey;
+          allow_from = [ 26396894 ];
+        };
+      };
     };
 
 
