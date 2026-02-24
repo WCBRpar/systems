@@ -11,11 +11,15 @@
     picoclaw = lib.mkIf ( config.networking.hostName == "yashuman" ) {
       enable = true;
       model = "deepseek/deepseek-chat"; # ou outro modelo disponível no OpenRouter
-      providers.openrouter.api_key = config.age.secrets.openrouter-apikey;
+      providers = {
+        openrouter = {
+          api_key = builtins.readFile config.age.secrets.openrouter-apikey.path;
+        };
+      };
       channels = {
         telegram = {
           enable = true;
-          token = builtins.readFile config.age.secrets.telegram-botkey;
+          token = builtins.readFile config.age.secrets.telegram-botkey.path;
           allow_from = [ 26396894 ];
         };
       };
