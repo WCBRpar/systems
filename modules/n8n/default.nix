@@ -17,10 +17,10 @@
         http = {
           routers = {
             N8-ALL = {
-              rule = "Host(`n8n.wcbrpar.com`) || Host(`n8n.redcom.digital`)";
-              service = "n8n-service";
-              entrypoints = ["websecure"];
-              tls.certResolver = "cloudflare";
+              # rule = "Host(`n8n.wcbrpar.com`) || Host(`n8n.redcom.digital`)";
+              # service = "n8n-service";
+              # entrypoints = ["websecure"];
+              # tls.certResolver = "cloudflare";
             };
           };
           

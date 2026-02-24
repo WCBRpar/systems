@@ -1,5 +1,7 @@
-{ config, lib, pkgs, ... }: {
- 
+{ config, lib, pkgs, ... }: 
+
+{
+
   services = {
     traefik = lib.mkIf (config.networking.hostName == "galactica") {
       dynamicConfigOptions = {
@@ -52,14 +54,23 @@
           # db_password = config.age.secrets.odoo-databasekey.path; 
           db_password = "odoo";
 
-          dbFilter = "^(wcbrpar\\.com|redcom\\.digital)$ -> WCBRpar|^(adufms\\.org\\.br)$ -> adufms";
+          # dbFilter = "^(wcbrpar\\.com|redcom\\.digital)$ -> WCBRpar|^(adufms\\.org\\.br)$ -> adufms";
 
         };
       };
       autoInit = true;
       addons = [
+        # dbfilterHeaderAddon
         # pkgs.odoo_enterprise
-	      pkgs.python314Packages.manifestoo
+        pkgs.python314Packages.click-odoo
+        pkgs.python314Packages.click-odoo-contrib
+        pkgs.python314Packages.hatch-odoo
+        pkgs.python314Packages.manifestoo
+        pkgs.python314Packages.manifestoo-core
+        pkgs.python314Packages.whool
+        pkgs.python314Packages.pylint-odoo        
+        pkgs.python314Packages.setuptools-odoo
+
       ];
     };
   };

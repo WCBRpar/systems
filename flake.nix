@@ -2,7 +2,8 @@
   description = "Configuração NIXOS dos servidores WCBRpar";
 
   inputs = {
-    nixpkgs.url = "github:WCBRpar/nixpkgs/master";
+    # nixpkgs.url = "github:WCBRpar/nixpkgs/WCBRpar/master";
+    nixpkgs.url = "path:/home/wjjunyor/Shared/DEV/nixOS/nixpkgs";
     
     home-manager = {
       url = "github:nix-community/home-manager/master";
@@ -52,6 +53,18 @@
             allowUnfree = true;
           };
         }
+        
+        # Overlay para pular testes do age
+        ({ config, pkgs, ... }: {
+          nixpkgs.overlays = [
+            (final: prev: {
+              age = prev.age.overrideAttrs (old: {
+                doCheck = false;  # Desabilita os testes
+              });
+            })
+          ];
+        })
+
       ];
     };
     

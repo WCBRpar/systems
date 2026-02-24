@@ -24,4 +24,5 @@ in
   "ssh-key.age".publicKeys = adminKeys;
   "onlyofficeDocumentServerKey.age".publicKeys = allUsers;
   "odooDatabaseKey.age".publicKeys = allUsers;
+  "grafanaSecurityKey.age".publicKeys = allUsers;
 }

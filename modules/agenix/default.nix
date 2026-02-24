@@ -32,6 +32,8 @@
   
   age.secrets.odoo-databasekey.file = ../../secrets/odooDatabaseKey.age;
 
+  age.secrets.grafana-securitykey.file = ../../secrets/grafanaSecurityKey.age;
+
   # Script para setup automático da chave de deploy
   system.activationScripts.setup-deploy-key = {
     text = ''

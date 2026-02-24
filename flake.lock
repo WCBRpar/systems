@@ -73,11 +73,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1770654520,
-        "narHash": "sha256-mg5WZMIPGsFu9MxSrUcuJUPMbfMsF77el5yb/7rc10k=",
+        "lastModified": 1771851181,
+        "narHash": "sha256-gFgE6mGUftwseV3DUENMb0k0EiHd739lZexPo5O/sdQ=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "6c4fdbe1ad198fac36c320fd45c5957324a80b8e",
+        "rev": "9a4b494b1aa1b93d8edf167f46dc8e0c0011280c",
         "type": "github"
       },
       "original": {
@@ -90,10 +90,10 @@
     "nixos-home-manager": {
       "flake": false,
       "locked": {
-        "lastModified": 1770165814,
-        "narHash": "sha256-6XnuTAmR7gW+4b0Yr/e+wFP2rLhhn8S3CpuL5yEbBWs=",
+        "lastModified": 1771799803,
+        "narHash": "sha256-AIMIkudjnkbqzHFvjQrEuiHhKJY8zWdGHkgm0W2qOtk=",
         "ref": "refs/heads/main",
-        "rev": "54b14a34461e827f41652325d2d49402b5298665",
+        "rev": "4b861d5f32e3604e02d287c420eac95fbe133527",
         "revCount": 38,
         "type": "git",
         "url": "ssh://git@github.com/wjjunyor/nixos-home-manager"
@@ -105,18 +105,14 @@
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1770665590,
-        "narHash": "sha256-9bAeNBhXnIyvfj4qWVUysDaaiWMD4mpqMufYCykMC+E=",
-        "owner": "WCBRpar",
-        "repo": "nixpkgs",
-        "rev": "d737f9391832f4201b5c79d80ba1549a7fb3f7ee",
-        "type": "github"
+        "lastModified": 1771962264,
+        "narHash": "sha256-iie7QWI08n9AWI/tm0PHdL3DyeaiDLx7CyNmEpX3qp0=",
+        "path": "/home/wjjunyor/Shared/DEV/nixOS/nixpkgs",
+        "type": "path"
       },
       "original": {
-        "owner": "WCBRpar",
-        "ref": "master",
-        "repo": "nixpkgs",
-        "type": "github"
+        "path": "/home/wjjunyor/Shared/DEV/nixOS/nixpkgs",
+        "type": "path"
       }
     },
     "root": {

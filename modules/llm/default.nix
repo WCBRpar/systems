@@ -3,7 +3,18 @@
 {
 
   services = {
-    
+
+    pangolin = {
+      enable = lib.mkForce false;  # Tentando resolver as cagadas no refactor do Traefik
+    };
+
+    picoclaw = lib.mkIf ( config.networking.hostName == "yashuman" ) {
+      enable = true;
+      model = "deepseek/deepseek-chat"; # ou outro modelo disponível no OpenRouter
+      providers.openrouter.api_key = "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";
+    };
+
+
     ollama = lib.mkIf ( config.networking.hostName == "yashuman" ) {
       enable = true;
       package = pkgs.ollama-cpu;
@@ -22,7 +33,7 @@
         OLLAMA_NICE = "-10";
         OLLAMA_KEEP_ALIVE = "5m";      
         OLLAMA_FLASH_ATTENTION = "0"; 
-        OLLAMA_HOST = "192.168.13.130:11434";
+        OLLAMA_HOST = "0.0.0.0";
       };
       openFirewall = true;
     };
@@ -41,7 +52,7 @@
       dynamicConfigOptions = {
         http = {
           routers = {
-            AI-ALL = {
+            "AI-ALL" = {
               rule = "Host(`ai.wcbrpar.com`) || Host(`ai.redcom.digital`)";
               service = "openwebui-service";
               entrypoints = ["websecure"];

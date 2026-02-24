@@ -40,6 +40,9 @@
           http_port = 3000;
           http_addr = "192.168.13.10";
         };
+        security = {
+          secret_key = config.age.secrets.grafana-securitykey.path; 
+         };
       };
 
       provision = {
