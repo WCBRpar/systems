@@ -22,9 +22,9 @@
         deepseek = {
           api_key = builtins.readFile config.age.secrets.deepseek-apikey.path;
         };
-        # openrouter = {
-        #   api_key = builtins.readFile config.age.secrets.openrouter-apikey.path;
-        # };
+        openrouter = {
+          api_key = builtins.readFile config.age.secrets.openrouter-apikey.path;
+        };
         ollama = {
           api_base = "http://yashuman.wcbrpar.com:11434/v1";
         };
@@ -57,7 +57,7 @@
         OLLAMA_NICE = "-10";
         OLLAMA_KEEP_ALIVE = "5m";      
         OLLAMA_FLASH_ATTENTION = "0"; 
-        OLLAMA_HOST = "0.0.0.0";
+        OLLAMA_HOST = "192.168.13.130:11434";
       };
       openFirewall = true;
     };
