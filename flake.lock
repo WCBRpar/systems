@@ -105,7 +105,7 @@
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1771962264,
+        "lastModified": 1771988197,
         "narHash": "sha256-iie7QWI08n9AWI/tm0PHdL3DyeaiDLx7CyNmEpX3qp0=",
         "path": "/home/wjjunyor/Shared/DEV/nixOS/nixpkgs",
         "type": "path"

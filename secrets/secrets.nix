@@ -26,5 +26,6 @@ in
   "odooDatabaseKey.age".publicKeys = allUsers;
   "grafanaSecurityKey.age".publicKeys = allUsers;
   "openrouterApiKey.age".publicKeys = allUsers;
+  "deepseekApiKey.age".publicKeys = allUsers;
   "telegramBotKey.age".publicKeys = allUsers;
 }
