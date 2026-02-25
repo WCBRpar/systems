@@ -17,14 +17,14 @@
 
     picoclaw = lib.mkIf ( config.networking.hostName == "yashuman" ) {
       enable = true;
-      model = "phi3:mini"; 
+      model = "ollama/phi3:mini"; 
       providers = {
         deepseek = {
-          # api_key = builtins.readFile config.age.secrets.deepseek-apikey.path;
+          api_key = builtins.readFile config.age.secrets.deepseek-apikey.path;
         };
-        openrouter = {
-          api_key = builtins.readFile config.age.secrets.openrouter-apikey.path;
-        };
+        # openrouter = {
+        #   api_key = builtins.readFile config.age.secrets.openrouter-apikey.path;
+        # };
         ollama = {
           api_base = "http://yashuman.wcbrpar.com:11434/v1";
         };
