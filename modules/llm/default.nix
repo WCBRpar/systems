@@ -38,7 +38,6 @@
       };
     };
 
-
     ollama = lib.mkIf ( config.networking.hostName == "yashuman" ) {
       enable = true;
       package = pkgs.ollama-cpu;
@@ -72,27 +71,6 @@
       };
     };
     
-    openapi-tool-servers = {
-      time = {
-        enable = true;
-        host = "192.168.13.130";
-        port = 8010;
-        openFirewall = true;
-      };
-      filesystem = {
-        enable = true;
-        host = "192.168.13.130";
-        port = 8020;
-        openFirewall = true;
-      };
-      git = {
-        enable = true;
-        host = "192.168.13.130";
-        port = 8030;
-        openFirewall = true;
-      };
-    };
-
     traefik = lib.mkIf (config.networking.hostName == "galactica") {
       dynamicConfigOptions = {
         http = {
