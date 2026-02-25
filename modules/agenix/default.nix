@@ -34,10 +34,6 @@
 
   age.secrets.grafana-securitykey.file = ../../secrets/grafanaSecurityKey.age;
 
-  age.secrets.openrouter-apikey.file = ../../secrets/openrouterApiKey.age;
-
-  age.secrets.telegram-botkey.file = ../../secrets/telegramBotKey.age;
-
   # Script para setup automático da chave de deploy
   system.activationScripts.setup-deploy-key = {
     text = ''

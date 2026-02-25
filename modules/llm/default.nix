@@ -2,6 +2,12 @@
 
 {
 
+  #Segredos
+  age.secrets = {
+    openrouter-apikey.file = ../../secrets/openrouterApiKey.age;
+    telegram-botkey.file = ../../secrets/telegramBotKey.age;
+  };
+
   services = {
 
     pangolin = {
@@ -12,8 +18,12 @@
       enable = true;
       model = "deepseek/deepseek-chat"; # ou outro modelo disponível no OpenRouter
       providers = {
-        openrouter = {
-          api_key = builtins.readFile config.age.secrets.openrouter-apikey.path;
+        # openrouter = {
+        #   api_key = builtins.readFile config.age.secrets.openrouter-apikey.path;
+        # };
+        ollama = {
+          api_key = "";
+          api_base = "http://yashuman.wcbrpar.com:11434/v1";
         };
       };
       channels = {
