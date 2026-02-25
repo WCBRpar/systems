@@ -19,11 +19,13 @@
       enable = true;
       model = "phi3:mini"; 
       providers = {
-        # openrouter = {
-        #   api_key = builtins.readFile config.age.secrets.openrouter-apikey.path;
-        # };
+        deepseek = {
+          # api_key = builtins.readFile config.age.secrets.deepseek-apikey.path;
+        };
+        openrouter = {
+          api_key = builtins.readFile config.age.secrets.openrouter-apikey.path;
+        };
         ollama = {
-          api_key = "";
           api_base = "http://yashuman.wcbrpar.com:11434/v1";
         };
       };
