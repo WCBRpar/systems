@@ -43,6 +43,7 @@
       enable = true;
       package = pkgs.ollama-cpu;
       port = 11434;
+      host = "[ 192.168.13.130 ]";
       # Preload modules from Ollama Library: https://ollama.com/library
       loadModels = [ 
         "codellama:7b"
@@ -57,7 +58,6 @@
         OLLAMA_NICE = "-10";
         OLLAMA_KEEP_ALIVE = "5m";      
         OLLAMA_FLASH_ATTENTION = "0"; 
-        OLLAMA_HOST = "192.168.13.130:11434";
       };
       openFirewall = true;
     };
