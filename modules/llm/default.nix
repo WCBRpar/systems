@@ -16,7 +16,7 @@
 
     picoclaw = lib.mkIf ( config.networking.hostName == "yashuman" ) {
       enable = true;
-      model = "deepseek/deepseek-chat"; # ou outro modelo disponível no OpenRouter
+      model = "phi3:mini"; 
       providers = {
         # openrouter = {
         #   api_key = builtins.readFile config.age.secrets.openrouter-apikey.path;
