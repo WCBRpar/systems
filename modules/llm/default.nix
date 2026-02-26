@@ -71,26 +71,26 @@
       };
     };
     
-    openapi-tool-servers = lib.mkIf (config.networking.hostName == "yashuman") {
-      time = {
-        enable = true;
-        host = "192.168.13.130";
-        port = 8010;
-        openFirewall = true;
-      };
-      filesystem = {
-        enable = true;
-        host = "192.168.13.130";
-        port = 8020;
-        openFirewall = true;
-      };
-      git = {
-        enable = true;
-        host = "192.168.13.130";
-        port = 8030;
-        openFirewall = true;
-      };
-    };
+    # openapi.tools = lib.mkIf (config.networking.hostName == "yashuman") {
+    #   time = {
+    #     enable = true;
+    #     host = "192.168.13.130";
+    #     port = 8010;
+    #     openFirewall = true;
+    #   };
+    #   filesystem = {
+    #     enable = true;
+    #     host = "192.168.13.130";
+    #     port = 8020;
+    #     openFirewall = true;
+    #   };
+    #   git = {
+    #     enable = true;
+    #     host = "192.168.13.130";
+    #     port = 8030;
+    #     openFirewall = true;
+    #   };
+    # };
 
     traefik = lib.mkIf (config.networking.hostName == "galactica") {
       dynamicConfigOptions = {
