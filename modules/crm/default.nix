@@ -9,7 +9,7 @@ let
       repo = "server-tools";
       rev = "18.0";
       # Substitua pelo hash correto após o primeiro build
-      sha256 = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
+      sha256 = "sha256-x+JrjAkPCp62RYC6SkgTX/cZEg1bSGNJtmis82XoopU=";
     };
     installPhase = ''
       mkdir -p $out
