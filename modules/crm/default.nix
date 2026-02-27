@@ -12,8 +12,8 @@ let
       sha256 = "sha256-x+JrjAkPCp62RYC6SkgTX/cZEg1bSGNJtmis82XoopU=";
     };
     installPhase = ''
-      mkdir -p $out
-      cp -r dbfilter_from_header/* $out/
+      mkdir -p $out/dbfilter_from_header
+      cp -r dbfilter_from_header/* $out/dbfilter_from_header/
     '';
   };
 in
