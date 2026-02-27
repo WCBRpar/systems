@@ -1,14 +1,13 @@
 { config, lib, pkgs, ... }:
 
 let
-  # Pacote que fornece o módulo dbfilter_from_header da OCA
+  # Pacote que fornece o módulo dbfilter_from_header da OCA para Odoo 19
   dbfilterHeaderAddon = pkgs.stdenv.mkDerivation {
     name = "odoo-addon-dbfilter_from_header";
     src = pkgs.fetchFromGitHub {
       owner = "OCA";
       repo = "server-tools";
-      rev = "18.0";
-      # Substitua pelo hash correto após o primeiro build
+      rev = "18.0";  
       sha256 = "sha256-x+JrjAkPCp62RYC6SkgTX/cZEg1bSGNJtmis82XoopU=";
     };
     installPhase = ''
@@ -78,26 +77,21 @@ in
           db_host = "localhost";
           db_port = 5432;
           db_user = "odoo";
+          # Use age para a senha (comente a linha abaixo e descomente a segura)
           # db_password = config.age.secrets.odoo-databasekey.path;
-          db_password = "odoo";  # ⚠️ Temporário
-          list_db = true;
-          proxy_mode = true;
-          dbfilter = ".*";
-          server_wide_modules = "base,web,dbfilter_from_header";
+          db_password = "odoo";          # ⚠️ Temporário
+          list_db = true;                # Habilita gerenciador web (opcional)
+          proxy_mode = true;             # Necessário para confiar nos cabeçalhos
+          dbfilter = ".*";               # Filtro global permissivo
+          server_wide_modules = "base, web, dbfilter_from_header";
+          # Evita banco padrão "odoo" que causa erros de tabela inexistente
+          db_name = false;
         };
       };
       autoInit = true;
       addons = [
-        dbfilterHeaderAddon          # Agora é um pacote válido
-        # pkgs.odoo_enterprise (se necessário)
-        pkgs.python314Packages.click-odoo
-        pkgs.python314Packages.click-odoo-contrib
-        pkgs.python314Packages.hatch-odoo
-        pkgs.python314Packages.manifestoo
-        pkgs.python314Packages.manifestoo-core
-        pkgs.python314Packages.whool
-        pkgs.python314Packages.pylint-odoo
-        pkgs.python314Packages.setuptools-odoo
+        dbfilterHeaderAddon
+        # pkgs.odoo_enterprise  # Descomente se necessário
       ];
     };
   };
