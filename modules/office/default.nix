@@ -53,6 +53,23 @@
       enable = true;
       domain = "office.wcbrpar.com";
       enableBackup = true; # Ativa backups automáticos do MySQL e PostgreSQL
+
+      # Configuração LDAP
+      ldap = {
+        enable = true;
+        url = "ldaps://ldap.wcbrpar.com";
+        # Outras configurações LDAP podem ser adicionadas aqui, se necessário
+      };
+
+      # Configuração do Mail Aggregator
+      mailAggregator = {
+        enable = true;
+        imapHost = "mail.wcbrpar.com";
+        imapPort = 993;
+        smtpHost = "mail.wcbrpar.com";
+        smtpPort = 587;
+        # Outras configurações do Mail Aggregator podem ser adicionadas aqui, se necessário
+      };
     };
 
     nginx.virtualHosts."office.wcbrpar.com" = lib.mkIf (config.networking.hostName == "pegasus") {
