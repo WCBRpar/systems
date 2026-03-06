@@ -1,21 +1,5 @@
 { config, lib, pkgs, ... }:
 
-let
-  # Pacote que fornece o módulo dbfilter_from_header da OCA para Odoo 19
-  dbfilterHeaderAddon = pkgs.stdenv.mkDerivation {
-    name = "odoo-addon-dbfilter_from_header";
-    src = pkgs.fetchFromGitHub {
-      owner = "OCA";
-      repo = "server-tools";
-      rev = "18.0";  
-      sha256 = "sha256-x+JrjAkPCp62RYC6SkgTX/cZEg1bSGNJtmis82XoopU=";
-    };
-    installPhase = ''
-      mkdir -p $out/dbfilter_from_header
-      cp -r dbfilter_from_header/* $out/dbfilter_from_header/
-    '';
-  };
-in
 
 {
   services = {
@@ -90,8 +74,67 @@ in
       };
       autoInit = true;
       addons = [
-        dbfilterHeaderAddon
         # pkgs.odoo_enterprise  # Descomente se necessário
+        pkgs.odooAddons.dbfilter-from-header
+        pkgs.odooAddons.sequence-python
+        pkgs.odooAddons.bus-alt-connection
+        pkgs.odooAddons.base-name-search-improved
+        pkgs.odooAddons.base-fontawesome-web-editor
+        pkgs.odooAddons.base-fontawesome
+        pkgs.odooAddons.partner-statement
+        pkgs.odooAddons.account-invoice-inter-company
+        pkgs.odooAddons.mail-multicompany
+        pkgs.odooAddons.purchase-sale-inter-company
+        pkgs.odooAddons.res-company-active
+        pkgs.odooAddons.account-multicompany-easy-creation
+        pkgs.odooAddons.base-multi-company
+        pkgs.odooAddons.calendar-event-multi-company
+        pkgs.odooAddons.calendar-event-type-multi-company
+        pkgs.odooAddons.crm-lost-reason-multi-company
+        pkgs.odooAddons.crm-stage-multi-company
+        pkgs.odooAddons.crm-tag-multi-company
+        pkgs.odooAddons.hr-employee-multi-company
+        pkgs.odooAddons.ir-filters-multi-company
+        pkgs.odooAddons.ir-ui-view-multi-company
+        pkgs.odooAddons.login-all-company
+        pkgs.odooAddons.mail-template-multi-company
+        pkgs.odooAddons.partner-category-multi-company
+        pkgs.odooAddons.partner-multi-company
+        pkgs.odooAddons.pos-category-multicompany
+        pkgs.odooAddons.product-multi-company
+        pkgs.odooAddons.product-multi-company-stock
+        pkgs.odooAddons.product-tax-multicompany-default
+        pkgs.odooAddons.purchase-sale-stock-inter-company
+        pkgs.odooAddons.res-company-category
+        pkgs.odooAddons.res-company-code
+        pkgs.odooAddons.res-company-search-view
+        pkgs.odooAddons.res-partner-industry-multi-company
+        pkgs.odooAddons.utm-medium-multi-company
+        pkgs.odooAddons.utm-source-multi-company
+        pkgs.odooAddons.l10n-br-account-due-list
+        pkgs.odooAddons.l10n-br-account-payment-order
+        pkgs.odooAddons.l10n-br-base
+        pkgs.odooAddons.l10n-br-base-l10n-br-compat
+        pkgs.odooAddons.l10n-br-cnpj-search
+        pkgs.odooAddons.l10n-br-coa
+        pkgs.odooAddons.l10n-br-crm
+        pkgs.odooAddons.l10n-br-crm-cnpj-search
+        pkgs.odooAddons.l10n-br-cte-spec
+        pkgs.odooAddons.l10n-br-currency-rate-update
+        pkgs.odooAddons.l10n-br-fiscal
+        pkgs.odooAddons.l10n-br-fiscal-certificate
+        pkgs.odooAddons.l10n-br-fiscal-dfe
+        pkgs.odooAddons.l10n-br-fiscal-edi
+        pkgs.odooAddons.l10n-br-fiscal-notification
+        pkgs.odooAddons.l10n-br-hr
+        pkgs.odooAddons.l10n-br-hr-contract
+        pkgs.odooAddons.l10n-br-mdfe-spec
+        pkgs.odooAddons.l10n-br-mis-report
+        pkgs.odooAddons.l10n-br-nfe-spec
+        pkgs.odooAddons.l10n-br-nfse
+        pkgs.odooAddons.l10n-br-nfse-focus
+        pkgs.odooAddons.l10n-br-sped-base
+        pkgs.odooAddons.l10n-br-zip
       ];
     };
   };
