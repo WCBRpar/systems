@@ -46,7 +46,6 @@ in
         settings = {
           WP_DEBUG = true;
           WP_DEBUG_LOG = true;
-          WP_DEBUG_DISPLAY = true;
         };
       };
     };
@@ -90,7 +89,6 @@ in
         };
         settings = {
           FORCE_SSL_ADMIN = false;
-          WP_DEBUG_DISPLAY = true;
         };
       };
     };
