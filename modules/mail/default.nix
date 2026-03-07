@@ -42,7 +42,7 @@
 
     # Use Let's Encrypt certificates. Note that this needs to set up a stripped
     # down nginx and opens port 80.
-    certificateScheme = "acme-nginx";
+#    certificateScheme = "acme-nginx"; # Migrado para Traefik/ACME externo
   };
 
   # services.opendkim = {             # Corrigir no dkim do SNM o diretório 
