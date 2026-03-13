@@ -15,30 +15,6 @@ in
 {
 
   services = {
-    traefik.dynamicConfigOptions = lib.mkIf (config.networking.hostName == "galactica") {
-      http = {
-        routers = {
-          "WP-${acronimo}" = {
-            rule = "Host(`${domain}`)";
-            service = "${domain}-site";
-            entrypoints = ["websecure"];
-            tls = {
-              certResolver = "cloudflare";
-            };
-          };
-        };
-
-        services = {
-          "${name}-site" = {
-            loadBalancer = {
-              servers = [{ url = "https://192.168.13.20:7770"; }];
-              # Importante para lidar com redirecionamentos:
-              passHostHeader = true;
-            };
-          };
-        };
-      };
-    };
 
   # security.acme = {
   #   certs."${domain}" = {

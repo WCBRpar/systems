@@ -13,123 +13,44 @@ in
 
 {
 
-  imports = [ ./sites ];
+  # imports = [ ./sites ];
+  imports = [ ./sites ./sites/fix-adf.nix ./sites/fix-cms.nix ./sites/fix-ham.nix ./sites/fix-evm.nix ./sites/fix-red.nix ];
 
-  environment.systemPackages = with pkgs; [php];
+      services.traefik.dynamicConfigOptions = lib.mkIf (config.networking.hostName == "galactica") {
+        http = {
+          routers = {
+            "WP-TMP" = {
+              rule = "Host(`adufms.org.br`) || Host(`cutms.org.br`) || Host(`redcom.digital`) || Host(`humbertoamaducci.com.br`) || Host(`esperancavermelha.com.br`)";
+              service = "wordpress-tmp-server";
+              entrypoints = [ "websecure" ];
+              tls.certResolver = "cloudflare";
+            };
+            "WS-TMP" = {
+              rule = "Host(`setra.com.br`)";
+              service = "website-tmp-server";
+              entrypoints = [ "websecure" ];
+              tls.certResolver = "cloudflare";
+            };
+          };
+          services = {
+            wordpress-tmp-server = {
+              loadBalancer = {
+                servers = [{ url = "http://pegasus.wcbrpar.com"; }];
+                passhostHeader = true;
+              };
+            };
+            website-tmp-server = {
+              loadBalancer = {
+                servers = [{ url = "http://pegasus.wcbrpar.com:7780"; }];
+                passhostHeader = true;
+              };
+            };
+          };
+        };
+      };
+
+  environment.systemPackages = with pkgs; [ php wp-cli ];
   environment.variables.WP_VERSION = "6.9";
 
-  mkSite = {
-    "RED" = {
-      enable = true;
-      siteFQDN = "redcom.digital";
-      siteType = "wordpress";
-      wordpress = {
-        themes = {
-          inherit (pkgs.wordpressPackages.themes) twentytwentythree;
-          inherit (wp4nix.themes) astra;
-        };
-        plugins = {
-          inherit (wp4nix.plugins)
-            add-widget-after-content
-            antispam-bee
-            async-javascript
-            code-syntax-block
-            custom-post-type-ui
-            disable-xml-rpc
-            google-site-kit
-            gutenberg
-            official-facebook-pixel
-            opengraph
-            static-mail-sender-configurator
-            wp-user-avatars;
-        };
-        settings = {
-          WP_DEBUG = true;
-          WP_DEBUG_LOG = true;
-          WP_DEBUG_DISPLAY = true;
-        };
-      };
-    };
-
-    "ADF" = {
-      enable = true;
-      siteFQDN = "adufms.org.br";
-      siteType = "wordpress";
-      wordpress = {
-        plugins = {
-          inherit (pkgs.wordpressPackages.plugins)
-            co-authors-plus
-            simple-mastodon-verification
-            surge
-            wordpress-seo
-            webp-converter-for-media;
-          inherit (wp4nix.plugins)
-            antispam-bee
-            async-javascript
-            code-syntax-block
-            custom-post-type-ui
-            disable-xml-rpc
-            google-site-kit
-	          notification
-	          official-facebook-pixel
-            opengraph
-	          rss-importer
-	          # simple-popup-block
-            static-mail-sender-configurator
-            webp-express
-	          # wp-popups-lite
-            wpforms-lite
-            wp-gdpr-compliance
-            wp-user-avatars
-	          wp-rss-aggregator
-            wp-swiper;
-        };
-        themes = {
-          inherit (pkgs.wordpressPackages.themes) twentytwentythree twentytwentyfive;
-          inherit (wp4nix.themes) astra;
-        };
-        settings = {
-          FORCE_SSL_ADMIN = false;
-          WP_DEBUG_DISPLAY = true;
-        };
-      };
-    };
-
-    "CMS" = {
-      enable = true;
-      siteFQDN = "cutms.org.br";
-      siteType = "wordpress";
-      wordpress = {
-        plugins = {
-          inherit (pkgs.wordpressPackages.plugins)
-            co-authors-plus
-            simple-mastodon-verification
-            surge
-            wordpress-seo
-            webp-converter-for-media;
-          inherit (wp4nix.plugins)
-            antispam-bee
-            async-javascript
-            google-site-kit
-            official-facebook-pixel
-            wpforms-lite;
-        };
-        themes = {
-          inherit (pkgs.wordpressPackages.themes) twentytwentythree twentytwentyfive;
-          inherit (wp4nix.themes) astra;
-        };
-        settings = {
-          FORCE_SSL_ADMIN = false;
-        };
-      };
-    };
-
-    "STR" = {
-      enable = true;
-      siteFQDN = "setra.com.br";
-      siteType = "estatico";
-      proxy.enable = true;
-    };
-  };
 }
 

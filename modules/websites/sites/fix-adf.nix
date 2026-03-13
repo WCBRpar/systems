@@ -10,30 +10,6 @@ let
 in
 {
   services = {
-    traefik.dynamicConfigOptions = lib.mkIf (config.networking.hostName == "galactica") {
-      http = {
-        routers = {
-          WP-ADF = {
-            rule = "Host(`adufms.org.br`)";
-            service = "wordpress-server";
-            entrypoints = ["websecure"];
-            tls = {
-              certResolver = "cloudflare";
-            };
-          };
-        };
-
-        services = {
-          wordpress-server = {
-            loadBalancer = {
-              servers = [{ url = "https://pegasus.wcbrpar.com:7770"; }];
-              # Importante para lidar com redirecionamentos:
-              passHostHeader = true;
-            };
-          };
-        };
-      };
-    };
 
   # security.acme = {
   #   certs."${domain}" = {
@@ -117,6 +93,12 @@ in
           extraConfig = ''
             @ini_set( 'error_log', '/var/log/wordpress/${domain}/debug.log' );
             @ini_set( 'display_errors', 1 );
+
+            // Confiar no cabeçalho do proxy reverso (Traefik)
+            if (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https') {
+              $_SERVER['HTTPS'] = 'on';
+              
+            }
           '';
           poolConfig = {
             "pm" = "dynamic";
@@ -145,9 +127,8 @@ in
 
     nginx.virtualHosts = lib.mkIf (config.networking.hostName == "pegasus") {
       "${domain}" = {
-        enableACME = true;
-        # useACMEHost = "${domain}";
-        addSSL = true;
+        enableACME = false;
+        addSSL = false;
 
         locations."/.well-known/acme-challenge" = {
           root = "/var/lib/acme/${domain}";

@@ -15,30 +15,6 @@ in
 {
 
   services = {
-    traefik.dynamicConfigOptions = lib.mkIf (config.networking.hostName == "galactica") {
-      http = {
-        routers = {
-          "WP-${acronimo}" = {
-            rule = "Host(`${domain}`)";
-            service = "wordpress-server";
-            entrypoints = ["websecure"];
-            tls = {
-              certResolver = "cloudflare";
-            };
-          };
-        };
-
-        services = {
-          "wordpress-server" = {
-            loadBalancer = {
-              servers = [{ url = "https://pegasus.wcbrpar.com:7770"; }];
-              # Importante para lidar com redirecionamentos:
-              passHostHeader = true;
-            };
-          };
-        };
-      };
-    };
 
   # security.acme = {
   #   certs."${domain}" = {
@@ -103,7 +79,16 @@ in
             WP_DEBUG_LOG = true;
             # WP_DEBUG_DISPLAY = true;
           };
-          poolConfig = {
+          extraConfig = ''
+            @ini_set( 'error_log', '/var/log/wordpress/${domain}/debug.log' );
+            @ini_set( 'display_errors', 1 );
+
+            // Confiar no cabeçalho do proxy reverso (Traefik)
+            if (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https') {
+                $_SERVER['HTTPS'] = 'on';
+            }
+          '';
+           poolConfig = {
             "pm" = "dynamic";
             "pm.max_children" = 64;
             "pm.max_requests" = 500;

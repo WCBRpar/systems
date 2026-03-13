@@ -8,33 +8,17 @@ let
   name = "cutms";
   domain = "${name}.org.br";
 in
-
 {
   services = {
-    # Configuração do Traefik no servidor galactica (proxy reverso com SSL)
-    traefik.dynamicConfigOptions = lib.mkIf (config.networking.hostName == "galactica") {
-      http = {
-        routers = {
-          WP-CMS = {
-            rule = "Host(`${domain}`)";
-            service = "wordpress-server";
-            entrypoints = ["websecure"];
-            tls.certResolver = "cloudflare";
-          };
-        };
-        services = {
-          wordpress-server = {
-            loadBalancer = {
-              # Comunicação interna com o servidor pegasus na porta 7770 (HTTP)
-              servers = [{ url = "http://pegasus.wcbrpar.com:7770"; }];
-              passHostHeader = true;
-            };
-          };
-        };
-      };
-    };
 
-    # Configuração do PHP-FPM no servidor pegasus
+    # security.acme = {
+    #   certs."${domain}" = {
+    #     extraDomainNames = [ "*.${domain}" ];
+    #     webroot = "/var/lib/acme/${domain}";
+    #     group = "nginx";
+    #   };
+    # };
+
     phpfpm.pools = lib.mkIf (config.networking.hostName == "pegasus") {
       "wordpress-${domain}".phpOptions = ''
         upload_max_filesize = 128M
@@ -43,9 +27,8 @@ in
       '';
     };
 
-    # Configuração do WordPress no servidor pegasus
     wordpress = lib.mkIf (config.networking.hostName == "pegasus") {
-      webserver = "nginx";   # Habilita gerenciamento do nginx pelo módulo
+      webserver = "nginx";
       sites = {
         "${domain}" = {
           package = pkgs.wordpress;
@@ -56,11 +39,13 @@ in
           plugins = {
             inherit (pkgs.wordpressPackages.plugins)
               co-authors-plus
+              # gutenberg
+              # simple-popup-block
               simple-mastodon-verification
               surge
               wordpress-seo
               webp-converter-for-media
-            ;
+              ;
             inherit (wp4nix.plugins)
               antispam-bee
               async-javascript
@@ -72,25 +57,32 @@ in
               official-facebook-pixel
               opengraph
               rss-importer
+              # simple-popup-block
               static-mail-sender-configurator
               webp-express
+              # wp-popups-lite
               wpforms-lite
               wp-gdpr-compliance
               wp-user-avatars
               wp-rss-aggregator
               wp-swiper
-            ;
+              ;
           };
           themes = {
-            inherit (pkgs.wordpressPackages.themes) twentytwentythree;
-            inherit (wp4nix.themes) astra;
+            inherit (pkgs.wordpressPackages.themes)
+              twentytwentythree
+              twentytwentyfive
+              ;
+            inherit (wp4nix.themes) 
+              astra
+              ;
           };
           languages = [ wp4nix.languages.pt_BR ];
           settings = {
-            WP_DEFAULT_THEME = "twentytwentythree";
+            WP_DEFAULT_THEME = "twentytwentyfive";
             WP_MAIL_FROM = "gcp-devops@wcbrpar.com";
-            WP_SITEURL = "https://${domain}";
-            WP_HOME = "https://${domain}";
+            WP_SITEURL = "https://cutms.org.br";
+            WP_HOME = "https://cutms.org.br";
             WPLANG = "pt_BR";
             AUTOMATIC_UPDATER_DISABLED = true;
             FORCE_SSL_ADMIN = false;
@@ -101,81 +93,21 @@ in
           extraConfig = ''
             @ini_set( 'error_log', '/var/log/wordpress/${domain}/debug.log' );
             @ini_set( 'display_errors', 1 );
+
+            // Confiar no cabeçalho do proxy reverso (Traefik)
+            if (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https') {
+                $_SERVER['HTTPS'] = 'on';
+            }
           '';
           poolConfig = {
             "pm" = "dynamic";
             "pm.max_children" = 64;
-            "pm.start_servers" = 2;
-            "pm.min_spare_servers" = 2;
-            "pm.max_spare_servers" = 4;
             "pm.max_requests" = 500;
+            "pm.max_spare_servers" = 4;
+            "pm.min_spare_servers" = 2;
+            "pm.start_servers" = 2;
           };
-
-          # Configuração completa do virtualHost (substitui a padrão)
           virtualHost = {
-            # Listen na porta 7770 (comunicação interna com Traefik)
-            # Usando sintaxe estruturada: ip, port, ssl (ssl false = HTTP)
-            listen = [
-              {
-                ip = "0.0.0.0";
-                port = 7770;
-                ssl = false;   # HTTP simples
-              }
-            ];
-
-            # Desabilitar SSL (quem termina é o Traefik)
-            enableACME = false;
-            addSSL = false;
-            forceSSL = false;  # Opcional, para evitar redirecionamento HTTPS
-
-            # Locations personalizadas
-            locations = {
-              # Para requisições à raiz: tenta arquivo estático, senão passa para o WordPress
-              "/" = {
-                tryFiles = "$uri $uri/ /index.php?$args";
-              };
-
-              # Processamento de PHP (sobrescreve a padrão para incluir CSP e APP_ENV)
-              "~ \\.php$" = {
-                extraConfig = ''
-                  fastcgi_split_path_info ^(.+\.php)(/.+)$;
-                  fastcgi_pass unix:${config.services.phpfpm.pools."wordpress-${domain}".socket};
-                  fastcgi_index index.php;
-                  include ${pkgs.nginx}/conf/fastcgi_params;
-                  fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
-                  fastcgi_param PATH_INFO $fastcgi_path_info;
-                  fastcgi_param APP_ENV dev;
-                  # Cabeçalhos CSP para todas as páginas PHP
-                  more_set_headers "Content-Security-Policy: default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https: data: blob:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https: *.gravatar.com; font-src 'self' https: data:; connect-src 'self' https:;";
-                '';
-              };
-
-              # Tratamento especial para PDFs (inline)
-              "~* (.*\\.pdf)" = {
-                extraConfig = ''
-                  types { application/pdf .pdf; }
-                  default_type application/pdf;
-                  more_set_headers Content-Disposition "inline" always;
-                  more_set_headers X-Content-Type-Options "nosniff";
-                  expires 30d;
-                  more_set_headers Cache-Control "public, no-transform" always;
-                  proxy_hide_header Content-Disposition;
-                  proxy_hide_header X-Content-Type-Options;
-                  proxy_ignore_headers Set-Cookie;
-                  proxy_set_header Connection "";
-                '';
-              };
-
-              # Área administrativa (CSP mais restritivo)
-              "~ ^/(wp-admin|wp-login\\.php)" = {
-                extraConfig = ''
-                  more_set_headers "Content-Security-Policy: default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https: *.gravatar.com; font-src 'self' https: data:; connect-src 'self' https:;";
-                '';
-              };
-
-            };
-
-            # Configuração do robots.txt via opção específica (gera o location automaticamente)
             robotsEntries = ''
               User-agent: *
               Disallow: /feed/
@@ -186,29 +118,81 @@ in
               Disallow: /xmlrpc.php
               Disallow: /wp-
             '';
-
-            # ExtraConfig pode ser usado para outras diretivas, se necessário
-            extraConfig = "
-              error_reporting(E_ALL);
-              ini_set('display_errors', 1);
-              ini_set('log_errors', 1);
-            ";
+            # addSSL = true;
           };
         };
       };
     };
 
-    # VirtualHost adicional para subdomínio red.cutms.org.br (redireciona)
-    # Como não faz parte do WordPress, mantemos no nginx.virtualHosts
     nginx.virtualHosts = lib.mkIf (config.networking.hostName == "pegasus") {
+      "${domain}" = {
+        enableACME = false;
+        addSSL = false;
+
+        locations."/.well-known/acme-challenge" = {
+          root = "/var/lib/acme/${domain}";
+        };
+
+        locations."~ \.php$" = {
+          root = "/var/www/${domain}";
+          extraConfig = ''
+            fastcgi_index index.php;
+            fastcgi_split_path_info ^(.+\.php)(/.*)$;
+            try_files $uri $uri/ index.php /index.php$is_args$args;
+            include ${pkgs.nginx}/conf/fastcgi_params;
+            fastcgi_pass unix:${config.services.phpfpm.pools."wordpress-${domain}".socket};
+            fastcgi_param SCRIPT_FILENAME $request_filename;
+            fastcgi_param APP_ENV dev;
+            # Configuração CSP específica para PHP
+            more_set_headers "Content-Security-Policy: default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https: data: blob:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https: *.gravatar.com; font-src 'self' https: data:; connect-src 'self' https:;";
+          '';
+        };
+
+        locations."~* (.*\.pdf)" = {
+          extraConfig = ''
+            types { application/pdf .pdf; }
+            default_type application/pdf;
+            more_set_headers Content-Disposition "inline" always;
+            more_set_headers X-Content-Type-Options "nosniff";
+            expires 30d;
+            more_set_headers Cache-Control "public, no-transform" always;
+            proxy_hide_header Content-Disposition;
+            proxy_hide_header X-Content-Type-Options;
+            proxy_ignore_headers Set-Cookie;
+            proxy_set_header Connection "";
+          '';
+        };
+
+        locations."/" = {
+          root = "/var/www/${domain}";
+          extraConfig = ''
+            fastcgi_split_path_info ^(.+\.php)(/.+)$;
+            fastcgi_pass unix:${config.services.phpfpm.pools."wordpress-${domain}".socket};
+            include ${pkgs.nginx}/conf/fastcgi_params;
+            include ${pkgs.nginx}/conf/fastcgi.conf;
+          '';
+        };
+
+        locations."~ ^/(wp-admin|wp-login\.php)" = {
+          extraConfig = ''
+            # Substitui o cabeçalho CSP existente apenas para a área administrativa
+            more_set_headers "Content-Security-Policy: default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https: *.gravatar.com; font-src 'self' https: data:; connect-src 'self' https:;";
+          '';
+        };
+      };
+
+      "${domain}80" = {
+        serverName = "${domain}";
+        locations."/.well-known/acme-challenge" = {
+          root = "/var/lib/acme/${domain}";
+          extraConfig = ''
+            auth_basic off;
+          '';
+        };
+        # locations."/" = { return = "301 https://$host$request_uri"; };
+      };
+
       "${app}.${domain}" = {
-        listen = [
-          {
-            addr = "0.0.0.0";
-            port = 7770;
-          }
-        ];
-        serverName = "${app}.${domain}";
         globalRedirect = "${domain}";
       };
     };
