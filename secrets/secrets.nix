@@ -1,31 +1,38 @@
+# secrets/secrets.nix
 let
-  # Chaves SSH existentes - REMOVA UMA DAS DUPLICATAS
-  # root e wjjunyor são a MESMA chave, então use apenas uma
+  # Importa as configurações de todos os hosts
+  hostConfigs = import ../hosts/default.nix;
+
+  # Extrai as chaves públicas de cada host
+  hostKeys = builtins.attrValues (builtins.mapAttrs (name: cfg: cfg.sshPublicKey) hostConfigs);
+
+  # Administradores (humanos)
   primary = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKzdmKZQGZOSI1denOeN3kso6Lf/OL92QXN5SHXA7EtG walter@wcbrpar.com";
-  
-  # NOVA CHAVE DE DEPLOY
-  devops = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICn5PEy7qX9HZ+NkKAFV+CAgydvXe57kmesBdZHja5d7 dev-ops@wcbrpar.com";
+  devops  = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICn5PEy7qX9HZ+NkKAFV+CAgydvXe57kmesBdZHja5d7 dev-ops@wcbrpar.com";
 
-  # Combine todas as chaves SEM DUPLICATAS
-  allUsers = [ primary devops ];
+  # Chave de deploy (usada apenas no primeiro bootstrap)
+  deployKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILbtJ4XG/uKw3e6of+VTuXgC/GCRkO9SKZiXNsuKvJns deploy@bootstrap";
 
-  # Opcional: crie grupos diferentes para diferentes ambientes
-  deployKeys = [ devops ];
-  adminKeys = [ primary ];
-
+  # Listas úteis
+  admins = [ primary devops ];
+  all = admins ++ hostKeys;   # todos que podem ler secrets de aplicação
+  hostKeyRecipients = admins ++ [ deployKey ];  # para as chaves privadas dos hosts
 in
 {
-  # Versão 2: Segregação de segredos por tipo
-  
-  "default.age".publicKeys = allUsers;  # Segredos gerais
-  "deploy.age".publicKeys = deployKeys; # Segredos específicos para deploy
-  
-  "alternative.age".publicKeys = allUsers;
-  "ssh-key.age".publicKeys = adminKeys;
-  "onlyofficeDocumentServerKey.age".publicKeys = allUsers;
-  "odooDatabaseKey.age".publicKeys = allUsers;
-  "grafanaSecurityKey.age".publicKeys = allUsers;
-  "openrouterApiKey.age".publicKeys = allUsers;
-  "deepseekApiKey.age".publicKeys = allUsers;
-  "telegramBotKey.age".publicKeys = allUsers;
-}
+  # Secrets de aplicação (acessíveis por admins e todos os hosts)
+  "default.age".publicKeys = all;
+  "deploy.age".publicKeys = all;
+  "alternative.age".publicKeys = all;
+  "ssh-key.age".publicKeys = admins;           # apenas admins (ex: chave SSH privada)
+  "onlyofficeDocumentServerKey.age".publicKeys = all;
+  "odooDatabaseKey.age".publicKeys = all;
+  "grafanaSecurityKey.age".publicKeys = all;
+  "openrouterApiKey.age".publicKeys = all;
+  "deepseekApiKey.age".publicKeys = all;
+  "telegramBotKey.age".publicKeys = all;
+
+  # Secrets das chaves privadas dos hosts (geradas automaticamente para cada host)
+} // builtins.listToAttrs (map (name: {
+  name = "host-${name}-key.age";
+  value = { publicKeys = hostKeyRecipients; };
+}) (builtins.attrNames hostConfigs))

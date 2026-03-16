@@ -2,8 +2,13 @@
   config,
   inputs,
   pkgs,
+  hostConfig ? null,
   ...
 }:
+
+let
+  cfg = if hostConfig != null then hostConfig else {};
+in
 
 {
 
@@ -29,6 +34,7 @@
 
   systemd.settings.Manager = {
     DefaultTimeoutStartSec = "900s";
+    DefaultIPAccounting = "no";
   };
 
   # Fuso horário do sistema

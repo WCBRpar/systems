@@ -1,3 +1,6 @@
 core
 result*
 /networking/hosts.nix
+secrets/*.pub
+secrets/*
+!secrets/*.age

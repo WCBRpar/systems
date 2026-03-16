@@ -14,13 +14,13 @@ in
 {
 
   # imports = [ ./sites ];
-  imports = [ ./sites ./sites/fix-adf.nix ./sites/fix-cms.nix ./sites/fix-ham.nix ./sites/fix-evm.nix ./sites/fix-red.nix ];
+  imports = [ ./sites ./sites/fix-adf.nix ./sites/fix-cms.nix ./sites/fix-ham.nix ./sites/fix-evm.nix ];
 
       services.traefik.dynamicConfigOptions = lib.mkIf (config.networking.hostName == "galactica") {
         http = {
           routers = {
             "WP-TMP" = {
-              rule = "Host(`adufms.org.br`) || Host(`cutms.org.br`) || Host(`redcom.digital`) || Host(`humbertoamaducci.com.br`) || Host(`esperancavermelha.com.br`)";
+              rule = "Host(`adufms.org.br`) || Host(`cutms.org.br`) || Host(`humbertoamaducci.com.br`) || Host(`esperancavermelha.com.br`)";
               service = "wordpress-tmp-server";
               entrypoints = [ "websecure" ];
               tls.certResolver = "cloudflare";

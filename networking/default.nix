@@ -1,45 +1,57 @@
-{ config, ... }:
+{ config, pkgs, hostConfig, ... }:
 
+let
+  # Importa as configurações de todos os hosts
+  allHosts = import ../hosts/default.nix;
+
+  # Função para gerar linha do /etc/hosts para um host
+  mkHostEntry = hostname: cfg:
+    "${cfg.ipAddress.internal} ${hostname}.wcbrpar.com ${hostname}";
+
+  # Gera todas as entradas do /etc/hosts
+  hostEntries = builtins.concatStringsSep "\n"
+    (builtins.attrValues (builtins.mapAttrs mkHostEntry allHosts));
+in
 {
-  # Configuração de rede
+  # Configurações básicas do host vindas do hostConfig
   networking = {
-    # hostId e hostName serão definidos no flake.nix ou nos arquivos de host específicos
-    # e não precisam ser importados aqui.
+    hostName = hostConfig.name;
+    hostId = hostConfig.id;
 
+    # Domínio e DNS
     domain = "wcbrpar.com";
-    nameservers = [ "84.200.69.80" "84.200.70.40" "1.1.1.1" "8.8.8.8" ]; # CloudFlare / DNS Watch
+    nameservers = [ "84.200.69.80" "84.200.70.40" "1.1.1.1" "8.8.8.8" ];
 
-    resolvconf = {
+    # Interface ZeroTier com IP configurado (assumindo /24)
+    interfaces.ztc25hlssg = {
+      ipv4.addresses = [{
+        address = hostConfig.ipAddress.internal;
+        prefixLength = 24;   # ajuste se necessário
+      }];
     };
 
-    interfaces = {
-      ztc25hlssg = {
-        # name = "ztr1s0";
-      };
-    };
-
-    # Configurações de firewall
+    # Firewall
     firewall = {
       enable = true;
-      allowedTCPPorts = [ 80 443 ]; # HTTP and HTTPS
       trustedInterfaces = [ "venet0" "ztc25hlssg" ];
-      extraCommands = ''
-      '';
     };
 
-    # Hosts da rede
+    # Hosts estáticos (incluindo todos os servidores)
     extraHosts = ''
       127.0.0.1       localhost
       172.16.129.0    nas.wcbrpar.com
-      192.168.13.10   galactica.wcbrpar.com
-      192.168.13.20   pegasus.wcbrpar.com
-      192.168.13.130  yashuman.wcbrpar.com
+      ${hostEntries}
     '';
   };
 
-  services = {
+  # Known hosts (entradas de /etc/ssh/ssh_known_hosts) para todos os hosts
+  programs.ssh.knownHosts = builtins.mapAttrs (hostname: cfg: {
+    hostNames = [ hostname "${hostname}.wcbrpar.com" ];
+    publicKey = cfg.sshPublicKey;
+  }) allHosts;
 
-    # mDNS Avahi
+  # Serviços de rede
+  services = {
     avahi = {
       enable = true;
       allowInterfaces = [ "ztc25hlssg" ];
@@ -53,40 +65,51 @@
       };
     };
 
+    # OpenSSH
     openssh = {
       enable = true;
-      openFirewall = true;     # SSH accessible on all interfaces
+      openFirewall = true;
       allowSFTP = true;
       settings = {
-        # PermitRootLogin = "prohibit-password";
-        # DenyUsers = [ "root" ];
         AllowUsers = [ "wjjunyor" ];
-	      # UsePAM = false;
         PasswordAuthentication = true;
-	      # PubKeyAuthentication = true;
       };
-      # hostKeys = [ getHost.hostKey ]; # Remover ou ajustar se hostKey for usado
-    };
-
-    # ZEROTIER
-    zerotierone = {
-      enable = true;
-      joinNetworks = [
-        "abfd31bd47447701" # vpn                (PRIVATE)
+      # Escuta no IP da interface ZeroTier
+      listenAddresses = [
+        { addr = hostConfig.ipAddress.internal; port = 22; }
+        # { addr = "0.0.0.0"; port = 22; } # opcional
+      ];
+      # Chave de host gerenciada pelo agenix
+      hostKeys = [
+        { path = "/etc/ssh/ssh_host_ed25519_key"; type = "ed25519"; }
       ];
     };
 
+    # ZeroTier
+    zerotierone = {
+      enable = true;
+      joinNetworks = [ "abfd31bd47447701" ];
+    };
   };
 
-  # OpenSSH
-  programs.mtr.enable = true;
-  programs.gnupg.agent = {
-    enable = true;
-    enableSSHSupport = true;
+  # Utilitários
+  programs = {
+    mtr.enable = true;
+    gnupg.agent = {
+      enable = true;
+      enableSSHSupport = true;
+    };
   };
 
+  # Instala a chave privada do host via agenix
+  age.secrets."host-ssh-key" = {
+    file = ../secrets/host-${hostConfig.name}-key.age;
+    path = "/etc/ssh/ssh_host_ed25519_key";
+    owner = "root";
+    group = "root";
+    mode = "600";
+  };
 
-  #  Habilita Builds Remotas via SSH
-  nix.settings.trusted-users = ["root" "wjjunyor"];
-
+  # Builds remotas via SSH
+  nix.settings.trusted-users = [ "root" "wjjunyor" ];
 }
