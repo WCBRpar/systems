@@ -3,7 +3,7 @@
 
   inputs = {
     # nixpkgs.url = "github:WCBRpar/nixpkgs/WCBRpar/master";
-    nixpkgs.url = "path:/home/wjjunyor/Shared/DEV/nixOS/nixpkgs";
+    nixpkgs.url = "path:/nas-data/shared/DEV/nixOS/nixpkgs";
 
     home-manager = {
       url = "github:nix-community/home-manager/master";
