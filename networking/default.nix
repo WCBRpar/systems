@@ -74,6 +74,7 @@ in
         # { addr = "0.0.0.0"; port = 22; } # opcional
       ];
       # Chave de host gerenciada pelo agenix
+      generateHostKeys = false;
       hostKeys = [
         { path = "/etc/ssh/ssh_host_ed25519_key"; type = "ed25519"; }
       ];
