@@ -16,14 +16,14 @@ let
   # Listas úteis
   admins = [ primary devops ];
   all = admins ++ hostKeys;   # todos que podem ler secrets de aplicação
-  hostKeyRecipients = admins ++ [ deployKey ];  # para as chaves privadas dos hosts
+  hostKeyRecipients = admins ++ [ deployKey ] ++ hostKeys;  # ADICIONADO: hosts podem ler suas próprias chaves
 in
 {
   # Secrets de aplicação (acessíveis por admins e todos os hosts)
   "default.age".publicKeys = all;
   "deploy.age".publicKeys = all;
   "alternative.age".publicKeys = all;
-  "ssh-key.age".publicKeys = admins;           # apenas admins (ex: chave SSH privada)
+  "ssh-key.age".publicKeys = admins;           # apenas admins
   "onlyofficeDocumentServerKey.age".publicKeys = all;
   "odooDatabaseKey.age".publicKeys = all;
   "grafanaSecurityKey.age".publicKeys = all;
@@ -31,8 +31,8 @@ in
   "deepseekApiKey.age".publicKeys = all;
   "telegramBotKey.age".publicKeys = all;
 
-  # Secrets das chaves privadas dos hosts (geradas automaticamente para cada host)
+  # Secrets das chaves privadas dos hosts - AGORA COM hostKeys INCLUÍDO
 } // builtins.listToAttrs (map (name: {
   name = "host-${name}-key.age";
-  value = { publicKeys = hostKeyRecipients; };
+  value = { publicKeys = hostKeyRecipients; };  # Agora inclui admins + deployKey + todos os hosts
 }) (builtins.attrNames hostConfigs))

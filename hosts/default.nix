@@ -11,7 +11,7 @@
   pegasus = {
     name = "pegasus";
     id = "8bf0dda5";
-    sshPublicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAfvbKgvWsYZWHWAcKu2bC/IP66QB/KJ5vH00P9F/7U3 root@pegasus";
+    sshPublicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOHZrLOs34YEEiz1F5PJwKDyIdUsdGZX0aNTyJgXRZ/b root@pegasus";
     ipAddress.internal = "192.168.13.20";
   };
 

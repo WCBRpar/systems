@@ -10,7 +10,8 @@
   services.nfs.server = lib.mkIf (config.networking.hostName == "yashuman") {
     enable = true;
     exports = ''
-      /nas-data/home   192.168.13.0/24(rw,fsid=0,no_subtree_check)
+      /nas-data/home     192.168.13.0/24(rw,fsid=0,no_subtree_check)
+      /nas-data/shared   192.168.13.0/24(rw,fsid=0,no_subtree_check)
     '';
   };
 
