@@ -14,7 +14,7 @@
     '';
   };
 
-  environment.systemPackages = with pkgs; [ kanidm_1_8 nginx ];
+  environment.systemPackages = with pkgs; [ kanidm_1_9 nginx ];
 
   services.traefik.dynamicConfigOptions = lib.mkIf ( config.networking.hostName == "galactica" ) {
     http = {
@@ -67,7 +67,7 @@
 
   services.kanidm = {
     enableClient = true;
-    package = pkgs.kanidm_1_8;
+    package = pkgs.kanidm_1_9;
 
     # Configurações do cliente Kanidm (usando objeto Nix)
     clientSettings = {
