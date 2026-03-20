@@ -44,12 +44,6 @@ in
     '';
   };
 
-  # Known hosts (entradas de /etc/ssh/ssh_known_hosts) para todos os hosts
-  programs.ssh.knownHosts = builtins.mapAttrs (hostname: cfg: {
-    hostNames = [ hostname "${hostname}.wcbrpar.com" ];
-    publicKey = cfg.sshPublicKey;
-  }) allHosts;
-
   # Serviços de rede
   services = {
     avahi = {
@@ -99,6 +93,23 @@ in
       enable = true;
       enableSSHSupport = true;
     };
+    ssh.knownHosts = 
+      builtins.listToAttrs (
+        (builtins.map (hostname: {
+        name = "${hostname}-short";
+        value = {
+          hostNames = [ hostname ];
+          publicKey = allHosts.${hostname}.sshPublicKey;
+        };
+    }) (builtins.attrNames allHosts)) ++
+      (builtins.map (hostname: {
+        name = "${hostname}-fqdn";
+        value = {
+          hostNames = [ "${hostname}.wcbrpar.com" ];
+          publicKey = allHosts.${hostname}.sshPublicKey;
+        };
+    }) (builtins.attrNames allHosts))
+    );
   };
 
   # Instala a chave privada do host via agenix
