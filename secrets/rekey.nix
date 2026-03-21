@@ -1,4 +1,5 @@
-# secrets/secrets.nix
+# secrets/rekey.nix
+# Configuração do agenix-rekey para re-encryptação automática de secrets
 let
   # Importa as configurações de todos os hosts
   hostConfigs = import ../hosts/default.nix;
@@ -15,16 +16,16 @@ let
 
   # Listas úteis
   admins = [ primary devops ];
-  all = admins ++ hostKeys;   # todos que podem ler secrets de aplicação
+  all = admins ++ hostKeys;
   hostKeyRecipients = admins ++ [ deployKey ];   # apenas admin + deployKey
-  # hostKeyRecipients = admins ++ [ deployKey ] ++ hostKeys;  # ADICIONADO: hosts podem ler suas próprias chaves
+  # hostKeyRecipients = admins ++ [ deployKey ] ++ hostKeys;
 in
 {
-  # Secrets de aplicação (acessíveis por admins e todos os hosts)
+  # Secrets de aplicação
   "default.age".publicKeys = all;
   "deploy.age".publicKeys = all;
   "alternative.age".publicKeys = all;
-  "ssh-key.age".publicKeys = admins;           # apenas admins
+  "ssh-key.age".publicKeys = admins;
   "onlyofficeDocumentServerKey.age".publicKeys = all;
   "odooDatabaseKey.age".publicKeys = all;
   "grafanaSecurityKey.age".publicKeys = all;
@@ -32,8 +33,8 @@ in
   "deepseekApiKey.age".publicKeys = all;
   "telegramBotKey.age".publicKeys = all;
 
-  # Secrets das chaves privadas dos hosts - AGORA COM hostKeys INCLUÍDO
+  # Secrets das chaves privadas dos hosts
 } // builtins.listToAttrs (map (name: {
   name = "host-${name}-key.age";
-  value = { publicKeys = hostKeyRecipients; };  # Agora inclui admins + deployKey + todos os hosts
+  value = { publicKeys = hostKeyRecipients; };
 }) (builtins.attrNames hostConfigs))

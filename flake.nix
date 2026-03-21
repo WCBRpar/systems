@@ -15,6 +15,12 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    agenix-rekey = {
+      url = "github:oddlama/agenix-rekey";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.agenix.follows = "agenix";
+    };
+
     wp4nix = {
       url = "git+https://git.helsinki.tools/helsinki-systems/wp4nix";
       flake = false;
@@ -35,7 +41,7 @@
     };
   };
 
-  outputs = { self, nixpkgs, home-manager, agenix, nixos-hardware, comin, ... }@inputs: 
+  outputs = { self, nixpkgs, home-manager, agenix, agenix-rekey, nixos-hardware, comin, ... }@inputs: 
   let
     system = "x86_64-linux";
     hostConfigs = import ./hosts/default.nix;
@@ -61,6 +67,22 @@
             });
           })
         ];
+      })
+      # Adiciona o módulo agenix-rekey
+      agenix-rekey.nixosModules.default
+      # Configuração do agenix-rekey
+      ({ config, pkgs, lib, hostName, ... }: {
+        age.rekey = {
+          masterIdentities = [
+            # Chave privada do administrador principal
+            "/home/wjjunyor/.ssh/id_ed25519"
+            # Chave privada do host (será instalada pelo agenix)
+            # "/etc/ssh/ssh_host_ed25519_key"
+          ];  
+
+          # Diretório onde as secrets rekeyadas serão armazenadas em cache
+          cacheDir = "/var/lib/agenix-rekey";
+        };
       })
     ];
 
@@ -174,6 +196,12 @@
       pegasus   = mkHost "pegasus";
       yashuman  = mkHost "yashuman";
       t800      = mkWorkstation "t800";
+    };
+    apps.${system}.agenix-rekey = {
+      agenix-rekey = {
+        type = "app";
+        program = "${agenix-rekey.packages.${system}.default}/bin/agenix-rekey";
+      };
     };
   };
 }
