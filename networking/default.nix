@@ -73,10 +73,10 @@ in
         { addr = hostConfig.ipAddress.internal; port = 22; }
         # { addr = "0.0.0.0"; port = 22; } # opcional
       ];
-      # Chave de host gerenciada pelo agenix
-      hostKeys = [
-        { path = "/etc/ssh/ssh_host_ed25519_key"; type = "ed25519"; }
-      ];
+      # Chave de host gerenciada pelo agenix - NÃO gerar automaticamente
+      # A chave privada é instalada via age.secrets abaixo
+      # Definimos generateHostKeys = false para evitar que o NixOS gere novas chaves
+      generateHostKeys = false;
     };
 
     # ZeroTier
@@ -119,6 +119,40 @@ in
     owner = "root";
     group = "root";
     mode = "600";
+  };
+
+  # Script de bootstrap para gerar a chave pública a partir da privada
+  # Isso resolve o problema do "ovo e a galinha": 
+  # - Com generateHostKeys = false, o NixOS não gera chaves automaticamente
+  # - O agenix instala a chave privada, mas a pública precisa ser derivada dela
+  # - Este script roda APENAS se a chave pública não existir (primeiro boot/deploy)
+  systemd.services.ssh-host-key-bootstrap = {
+    description = "Generate SSH host public key from private key if missing";
+    before = [ "sshd.service" ];
+    after = [ "agenix.service" ];
+    wantedBy = [ "multi-user.target" ];
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = true;
+      ExecStart = ''
+        ${pkgs.bash}/bin/bash -c '
+          KEY_PATH="/etc/ssh/ssh_host_ed25519_key"
+          PUB_PATH="/etc/ssh/ssh_host_ed25519_key.pub"
+          
+          if [ -f "$KEY_PATH" ] && [ ! -f "$PUB_PATH" ]; then
+            echo "Generating public key from private key..."
+            ${pkgs.openssh}/bin/ssh-keygen -y -f "$KEY_PATH" > "$PUB_PATH"
+            chmod 644 "$PUB_PATH"
+            echo "Public key generated successfully"
+          elif [ -f "$PUB_PATH" ]; then
+            echo "Public key already exists, skipping generation"
+          else
+            echo "WARNING: Private key not found at $KEY_PATH"
+            exit 1
+          fi
+        '
+      '';
+    };
   };
 
   # Builds remotas via SSH
