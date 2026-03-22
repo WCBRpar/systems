@@ -4,7 +4,7 @@
     name = "galactica";                     #redundância ?
     id = "13960a97";
     role = "server";
-    sshPublicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPU1bF52Qz62wQMJonN4Jn2UwHfV4YaX4DapY+bgu2l0 root@galactica";
+    sshPublicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDt3CCZjs0BoMz31szAxs/gBNbZfA+ppjBqDMB8ey7lV root@galactica";
     ipAddress = {
       internal = "192.168.13.10";
     };
