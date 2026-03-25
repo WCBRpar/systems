@@ -77,7 +77,7 @@
             # Chave privada do administrador principal
             "/home/wjjunyor/.ssh/id_ed25519"
             # Chave privada do host (será instalada pelo agenix)
-            # "/etc/ssh/ssh_host_ed25519_key"
+            "/etc/ssh/ssh_host_ed25519_key"
           ];  
 
           # Diretório onde as secrets rekeyadas serão armazenadas em cache

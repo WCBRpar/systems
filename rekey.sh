@@ -25,8 +25,8 @@ fi
 # Executa o rekey usando nix run para evitar dependência de instalação global
 # Isso usa o input do flake local, evitando downloads repetidos da internet
 echo ""
-echo "📝 Executando agenix-rekey via nix run..."
-nix run ".#agenix-rekey" -- rekey \
+echo "📝 Executando agenix-rekey..."
+nix run "github:oddlama/agenix-rekey" -- rekey \
     --secrets-file secrets/secrets.nix \
     --rekey-file secrets/rekey.nix \
     $HOST_FILTER \
