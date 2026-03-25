@@ -14,7 +14,7 @@
     name = "pegasus";
     id = "8bf0dda5";
     role = "server";
-    sshPublicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPapRTpo/ruuJUMCoYWwlWJZDkrLbmronwj2z7XMAkQd root@pegasus";
+    sshPublicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOjZ++UF1XKDmTU1NJmwGO2GHYdSL4PJP/6TuVBLfLWv root@pegasus";
     ipAddress.internal = "192.168.13.20";
   };
 
