@@ -4,7 +4,7 @@
     name = "galactica";                     #redundância ?
     id = "13960a97";
     role = "server";
-    sshPublicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDt3CCZjs0BoMz31szAxs/gBNbZfA+ppjBqDMB8ey7lV root@galactica";
+    sshPublicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGmT1KuH5xEOsZSyfc61yuf84vEAp2MZwcirOKABv2qe root@galactica";
     ipAddress = {
       internal = "192.168.13.10";
     };
@@ -14,7 +14,7 @@
     name = "pegasus";
     id = "8bf0dda5";
     role = "server";
-    sshPublicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOjZ++UF1XKDmTU1NJmwGO2GHYdSL4PJP/6TuVBLfLWv root@pegasus";
+    sshPublicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKt6p+zn6fJM8n0RcATJ6eylGDk9ojBQaJMznGXAUZJo root@pegasus";
     ipAddress.internal = "192.168.13.20";
   };
 

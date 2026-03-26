@@ -16,8 +16,8 @@ let
   # Listas úteis
   admins = [ primary devops ];
   all = admins ++ hostKeys;   # todos que podem ler secrets de aplicação
-  hostKeyRecipients = admins ++ [ deployKey ];   # apenas admin + deployKey
-  # hostKeyRecipients = admins ++ [ deployKey ] ++ hostKeys;  # ADICIONADO: hosts podem ler suas próprias chaves
+  # hostKeyRecipients = admins ++ [ deployKey ];   # apenas admin + deployKey
+  hostKeyRecipients = admins ++ [ deployKey ] ++ hostKeys;  # ADICIONADO: hosts podem ler suas próprias chaves
 in
 {
   # Secrets de aplicação (acessíveis por admins e todos os hosts)
