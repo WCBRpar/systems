@@ -63,8 +63,8 @@
           db_port = 5432;
           db_user = "odoo";
           # Use age para a senha (comente a linha abaixo e descomente a segura)
-          admin_password = config.age.secrets.odoo-databasekey.path;
-          db_password = config.age.secrets.odoo-databasekey.path;
+          admin_password = builtins.readFile config.age.secrets.odoo-databasekey.path;
+          db_password = builtins.readFile config.age.secrets.odoo-databasekey.path;
           # db_password = "odoo";          # ⚠️ Temporário
           list_db = true;                # Habilita gerenciador web (opcional)
           proxy_mode = true;             # Necessário para confiar nos cabeçalhos
