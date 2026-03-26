@@ -53,10 +53,11 @@
 
     odoo = lib.mkIf (config.networking.hostName == "pegasus") {
       enable = true;
+      package = pkgs.odoo19;
       domain = "redcom.digital";
       settings = {
         options = {
-          http_port = 8011;
+          http_port = 8011; 
           listen_addresses = "localhost, 192.168.13.20";
           db_host = "localhost";
           db_port = 5432;
