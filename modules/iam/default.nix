@@ -1,32 +1,31 @@
 { config, lib, pkgs, ... }:
 
 {
-
-  networking.firewall = lib.mkIf ( config.networking.hostName == "galactica" ) {
+  networking.firewall = lib.mkIf (config.networking.hostName == "galactica") {
     enable = true;
-    allowedTCPPorts = [ 80 443 ];
-    allowedTCPPortRanges = [
-      { from = 80; to = 443; }
-    ];
-    extraCommands = ''
-      iptables -A INPUT -p tcp --dport 8443 -s 127.0.0.1 -j ACCEPT
-      iptables -A INPUT -p tcp --dport 8443 -j DROP
-    '';
+    # allowedTCPPorts = [ 80 443 ];
+    # Allow Kanidm API (OIDC) and LDAPS for other hosts
+    allowedTCPPorts = [ 80 443 8443 636 ];
+    # The extraCommands are no longer needed because we now include 8443 in allowedTCPPorts
+    # If you want to restrict access to a specific subnet, use allowedTCPPortRanges instead.
+    # Example: allowedTCPPortRanges = [ { from = 8443; to = 8443; } ] combined with
+    # firewall.extraCommands = "iptables -A INPUT -p tcp --dport 8443 -s 192.168.1.0/24 -j ACCEPT";
+    extraCommands = "";
   };
 
   environment.systemPackages = with pkgs; [ kanidm_1_9 nginx ];
 
-  services.traefik.dynamicConfigOptions = lib.mkIf ( config.networking.hostName == "galactica" ) {
+  services.traefik.dynamicConfigOptions = lib.mkIf (config.networking.hostName == "galactica") {
     http = {
       routers = {
         KN-ALL = {
-	        rule = "Host(`iam.wcbrpar.com`) || Host (`iam.redcom.digital`) && (PathPrefix(`/`))";
+          rule = "Host(`iam.wcbrpar.com`) || Host(`iam.redcom.digital`) && (PathPrefix(`/`))";
           service = "kanidm-service";
           entrypoints = ["websecure"];
           tls = {
-      	    certResolver = "cloudflare";
-	        };
-          middlewares = ["fix-kanidm-headers" ];
+            certResolver = "cloudflare";
+          };
+          middlewares = ["fix-kanidm-headers"];
         };
       };
 
@@ -34,20 +33,17 @@
         kanidm-service = {
           loadBalancer = {
             servers = [{ url = "${toString config.services.kanidm.serverSettings.origin}:8443"; }];
-            # Importante para lidar com redirecionamentos:
             passHostHeader = true;
           };
         };
       };
-
-
 
       middlewares = {
         "fix-kanidm-headers" = {
           headers = {
             customRequestHeaders = {
               X-Forwarded-Proto = "https";
-	            X-Forwarded-Host = "iam.wcbrpar.com";
+              X-Forwarded-Host = "iam.wcbrpar.com";
               X-Real-IP = "$remote_addr";
             };
             sslRedirect = false;
@@ -60,29 +56,22 @@
           };
         };
       };
-
     };
   };
 
-  services.kanidm = {  # Todos os hosts!
+  services.kanidm = {
     package = pkgs.kanidm_1_9;
-    client = { 
-      enable = true;
 
-      # Configurações do cliente Kanidm (usando objeto Nix)
+    client = {
+      enable = true;
       settings = {
         uri = "https://iam.wcbrpar.com:8443";
         verify_ca = true;
         verify_hostnames = true;
-
-        # Configurações adicionais (opcional)
-        name = {
-          uri = "https://iam.redcom.digital";
-        };
       };
     };
 
-    server = lib.mkIf ( config.networking.hostName == "galactica" ) {
+    server = lib.mkIf (config.networking.hostName == "galactica") {
       enable = true;
       settings = {
         domain = "wcbrpar.com";
@@ -91,6 +80,17 @@
         ldapbindaddress = "0.0.0.0:636";
         tls_chain = "/var/lib/acme/wcbrpar.com/cert.pem";
         tls_key = "/var/lib/acme/wcbrpar.com/key.pem";
+
+        # OAuth2 clients for web services – uncomment and customise as needed
+        # oauth2 = {
+        #   "traefik" = {
+        #     client_id = "traefik";
+        #     client_secret = "CHANGE_ME";  # use a secret manager!
+        #     redirect_uris = [ "https://example.com/oauth2/callback" ];
+        #     response_types = [ "code" ];
+        #     scopes = [ "openid" "profile" "email" ];
+        #   };
+        # };
       };
     };
 
@@ -104,9 +104,9 @@
       };
     };
 
-    enablePam = lib.mkIf ( config.networking.hostName == "galactica" ) true;
+    enablePam = lib.mkIf (config.networking.hostName == "galactica") true;
 
-    provision = lib.mkIf ( config.networking.hostName == "galactica" ) {
+    provision = lib.mkIf (config.networking.hostName == "galactica") {
       enable = true;
       autoRemove = true;
 
@@ -126,9 +126,10 @@
     };
   };
 
-  users.users.kanidm.isSystemUser = true;
-  users.users.kanidm.extraGroups = [ "traefik" "acme" "nginx" ];
-  users.users.kanidm.group = "kanidm";
-  users.groups.kanidm = {};
-
+  users.users.kanidm = {
+    isSystemUser = true;
+    extraGroups = [ "traefik" "acme" "nginx" ];
+    group = "kanidm";
+  };
+  users.groups.kanidm = { };
 }
