@@ -20,14 +20,13 @@
     http = {
       routers = {
         KN-ALL = {
-	  rule = "Host(`iam.wcbrpar.com`) && (PathPrefix(`/`))";
+	        rule = "Host(`iam.wcbrpar.com`) || Host (`iam.redcom.digital`) && (PathPrefix(`/`))";
           service = "kanidm-service";
           entrypoints = ["websecure"];
           tls = {
-	    certResolver = "cloudflare";
-	  };
+      	    certResolver = "cloudflare";
+	        };
           middlewares = ["fix-kanidm-headers" ];
-
         };
       };
 
@@ -65,38 +64,44 @@
     };
   };
 
-  services.kanidm = {
-    enableClient = true;
+  services.kanidm = {  # Todos os hosts!
     package = pkgs.kanidm_1_9;
+    client = { 
+      enable = true;
 
-    # Configurações do cliente Kanidm (usando objeto Nix)
-    clientSettings = {
-      uri = "https://iam.wcbrpar.com:8443";
-      verify_ca = true;
-      verify_hostnames = true;
+      # Configurações do cliente Kanidm (usando objeto Nix)
+      settings = {
+        uri = "https://iam.wcbrpar.com:8443";
+        verify_ca = true;
+        verify_hostnames = true;
 
-      # Configurações adicionais (opcional)
-      name = {
-        uri = "https://iam.redcom.digital";
+        # Configurações adicionais (opcional)
+        name = {
+          uri = "https://iam.redcom.digital";
+        };
       };
     };
 
-    enableServer = lib.mkIf ( config.networking.hostName == "galactica" ) true;
-    serverSettings = lib.mkIf ( config.networking.hostName == "galactica" ) {
-      domain = "wcbrpar.com";
-      origin = "https://iam.wcbrpar.com";
-      bindaddress = "0.0.0.0:8443";
-      ldapbindaddress = "0.0.0.0:636";
-      tls_chain = "/var/lib/acme/wcbrpar.com/cert.pem";
-      tls_key = "/var/lib/acme/wcbrpar.com/key.pem";
+    server = lib.mkIf ( config.networking.hostName == "galactica" ) {
+      enable = true;
+      settings = {
+        domain = "wcbrpar.com";
+        origin = "https://iam.wcbrpar.com";
+        bindaddress = "0.0.0.0:8443";
+        ldapbindaddress = "0.0.0.0:636";
+        tls_chain = "/var/lib/acme/wcbrpar.com/cert.pem";
+        tls_key = "/var/lib/acme/wcbrpar.com/key.pem";
+      };
     };
 
-    unixSettings = lib.mkIf ( config.networking.hostName == "galactica" ) {
-      hsm_type = "soft";
-      default_shell = "/bin/zsh";
-      home_attr = "uuid";
-      home_prefix = "/home/";
-      kanidm.pam_allowed_login_groups = [ "users" "admins" ];
+    unix = {
+      settings = {
+        hsm_type = "soft";
+        default_shell = "/bin/zsh";
+        home_attr = "uuid";
+        home_prefix = "/home/";
+        kanidm.pam_allowed_login_groups = [ "users" "admins" ];
+      };
     };
 
     enablePam = lib.mkIf ( config.networking.hostName == "galactica" ) true;
