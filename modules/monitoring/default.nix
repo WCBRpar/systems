@@ -3,7 +3,7 @@
 let
   # IP do servidor central de logs (galactica)
   lokiServer = "192.168.13.10";
-  
+
   # Lista de todos os servidores para scraping do Prometheus
   allServers = [
     "192.168.13.10"  # galactica
@@ -13,25 +13,15 @@ let
 in
 
 {
-
   services = {
 
-    traefik = lib.mkIf ( hostName == "galactica" ) {
-
+    traefik = lib.mkIf (hostName == "galactica") {
       dynamicConfigOptions = {
         http = {
           routers = {
             GF-ALL = {
               rule = "Host(`grafana.wcbrpar.com`) || Host(`grafana.redcom.digital`) ";
               service = "grafana-service";
-              entrypoints = ["websecure"];
-              tls = {
-                certResolver = "cloudflare";
-              };
-            };
-            LOKI-ROUTER = {
-              rule = "Host(`loki.wcbrpar.com`)";
-              service = "loki-service";
               entrypoints = ["websecure"];
               tls = {
                 certResolver = "cloudflare";
@@ -56,81 +46,81 @@ in
       };
     };
 
-    grafana = lib.mkIf ( hostName == "galactica" ) {
-      # declarativePlugins = with pkgs.grafanaPlugins; [ ... ];
-
+    grafana = lib.mkIf (hostName == "galactica") {
       enable = true;
-      settings = { 
-        server = { 
+      settings = {
+        server = {
           domain = "grafana.wcbrpar.com";
           http_port = 3000;
           http_addr = "192.168.13.10";
         };
         security = {
-          secret_key = config.age.secrets.grafana-securitykey.path; 
-         };
+          secret_key = config.age.secrets.grafana-securitykey.path;
+        };
       };
 
       provision = {
         enable = true;
 
+        datasources.settings = {
+          apiVersion = 1;
+          datasources = [
+            {
+              name = "Prometheus";
+              type = "prometheus";
+              uid = "prometheus";
+              url = "http://127.0.0.1:${toString config.services.prometheus.port}";
+              access = "proxy";
+              isDefault = true;
+            }
+            {
+              name = "Loki";
+              type = "loki";
+              uid = "loki";
+              url = "http://${config.services.loki.configuration.server.http_listen_address}:${toString config.services.loki.configuration.server.http_listen_port}";
+              access = "proxy";
+              isDefault = false;
+            }
+          ];
+          deleteDatasources = [];
+        };
+
         dashboards.settings.providers = [{
           name = "my dashboards";
           options.path = "/etc/grafana-dashboards";
         }];
-
-        datasources.settings.datasources = [
-          # "Built-in" datasources can be provisioned - c.f. https://grafana.com/docs/grafana/latest/administration/provisioning/#data-sources
-          {
-            name = "Prometheus";
-            type = "prometheus";
-            url = "http://${config.services.prometheus.listenAddress}:${toString config.services.prometheus.port}";
-            isDefault = true;
-          }
-          # Loki datasource para logs centralizados
-          {
-            name = "Loki";
-            type = "loki";
-            url = "http://${config.services.loki.configuration.server.http_listen_address}:${toString config.services.loki.configuration.server.http_listen_port}";
-            isDefault = false;
-          }
-          # Some plugins also can - c.f. https://grafana.com/docs/plugins/yesoreyeram-infinity-datasource/latest/setup/provisioning/
-          {
-            name = "Infinity";
-            type = "yesoreyeram-infinity-datasource";
-          }
-          # But not all - c.f. https://github.com/fr-ser/grafana-sqlite-datasource/issues/141
-        ];
-
-        # Note: removing attributes from the above `datasources.settings.datasources` is not enough for them to be deleted on `grafana`;
-        # One needs to use the following option:
-        # datasources.settings.deleteDatasources = [ { name = "foo"; orgId = 1; } { name = "bar"; orgId = 1; } ];
       };
     };
 
     # Loki - Servidor central de logs (apenas no galactica)
-    loki = lib.mkIf ( hostName == "galactica" ) {
+    loki = lib.mkIf (hostName == "galactica") {
       enable = true;
       configuration = {
+        auth_enabled = false;
+
         server = {
           http_listen_address = "192.168.13.10";
           http_listen_port = 3100;
         };
-        
+
         common = {
           path_prefix = "/var/lib/loki";
           replication_factor = 1;
         };
-        
+
         schema_config = {
           configs = [{
             from = "2024-01-01";
             store = "tsdb";
             object_store = "filesystem";
             schema = "v13";
+            index = {
+              prefix = "index_";
+              period = "24h";
+            };
           }];
         };
-        
+
         storage_config = {
           filesystem = {
             directory = "/var/lib/loki/chunks";
@@ -140,18 +130,25 @@ in
             cache_location = "/var/lib/loki/tsdb-cache";
           };
         };
-        
+
         limits_config = {
-          retention_period = "744h"; # 31 dias
-          enforce_metric_name = false;
+          retention_period = "744h";
           reject_old_samples = true;
           reject_old_samples_max_age = "168h";
         };
-        
-        chunk_store_config = {
-          max_look_back_period = "0s";
+
+        ingester = {
+          lifecycler = {
+            ring = {
+              kvstore = {
+                store = "inmemory";
+              };
+              replication_factor = 1;
+            };
+            final_sleep = "0s";
+          };
         };
-        
+
         table_manager = {
           retention_deletes_enabled = false;
           retention_period = "0s";
@@ -164,20 +161,20 @@ in
       enable = true;
       configuration = {
         server = {
+          http_listen_address = "0.0.0.0";
           http_listen_port = 9080;
           grpc_listen_port = 0;
         };
-        
+
         clients = [{
           url = "http://${lokiServer}:3100/loki/api/v1/push";
         }];
-        
+
         positions = {
           filename = "/tmp/positions.yaml";
         };
-        
+
         scrape_configs = [
-          # Logs do sistema (journalctl)
           {
             job_name = "journal";
             journal = {
@@ -198,8 +195,6 @@ in
               }
             ];
           }
-          
-          # Logs de arquivos específicos
           {
             job_name = "system";
             static_configs = [
@@ -213,8 +208,6 @@ in
               }
             ];
           }
-          
-          # Logs do Nginx/Traefik se disponíveis
           {
             job_name = "traefik";
             static_configs = [
@@ -232,73 +225,71 @@ in
       };
     };
 
-    prometheus = {
-      enable = true;
-      port = 9001;
-      listenAddress = "0.0.0.0";
-      
-      # Configuração para scrapear métricas de todos os hosts
-      scrapeConfigs = [
-        {
-          job_name = "prometheus";
-          static_configs = [{
-            targets = ["localhost:${toString config.services.prometheus.port}"];
-            labels = {
-              instance = hostName;
-            };
-          }];
-        }
-        
-        # Node Exporter - Métricas do sistema de todos os hosts
-        {
-          job_name = "node";
-          static_configs = builtins.map (ip: { 
-            targets = ["${ip}:9100"]; 
-            labels = { 
-              instance = if ip == "192.168.13.10" then "galactica" 
-                         else if ip == "192.168.13.20" then "pegasus" 
-                         else "yashuman";
-            }; 
-          }) allServers;
-        }
-        
-        # Promtail - Métricas dos agentes de log
-        {
-          job_name = "promtail";
-          static_configs = builtins.map (ip: { 
-            targets = ["${ip}:9080"]; 
-            labels = { 
-              instance = if ip == "192.168.13.10" then "galactica" 
-                         else if ip == "192.168.13.20" then "pegasus" 
-                         else "yashuman";
-            }; 
-          }) allServers;
-        }
-      ];
-    };
-    
-    # Node Exporter - Exporta métricas do sistema (todos os hosts)
-    prometheus.exporters.node = {
-      enable = true;
-      port = 9100;
-      enabledCollectors = [
-        "systemd"
-        "network"
-        "cpu"
-        "diskstats"
-        "filesystem"
-        "loadavg"
-        "meminfo"
-        "stat"
-        "time"
-      ];
-    };
+    # Prometheus: servidor (apenas no galactica) + node exporter (todos os hosts)
+    prometheus = lib.mkMerge [
+      (lib.mkIf (hostName == "galactica") {
+        enable = true;
+        port = 9001;
+        listenAddress = "0.0.0.0";
 
+        scrapeConfigs = [
+          {
+            job_name = "prometheus";
+            static_configs = [{
+              targets = ["localhost:${toString config.services.prometheus.port}"];
+              labels = {
+                instance = hostName;
+              };
+            }];
+          }
+          {
+            job_name = "node";
+            static_configs = builtins.map (ip: {
+              targets = ["${ip}:9100"];
+              labels = {
+                instance = if ip == "192.168.13.10" then "galactica"
+                  else if ip == "192.168.13.20" then "pegasus"
+                  else "yashuman";
+              };
+            }) allServers;
+          }
+          {
+            job_name = "promtail";
+            static_configs = builtins.map (ip: {
+              targets = ["${ip}:9080"];
+              labels = {
+                instance = if ip == "192.168.13.10" then "galactica"
+                  else if ip == "192.168.13.20" then "pegasus"
+                  else "yashuman";
+              };
+            }) allServers;
+          }
+        ];
+      })
+
+      {
+        exporters.node = {
+          enable = true;
+          port = 9100;
+          listenAddress = "0.0.0.0";
+          enabledCollectors = [
+            "systemd"
+            "cpu"
+            "diskstats"
+            "filesystem"
+            "loadavg"
+            "meminfo"
+            "stat"
+            "time"
+            "netdev"
+          ];
+        };
+      }
+    ];
   };
 
   # Dashboards do Grafana
-  environment.etc = lib.mkIf ( hostName == "galactica" ) {
-    # Dashboard de métricas do sistema
+  environment.etc = lib.mkIf (hostName == "galactica") {
     "grafana-dashboards/system-metrics.json".text = builtins.toJSON {
       annotations = {
         list = [];
@@ -405,7 +396,7 @@ in
             datasource = { type = "prometheus"; uid = "prometheus"; };
             expr = "(1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100";
             legendFormat = "{{instance}} - Memória";
-            refId = "A";
+             refId = "A";
           }];
           title = "Uso de Memória por Host";
           type = "timeseries";
@@ -592,6 +583,686 @@ in
       version = 1;
       weekStart = "";
     };
+
+    # NOVO DASHBOARD: All Systems (métricas + rede + logs)
+    "grafana-dashboards/all-systems.json".text = builtins.toJSON {
+      annotations = {
+        list = [
+          {
+            builtIn = 1;
+            datasource = {
+              type = "grafana";
+              uid = "-- Grafana --";
+            };
+            enable = true;
+            hide = true;
+            iconColor = "rgba(0, 211, 255, 1)";
+            name = "Annotations & Alerts";
+            type = "dashboard";
+          }
+        ];
+      };
+      editable = true;
+      fiscalYearStartMonth = 0;
+      graphTooltip = 0;
+      links = [];
+      panels = [
+        {
+          datasource = {
+            type = "prometheus";
+            uid = "prometheus";
+          };
+          fieldConfig = {
+            defaults = {
+              color = {
+                mode = "palette-classic";
+              };
+              custom = {
+                axisBorderShow = false;
+                axisCenteredZero = false;
+                axisColorMode = "text";
+                axisLabel = "";
+                axisPlacement = "auto";
+                barAlignment = 0;
+                barWidthFactor = 0.6;
+                drawStyle = "line";
+                fillOpacity = 10;
+                gradientMode = "none";
+                hideFrom = {
+                  legend = false;
+                  tooltip = false;
+                  viz = false;
+                };
+                insertNulls = false;
+                lineInterpolation = "linear";
+                lineWidth = 1;
+                pointSize = 5;
+                scaleDistribution = {
+                  type = "linear";
+                };
+                showPoints = "auto";
+                showValues = false;
+                spanNulls = false;
+                stacking = {
+                  group = "A";
+                  mode = "none";
+                };
+                thresholdsStyle = {
+                  mode = "off";
+                };
+              };
+              mappings = [];
+              thresholds = {
+                mode = "absolute";
+                steps = [
+                  {
+                    color = "green";
+                    value = 0;
+                  }
+                  {
+                    color = "red";
+                    value = 80;
+                  }
+                ];
+              };
+              unit = "percent";
+            };
+            overrides = [];
+          };
+          gridPos = {
+            h = 8;
+            w = 12;
+            x = 0;
+            y = 0;
+          };
+          id = 1;
+          options = {
+            legend = {
+              calcs = [];
+              displayMode = "list";
+              placement = "bottom";
+              showLegend = true;
+            };
+            tooltip = {
+              hideZeros = false;
+              mode = "single";
+              sort = "none";
+            };
+          };
+          pluginVersion = "12.4.2";
+          targets = [
+            {
+              expr = "100 - (avg by(instance) (rate(node_cpu_seconds_total{mode=\"idle\"}[5m])) * 100)";
+              legendFormat = "{{instance}}";
+              refId = "A";
+            }
+          ];
+          title = "Uso de CPU por Host";
+          type = "timeseries";
+        }
+        {
+          datasource = {
+            type = "prometheus";
+            uid = "prometheus";
+          };
+          fieldConfig = {
+            defaults = {
+              color = {
+                mode = "palette-classic";
+              };
+              custom = {
+                axisBorderShow = false;
+                axisCenteredZero = false;
+                axisColorMode = "text";
+                axisLabel = "";
+                axisPlacement = "auto";
+                barAlignment = 0;
+                barWidthFactor = 0.6;
+                drawStyle = "line";
+                fillOpacity = 10;
+                gradientMode = "none";
+                hideFrom = {
+                  legend = false;
+                  tooltip = false;
+                  viz = false;
+                };
+                insertNulls = false;
+                lineInterpolation = "linear";
+                lineWidth = 1;
+                pointSize = 5;
+                scaleDistribution = {
+                  type = "linear";
+                };
+                showPoints = "auto";
+                showValues = false;
+                spanNulls = false;
+                stacking = {
+                  group = "A";
+                  mode = "none";
+                };
+                thresholdsStyle = {
+                  mode = "off";
+                };
+              };
+              mappings = [];
+              thresholds = {
+                mode = "absolute";
+                steps = [
+                  {
+                    color = "green";
+                    value = 0;
+                  }
+                  {
+                    color = "red";
+                    value = 80;
+                  }
+                ];
+              };
+              unit = "percent";
+            };
+            overrides = [];
+          };
+          gridPos = {
+            h = 8;
+            w = 12;
+            x = 12;
+            y = 0;
+          };
+          id = 2;
+          options = {
+            legend = {
+              calcs = [];
+              displayMode = "list";
+              placement = "bottom";
+              showLegend = true;
+            };
+            tooltip = {
+              hideZeros = false;
+              mode = "single";
+              sort = "none";
+            };
+          };
+          pluginVersion = "12.4.2";
+          targets = [
+            {
+              expr = "(1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100";
+              legendFormat = "{{instance}}";
+              refId = "A";
+            }
+          ];
+          title = "Uso de Memória por Host";
+          type = "timeseries";
+        }
+        {
+          datasource = {
+            type = "prometheus";
+            uid = "prometheus";
+          };
+          fieldConfig = {
+            defaults = {
+              color = {
+                mode = "palette-classic";
+              };
+              custom = {
+                axisBorderShow = false;
+                axisCenteredZero = false;
+                axisColorMode = "text";
+                axisLabel = "";
+                axisPlacement = "auto";
+                barAlignment = 0;
+                barWidthFactor = 0.6;
+                drawStyle = "line";
+                fillOpacity = 10;
+                gradientMode = "none";
+                hideFrom = {
+                  legend = false;
+                  tooltip = false;
+                  viz = false;
+                };
+                insertNulls = false;
+                lineInterpolation = "linear";
+                lineWidth = 1;
+                pointSize = 5;
+                scaleDistribution = {
+                  type = "linear";
+                };
+                showPoints = "auto";
+                showValues = false;
+                spanNulls = false;
+                stacking = {
+                  group = "A";
+                  mode = "none";
+                };
+                thresholdsStyle = {
+                  mode = "off";
+                };
+              };
+              mappings = [];
+              thresholds = {
+                mode = "absolute";
+                steps = [
+                  {
+                    color = "green";
+                    value = 0;
+                  }
+                  {
+                    color = "yellow";
+                    value = 70;
+                  }
+                  {
+                    color = "red";
+                    value = 90;
+                  }
+                ];
+              };
+              unit = "percent";
+            };
+            overrides = [];
+          };
+          gridPos = {
+            h = 8;
+            w = 12;
+            x = 0;
+            y = 8;
+          };
+          id = 3;
+          options = {
+            legend = {
+              calcs = [];
+              displayMode = "list";
+              placement = "bottom";
+              showLegend = true;
+            };
+            tooltip = {
+              hideZeros = false;
+              mode = "single";
+              sort = "none";
+            };
+          };
+          pluginVersion = "12.4.2";
+          targets = [
+            {
+              expr = "100 - ((node_filesystem_avail_bytes{mountpoint=\"/\"} / node_filesystem_size_bytes{mountpoint=\"/\"}) * 100)";
+              legendFormat = "{{instance}}";
+              refId = "A";
+            }
+          ];
+          title = "Uso de Disco (/)";
+          type = "timeseries";
+        }
+        {
+          datasource = {
+            type = "prometheus";
+            uid = "prometheus";
+          };
+          fieldConfig = {
+            defaults = {
+              mappings = [];
+              thresholds = {
+                mode = "absolute";
+                steps = [
+                  {
+                    color = "green";
+                    value = 0;
+                  }
+                  {
+                    color = "yellow";
+                    value = 1;
+                  }
+                  {
+                    color = "red";
+                    value = 5;
+                  }
+                ];
+              };
+            };
+            overrides = [];
+          };
+          gridPos = {
+            h = 8;
+            w = 12;
+            x = 12;
+            y = 8;
+          };
+          id = 4;
+          options = {
+            colorMode = "value";
+            graphMode = "area";
+            justifyMode = "auto";
+            orientation = "auto";
+            percentChangeColorMode = "standard";
+            reduceOptions = {
+              calcs = ["lastNotNull"];
+              fields = "";
+              values = false;
+            };
+            showPercentChange = false;
+            textMode = "auto";
+            wideLayout = true;
+          };
+          pluginVersion = "12.4.2";
+          targets = [
+            {
+              expr = "node_load1";
+              legendFormat = "{{instance}}";
+              refId = "A";
+            }
+          ];
+          title = "Load Average (1m)";
+          type = "stat";
+        }
+        {
+          datasource = {
+            type = "prometheus";
+            uid = "prometheus";
+          };
+          fieldConfig = {
+            defaults = {
+              color = {
+                mode = "palette-classic";
+              };
+              custom = {
+                axisBorderShow = false;
+                axisCenteredZero = false;
+                axisColorMode = "text";
+                axisLabel = "";
+                axisPlacement = "auto";
+                barAlignment = 0;
+                barWidthFactor = 0.6;
+                drawStyle = "lines";
+                fillOpacity = 10;
+                gradientMode = "none";
+                hideFrom = {
+                  legend = false;
+                  tooltip = false;
+                  viz = false;
+                };
+                insertNulls = false;
+                lineInterpolation = "linear";
+                lineWidth = 1;
+                pointSize = 5;
+                scaleDistribution = {
+                  type = "linear";
+                };
+                showPoints = "auto";
+                showValues = false;
+                spanNulls = false;
+                stacking = {
+                  group = "A";
+                  mode = "none";
+                };
+                thresholdsStyle = {
+                  mode = "off";
+                };
+              };
+              mappings = [];
+              thresholds = {
+                mode = "absolute";
+                steps = [
+                  {
+                    color = "green";
+                    value = 0;
+                  }
+                  {
+                    color = "red";
+                    value = 80;
+                  }
+                ];
+              };
+              unit = "Bps";
+            };
+            overrides = [];
+          };
+          gridPos = {
+            h = 8;
+            w = 12;
+            x = 0;
+            y = 16;
+          };
+          id = 5;
+          options = {
+            legend = {
+              calcs = [];
+              displayMode = "list";
+              placement = "bottom";
+              showLegend = true;
+            };
+            tooltip = {
+              hideZeros = false;
+              mode = "single";
+              sort = "none";
+            };
+          };
+          pluginVersion = "12.4.2";
+          targets = [
+            {
+              expr = "rate(node_network_receive_bytes_total{instance=~\"$host\", device!=\"lo\"}[5m])";
+              legendFormat = "{{instance}} - {{device}} RX";
+              refId = "A";
+            }
+            {
+              expr = "rate(node_network_transmit_bytes_total{instance=~\"$host\", device!=\"lo\"}[5m])";
+              legendFormat = "{{instance}} - {{device}} TX";
+              refId = "B";
+            }
+          ];
+          title = "Tráfego de Rede (bytes/s)";
+          type = "timeseries";
+        }
+        {
+          datasource = {
+            type = "prometheus";
+            uid = "prometheus";
+          };
+          fieldConfig = {
+            defaults = {
+              color = {
+                mode = "palette-classic";
+              };
+              custom = {
+                axisBorderShow = false;
+                axisCenteredZero = false;
+                axisColorMode = "text";
+                axisLabel = "";
+                axisPlacement = "auto";
+                barAlignment = 0;
+                barWidthFactor = 0.6;
+                drawStyle = "lines";
+                fillOpacity = 10;
+                gradientMode = "none";
+                hideFrom = {
+                  legend = false;
+                  tooltip = false;
+                  viz = false;
+                };
+                insertNulls = false;
+                lineInterpolation = "linear";
+                lineWidth = 1;
+                pointSize = 5;
+                scaleDistribution = {
+                  type = "linear";
+                };
+                showPoints = "auto";
+                showValues = false;
+                spanNulls = false;
+                stacking = {
+                  group = "A";
+                  mode = "none";
+                };
+                thresholdsStyle = {
+                  mode = "off";
+                };
+              };
+              mappings = [];
+              thresholds = {
+                mode = "absolute";
+                steps = [
+                  {
+                    color = "green";
+                    value = 0;
+                  }
+                  {
+                    color = "red";
+                    value = 80;
+                  }
+                ];
+              };
+              unit = "cps";
+            };
+            overrides = [];
+          };
+          gridPos = {
+            h = 8;
+            w = 12;
+            x = 12;
+            y = 16;
+          };
+          id = 6;
+          options = {
+            legend = {
+              calcs = [];
+              displayMode = "list";
+              placement = "bottom";
+              showLegend = true;
+            };
+            tooltip = {
+              hideZeros = false;
+              mode = "single";
+              sort = "none";
+            };
+          };
+          pluginVersion = "12.4.2";
+          targets = [
+            {
+              expr = "rate(node_network_receive_errs_total{instance=~\"$host\", device!=\"lo\"}[5m])";
+              legendFormat = "{{instance}} - {{device}} RX errors";
+              refId = "A";
+            }
+            {
+              expr = "rate(node_network_transmit_errs_total{instance=~\"$host\", device!=\"lo\"}[5m])";
+              legendFormat = "{{instance}} - {{device}} TX errors";
+              refId = "B";
+            }
+          ];
+          title = "Erros de Rede (pacotes/s)";
+          type = "timeseries";
+        }
+        {
+          datasource = {
+            type = "loki";
+            uid = "loki";
+          };
+          fieldConfig = {
+            defaults = {};
+            overrides = [];
+          };
+          gridPos = {
+            h = 20;
+            w = 24;
+            x = 0;
+            y = 24;
+          };
+          id = 7;
+          options = {
+            dedupStrategy = "none";
+            enableInfiniteScrolling = false;
+            enableLogDetails = true;
+            preWrapLines = true;
+            showControls = false;
+            showLabels = true;
+            showTime = true;
+            sortOrder = "Descending";
+            unwrappedColumns = false;
+            wrapLogMessage = true;
+          };
+          pluginVersion = "12.4.2";
+          targets = [
+            {
+              direction = "backward";
+              editorMode = "builder";
+              expr = "{host=~\"$host\", job=~\"$job\"} |~ \"$level_filter\"";
+              queryType = "range";
+              refId = "A";
+            }
+          ];
+          title = "Logs Centralizados";
+          type = "logs";
+        }
+      ];
+      preload = false;
+      refresh = "5s";
+      schemaVersion = 42;
+      tags = [
+        "system"
+        "logs"
+        "network"
+        "nixos"
+      ];
+      templating = {
+        list = [
+          {
+            current = {
+              text = "All";
+              value = "$__all";
+            };
+            datasource = {
+              type = "prometheus";
+              uid = "prometheus";
+            };
+            includeAll = true;
+            label = "Host";
+            multi = true;
+            name = "host";
+            options = [];
+            query = "label_values(node_uname_info, instance)";
+            refresh = 1;
+            regexApplyTo = "value";
+            type = "query";
+          }
+          {
+            current = {
+              text = "All";
+              value = "$__all";
+            };
+            datasource = {
+              type = "loki";
+              uid = "loki";
+            };
+            includeAll = true;
+            label = "Job";
+            multi = true;
+            name = "job";
+            options = [];
+            query = "label_values(job)";
+            refresh = 1;
+            regexApplyTo = "value";
+            type = "query";
+          }
+          {
+            current = {
+              text = "";
+              value = "";
+            };
+            hide = 0;
+            label = "Error Level Filter";
+            name = "level_filter";
+            options = [];
+            query = "";
+            type = "textbox";
+          }
+        ];
+      };
+      time = {
+        from = "now-1h";
+        to = "now";
+      };
+      timepicker = {};
+      timezone = "browser";
+      title = "All Systems";
+      uid = "all-systems";
+      version = 1;
+      weekStart = "";
+    };
   };
 
   # Firewall - liberar portas do monitoramento
@@ -604,5 +1275,4 @@ in
       9100  # Node Exporter
     ];
   };
-
 }
