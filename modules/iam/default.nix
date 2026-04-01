@@ -15,25 +15,45 @@ let
 
     # Verificar se o arquivo acme.json existe
     if [ ! -f "$ACME_FILE" ]; then
-      echo "Arquivo $ACME_FILE não encontrado"
-      exit 1
+      echo "Arquivo $ACME_FILE não encontrado, aguardando certificação inicial..."
+      exit 0
     fi
 
-    # Extrair certificado e chave usando jq
-    ${pkgs.jq}/bin/jq -r "
-      .\"$DOMAIN\".Certificates[] |
+    # Verificar se há certificados para este domínio no provedor cloudflare
+    CERT_COUNT=$(${pkgs.jq}/bin/jq -r '.cloudflare.Certificates // [] | length' "$ACME_FILE")
+
+    if [ "$CERT_COUNT" -eq 0 ] || [ "$CERT_COUNT" = "null" ]; then
+      echo "Nenhum certificado encontrado no acme.json ainda"
+      exit 0
+    fi
+
+    # Extrair primeiro certificado válido para o domínio wcbrpar.com
+    ${pkgs.jq}/bin/jq -r '
+      .cloudflare.Certificates[] |
       select(.Certificate != null and .Key != null) |
-      {cert: .Certificate, key: .Key}
-    " "$ACME_FILE" | \
-    ${pkgs.jq}/bin/jq -r '.cert' > "$CERT_DIR/cert.pem.tmp" && \
-    ${pkgs.jq}/bin/jq -r '.key' > "$CERT_DIR/key.pem.tmp"
+      select(.domain.main == "'"$DOMAIN"'" or (.domain.SANs // []) | index("'"$DOMAIN"'")) |
+      .Certificate
+    ' "$ACME_FILE" | head -1 | \
+    ${pkgs.coreutils}/bin/base64 -d > "$CERT_DIR/cert.pem.tmp" || true
 
-    # Decodificar base64
-    ${pkgs.coreutils}/bin/base64 -d "$CERT_DIR/cert.pem.tmp" > "$CERT_DIR/cert.pem"
-    ${pkgs.coreutils}/bin/base64 -d "$CERT_DIR/key.pem.tmp" > "$CERT_DIR/key.pem"
+    ${pkgs.jq}/bin/jq -r '
+      .cloudflare.Certificates[] |
+      select(.Certificate != null and .Key != null) |
+      select(.domain.main == "'"$DOMAIN"'" or (.domain.SANs // []) | index("'"$DOMAIN"'")) |
+      .Key
+    ' "$ACME_FILE" | head -1 | \
+    ${pkgs.coreutils}/bin/base64 -d > "$CERT_DIR/key.pem.tmp" || true
 
-    # Remover temporários
-    rm -f "$CERT_DIR/cert.pem.tmp" "$CERT_DIR/key.pem.tmp"
+    # Verificar se os certificados foram extraídos
+    if [ ! -s "$CERT_DIR/cert.pem.tmp" ] || [ ! -s "$CERT_DIR/key.pem.tmp" ]; then
+      echo "Falha ao extrair certificados"
+      rm -f "$CERT_DIR/cert.pem.tmp" "$CERT_DIR/key.pem.tmp"
+      exit 0
+    fi
+
+    # Mover para arquivos finais
+    mv "$CERT_DIR/cert.pem.tmp" "$CERT_DIR/cert.pem"
+    mv "$CERT_DIR/key.pem.tmp" "$CERT_DIR/key.pem"
 
     # Ajustar permissões
     chown kanidm:kanidm "$CERT_DIR/cert.pem" "$CERT_DIR/key.pem"
@@ -42,8 +62,10 @@ let
 
     echo "Certificados extraídos com sucesso para $CERT_DIR"
 
-    # Reiniciar Kanidm para aplicar novos certificados
-    systemctl restart kanidm-server
+    # Reiniciar Kanidm para aplicar novos certificados (apenas se o serviço estiver ativo)
+    if systemctl is-active --quiet kanidm-server; then
+      systemctl restart kanidm-server || true
+    fi
   '';
 in
 
