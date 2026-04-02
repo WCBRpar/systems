@@ -18,7 +18,7 @@
   services.traefik = lib.mkIf (config.networking.hostName == "galactica") {
     enable = true;
     dataDir = "/var/lib/traefik"; # Diretório para dados persistentes do Traefik (como acme.json)
-    environmentFiles = ["builtins.readFile config.age.secrets.cloudflare-api-key.path"];
+    environmentFiles = [ builtins.readFile config.age.secrets.cloudflare-api-key.path ];
     group = "nginx";
 
     staticConfigOptions = {
@@ -102,7 +102,7 @@
             # caserver = "https://acme-v02.api.letsencrypt.org/directory";
             dnsChallenge = {
               provider = "cloudflare";
-              credentialsFile = "builtins.readFile config.age.secrets.cloudflare-api-key.path"; # Caminho corrigido
+              credentialsFile = builtins.readFile config.age.secrets.cloudflare-api-key.path; # Caminho corrigido
               resolvers = ["1.1.1.1:53" "8.8.8.8:53"];
               propagation.delayBeforeChecks = 120; # Important: Increase delay for slow DNS propagation
             };
