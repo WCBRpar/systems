@@ -106,13 +106,6 @@
               propagation.delayBeforeChecks = 120; # Important: Increase delay for slow DNS propagation
               # Configuração específica para wildcard
               keyType = "RSA4096";
-
-              # Domínios para certificados wildcard
-              domains = [
-                { main = "wcbrpar.com"; sans = ["*.wcbrpar.com"]; }
-                { main = "redcom.digital"; sans = ["*.redcom.digital"]; }
-                { main = "wqueiroz.adv.br"; sans = ["*.wqueiroz.adv.br"]; }
-              ];
             };
           };
         };
@@ -122,8 +115,9 @@
     dynamicConfigOptions = {
       http = {
         routers = {
-          TK-ALL = {
-            rule = "HostRegexp(`{subdomain:[a-z0-9-]+}.wcbrpar.com`, `{subdomain:[a-z0-9-]+}.redcom.digital`, `{subdomain:[a-z0-9-]+}.wqueiroz.adv.br`)";
+          TK-WPR = {
+            # rule = "HostRegexp(`{subdomain:[a-z0-9-]+}.wcbrpar.com`, `{subdomain:[a-z0-9-]+}.redcom.digital`, `{subdomain:[a-z0-9-]+}.wqueiroz.adv.br`)";
+            rule = "Host(`traefik.wcbrpar.com`)";
             service = "api@internal";
             entrypoints = ["websecure"];
             tls = {
