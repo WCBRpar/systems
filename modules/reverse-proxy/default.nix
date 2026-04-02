@@ -104,8 +104,9 @@
               # credentialsFile = config.age.secrets.cloudflare-api-key.path; # Caminho corrigido
               resolvers = ["1.1.1.1:53" "8.8.8.8:53"];
               propagation.delayBeforeChecks = 120; # Important: Increase delay for slow DNS propagation
-              # Configuração específica para wildcard
-              keyType = "RSA4096";
+              
+              # TODO: Configuração específica para wildcards
+
             };
           };
         };
