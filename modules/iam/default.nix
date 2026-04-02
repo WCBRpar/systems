@@ -1,74 +1,108 @@
 { config, lib, pkgs, ... }:
 
 let
-  # Script para extrair certificados do acme.json do Traefik
+  # Robust certificate extraction script with auto‑trigger and retry
   extractCertScript = pkgs.writeShellScriptBin "extract-traefik-certs" ''
     #!/bin/sh
     set -e
 
-    ACME_FILE="/var/lib/traefik/acme.json"
+    ACME_FILE="/var/lib/traefik/acme-wildcard.json"
     CERT_DIR="/var/lib/acme/wcbrpar.com"
     DOMAIN="wcbrpar.com"
+    RESOLVER="cloudflare-wildcard"
+    TRIGGER_URL="https://iam.wcbrpar.com"
+    MAX_RETRIES=60        # up to 10 minutes (60 * 10s)
+    SLEEP_SECONDS=10
+    TRIGGER_DELAY=20      # wait 20 seconds after triggering before retrying
 
-    # Criar diretório se não existir
     mkdir -p "$CERT_DIR"
 
-    # Verificar se o arquivo acme.json existe
-    if [ ! -f "$ACME_FILE" ]; then
-      echo "Arquivo $ACME_FILE não encontrado, aguardando certificação inicial..."
-      exit 0
+    # Remove any stale symlinks or empty files
+    rm -f "$CERT_DIR/cert.pem" "$CERT_DIR/key.pem"
+    # (the directory may still contain other files; we'll overwrite)
+
+    for i in $(seq 1 $MAX_RETRIES); do
+      if [ ! -f "$ACME_FILE" ]; then
+        echo "Waiting for $ACME_FILE to be created... ($i/$MAX_RETRIES)"
+        sleep $SLEEP_SECONDS
+        continue
+      fi
+
+      # Check if there's a certificate for our wildcard domain
+      CERT_COUNT=$(${pkgs.jq}/bin/jq --arg resolver "$RESOLVER" --arg domain "*.$DOMAIN" '
+        .[$resolver].Certificates // []
+        | map(select(
+            .domain.main == $domain or
+            ((.domain.SANs // []) | index($domain))
+          ))
+        | length
+      ' "$ACME_FILE" 2>/dev/null || echo 0)
+
+      if [ "$CERT_COUNT" -gt 0 ]; then
+        echo "Found certificate for *.$DOMAIN in resolver $RESOLVER"
+        break
+      fi
+
+      echo "No certificate for *.$DOMAIN yet, attempt $i/$MAX_RETRIES"
+
+      # First few attempts: just wait
+      if [ $i -ge 5 ] && [ $((i % 5)) -eq 0 ]; then
+        echo "Triggering ACME by hitting $TRIGGER_URL..."
+        curl -k -o /dev/null -s -w "%{http_code}\n" "$TRIGGER_URL" || true
+        sleep $TRIGGER_DELAY
+      else
+        sleep $SLEEP_SECONDS
+      fi
+    done
+
+    # After loop, if still no certificate, exit with error (will be retried by timer)
+    if [ "$CERT_COUNT" -eq 0 ]; then
+      echo "ERROR: Could not find wildcard certificate after $MAX_RETRIES attempts."
+      exit 1
     fi
 
-    # Verificar se há certificados para este domínio no provedor cloudflare
-    CERT_COUNT=$(${pkgs.jq}/bin/jq -r '.cloudflare.Certificates // [] | length' "$ACME_FILE")
+    # Extract certificate and key
+    ${pkgs.jq}/bin/jq --arg resolver "$RESOLVER" --arg domain "*.$DOMAIN" -r '
+      .[$resolver].Certificates[]
+      | select(
+          .domain.main == $domain or
+          ((.domain.SANs // []) | index($domain))
+        )
+      | .Certificate
+    ' "$ACME_FILE" > "$CERT_DIR/cert.pem.tmp"
 
-    if [ "$CERT_COUNT" -eq 0 ] || [ "$CERT_COUNT" = "null" ]; then
-      echo "Nenhum certificado encontrado no acme.json ainda"
-      exit 0
-    fi
+    ${pkgs.jq}/bin/jq --arg resolver "$RESOLVER" --arg domain "*.$DOMAIN" -r '
+      .[$resolver].Certificates[]
+      | select(
+          .domain.main == $domain or
+          ((.domain.SANs // []) | index($domain))
+        )
+      | .Key
+    ' "$ACME_FILE" > "$CERT_DIR/key.pem.tmp"
 
-    # Extrair primeiro certificado válido para o domínio wcbrpar.com
-    ${pkgs.jq}/bin/jq -r '
-      .cloudflare.Certificates[] |
-      select(.Certificate != null and .Key != null) |
-      select(.domain.main == "'"$DOMAIN"'" or (.domain.SANs // []) | index("'"$DOMAIN"'")) |
-      .Certificate
-    ' "$ACME_FILE" | head -1 | \
-    ${pkgs.coreutils}/bin/base64 -d > "$CERT_DIR/cert.pem.tmp" || true
-
-    ${pkgs.jq}/bin/jq -r '
-      .cloudflare.Certificates[] |
-      select(.Certificate != null and .Key != null) |
-      select(.domain.main == "'"$DOMAIN"'" or (.domain.SANs // []) | index("'"$DOMAIN"'")) |
-      .Key
-    ' "$ACME_FILE" | head -1 | \
-    ${pkgs.coreutils}/bin/base64 -d > "$CERT_DIR/key.pem.tmp" || true
-
-    # Verificar se os certificados foram extraídos
+    # Verify both files are non‑empty
     if [ ! -s "$CERT_DIR/cert.pem.tmp" ] || [ ! -s "$CERT_DIR/key.pem.tmp" ]; then
-      echo "Falha ao extrair certificados"
+      echo "ERROR: Extracted certificate or key is empty"
       rm -f "$CERT_DIR/cert.pem.tmp" "$CERT_DIR/key.pem.tmp"
-      exit 0
+      exit 1
     fi
 
-    # Mover para arquivos finais
     mv "$CERT_DIR/cert.pem.tmp" "$CERT_DIR/cert.pem"
     mv "$CERT_DIR/key.pem.tmp" "$CERT_DIR/key.pem"
 
-    # Ajustar permissões
     chown kanidm:kanidm "$CERT_DIR/cert.pem" "$CERT_DIR/key.pem"
     chmod 600 "$CERT_DIR/key.pem"
     chmod 644 "$CERT_DIR/cert.pem"
 
-    echo "Certificados extraídos com sucesso para $CERT_DIR"
+    echo "Certificates extracted successfully to $CERT_DIR"
 
-    # Reiniciar Kanidm para aplicar novos certificados (apenas se o serviço estiver ativo)
-    if systemctl is-active --quiet kanidm-server; then
-      systemctl restart kanidm-server || true
+    # If Kanidm is running, restart it to pick up new certificates
+    if systemctl is-active --quiet kanidm.service; then
+      echo "Restarting Kanidm to apply new certificates..."
+      systemctl restart kanidm.service || true
     fi
   '';
 in
-
 {
   networking.firewall = lib.mkIf (config.networking.hostName == "galactica") {
     enable = true;
@@ -76,19 +110,17 @@ in
     extraCommands = "";
   };
 
-  environment.systemPackages = with pkgs; [ kanidm_1_9 nginx jq ];
+  environment.systemPackages = with pkgs; [ kanidm_1_9 nginx jq extractCertScript ];
 
   services.traefik = {
-    staticConfigOptions = {
-      serversTransports = {
-        default = {
-          insecureSkipVerify = true;
-        };
-      };
-    };
 
     dynamicConfigOptions = lib.mkIf (config.networking.hostName == "galactica") {
       http = {
+        serversTransports = {
+          kanidm-backend = {
+            insecureSkipVerify = true;
+          };
+        };
         routers = {
           KN-ALL = {
             rule = "Host(`iam.wcbrpar.com`) || Host(`iam.redcom.digital`)";
@@ -104,8 +136,9 @@ in
         services = {
           kanidm-service = {
             loadBalancer = {
-              servers = [{ url = "http://127.0.0.1:8443"; }];
+              servers = [{ url = "https://127.0.0.1:8443"; }];
               passHostHeader = true;
+              serversTransport = "kanidm-backend";
             };
           };
         };
@@ -151,7 +184,6 @@ in
         origin = "https://iam.wcbrpar.com";
         bindaddress = "0.0.0.0:8443";
         ldapbindaddress = "0.0.0.0:636";
-        # TLS interno necessário - certificados extraídos do Traefik
         tls_chain = "/var/lib/acme/wcbrpar.com/cert.pem";
         tls_key = "/var/lib/acme/wcbrpar.com/key.pem";
       };
@@ -164,19 +196,18 @@ in
         home_attr = "uuid";
         home_prefix = "/home/";
         kanidm.pam_allowed_login_groups = [ "users" "admins" ];
-        enablePam = lib.mkIf (config.networking.hostName == "galactica") true;
       };
     };
+
+    enablePam = lib.mkIf (config.networking.hostName == "galactica") true;
 
     provision = lib.mkIf (config.networking.hostName == "galactica") {
       enable = true;
       autoRemove = true;
-
       groups = {
         "admins" = { };
         "users" = { };
       };
-
       persons = {
         "wjjunyor" = {
           displayName = "WQJ";
@@ -195,18 +226,18 @@ in
   };
   users.groups.kanidm = { };
 
-  # Systemd timer para extrair certificados periodicamente
+  # Timer to run the extraction script every 12 hours
   systemd.timers."extract-traefik-certs" = lib.mkIf (config.networking.hostName == "galactica") {
     wantedBy = [ "timers.target" ];
     timerConfig = {
-      OnBootSec = "5min";
+      OnBootSec = "1min";
       OnUnitActiveSec = "12h";
       Unit = "extract-traefik-certs.service";
     };
   };
 
   systemd.services."extract-traefik-certs" = lib.mkIf (config.networking.hostName == "galactica") {
-    description = "Extrair certificados do Traefik para o Kanidm";
+    description = "Extract certificates from Traefik for Kanidm";
     after = [ "traefik.service" ];
     requires = [ "traefik.service" ];
     serviceConfig = {
@@ -216,28 +247,17 @@ in
     };
   };
 
-  # Hook para extrair certificados quando o Traefik renovar
-  systemd.services."traefik-renew-certs" = lib.mkIf (config.networking.hostName == "galactica") {
-    description = "Extrair certificados do Traefik após renovação";
-    after = [ "traefik.service" ];
-    before = [ "kanidm-server.service" ];
-    serviceConfig = {
-      Type = "oneshot";
-      User = "root";
-      ExecStart = "${extractCertScript}/bin/extract-traefik-certs";
-    };
-  };
-
-  # Garantir que o diretório exista e tenha permissões corretas
-  systemd.tmpfiles.rules = [
-    "d /var/lib/acme/wcbrpar.com 0755 kanidm kanidm -"
-  ];
-
-  # O serviço do Kanidm depende da extração inicial dos certificados
+  # Kanidm will be started by the system; if it fails due to missing certificates,
+  # the extraction script will restart it later. No hard dependency.
+  # (We keep the service enabled; if it fails, the timer will eventually restart it.)
   systemd.services.kanidm-server = lib.mkIf (config.networking.hostName == "galactica") {
-    after = [ "traefik.service" "extract-traefik-certs.service" ];
-    requires = [ "extract-traefik-certs.service" ];
-    wants = [ "extract-traefik-certs.service" ];
+    after = [ "extract-traefik-certs.service" ];
+    # Not required, but we ensure that the first extraction runs before Kanidm starts.
+    # However, if extraction fails, Kanidm may still start (and fail), but will be restarted later.
   };
-}
 
+  # Clean up old certificate directory on boot
+  systemd.tmpfiles.rules = [
+    "D /var/lib/acme/wcbrpar.com 0755 kanidm kanidm -"
+  ];
+}

@@ -11,7 +11,7 @@
 
     staticConfigOptions = {
       log = {
-        level = "DEBUG";
+        level = "TRACE";
         filePath = "/var/log/traefik/traefik.log"; # Logs do Traefik
       };
 
@@ -110,6 +110,14 @@
           };
           # Configuração específica para wildcard
           keyType = "RSA4096";
+
+          # Domínios para certificados wildcard
+          domains = [
+            { main = "wcbrpar.com"; sans = ["*.wcbrpar.com"]; }
+            { main = "redcom.digital"; sans = ["*.redcom.digital"]; }
+            { main = "wqueiroz.adv.br"; sans = ["*.wqueiroz.adv.br"]; }
+          ];
+
         };
       };
     };
@@ -117,6 +125,13 @@
     dynamicConfigOptions = {
       http = {
         routers = {
+          TK-ALL = {
+            rule = "HostRegexp(`{subdomain:[a-z0-9-]+}.wcbrpar.com`, `{subdomain:[a-z0-9-]+}.redcom.digital`, `{subdomain:[a-z0-9-]+}.wqueiroz.adv.br`)";
+            entrypoints = ["websecure"];
+            tls = {
+              certResolver = "cloudflare-wildcard";
+            };
+          };
           TK-DASHBOARD = {
             rule = "Host(`traefik.wcbrpar.com`) || Host(`traefik.redcom.digital`) && (PathPrefix(`/`) || PathPrefix(`/dashboard`) || PathPrefix(`/api`))";
             service = "api@internal";
@@ -154,6 +169,7 @@
   systemd.tmpfiles.rules = [
     "d /var/lib/traefik 0750 traefik traefik -"
     "f /var/lib/traefik/acme.json 0750 traefik traefik -"
+    "f /var/lib/traefik/acme-wildcard.json 0750 traefik traefik -"
     "d /var/log/traefik 0750 traefik traefik -"
     "f /var/log/traefik/access.log 0750 traefik traefik -"
   ];
