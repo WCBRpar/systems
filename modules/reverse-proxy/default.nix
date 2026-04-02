@@ -99,37 +99,22 @@
           acme = {
             email = "dev-ops@wcbrpar.com";
             storage = "/var/lib/traefik/acme.json";
-            # caserver = "https://acme-v02.api.letsencrypt.org/directory";
             dnsChallenge = {
               provider = "cloudflare";
               # credentialsFile = config.age.secrets.cloudflare-api-key.path; # Caminho corrigido
               resolvers = ["1.1.1.1:53" "8.8.8.8:53"];
               propagation.delayBeforeChecks = 120; # Important: Increase delay for slow DNS propagation
+              # Configuração específica para wildcard
+              keyType = "RSA4096";
+
+              # Domínios para certificados wildcard
+              domains = [
+                { main = "wcbrpar.com"; sans = ["*.wcbrpar.com"]; }
+                { main = "redcom.digital"; sans = ["*.redcom.digital"]; }
+                { main = "wqueiroz.adv.br"; sans = ["*.wqueiroz.adv.br"]; }
+              ];
             };
           };
-        };
-
-      };
-
-      # Cloudflare WildCard
-      cloudflare-wildcard = {
-        acme = {
-          email = "dev-ops@wcbrpar.com";
-          storage = "/var/lib/traefik/acme-wildcard.json";
-          dnsChallenge = {
-            provider = "cloudflare";
-            resolvers = ["1.1.1.1:53"];
-          };
-          # Configuração específica para wildcard
-          keyType = "RSA4096";
-
-          # Domínios para certificados wildcard
-          domains = [
-            { main = "wcbrpar.com"; sans = ["*.wcbrpar.com"]; }
-            { main = "redcom.digital"; sans = ["*.redcom.digital"]; }
-            { main = "wqueiroz.adv.br"; sans = ["*.wqueiroz.adv.br"]; }
-          ];
-
         };
       };
     };
@@ -139,13 +124,6 @@
         routers = {
           TK-ALL = {
             rule = "HostRegexp(`{subdomain:[a-z0-9-]+}.wcbrpar.com`, `{subdomain:[a-z0-9-]+}.redcom.digital`, `{subdomain:[a-z0-9-]+}.wqueiroz.adv.br`)";
-            entrypoints = ["websecure"];
-            tls = {
-              certResolver = "cloudflare-wildcard";
-            };
-          };
-          TK-DASHBOARD = {
-            rule = "Host(`traefik.wcbrpar.com`) || Host(`traefik.redcom.digital`) && (PathPrefix(`/`) || PathPrefix(`/dashboard`) || PathPrefix(`/api`))";
             service = "api@internal";
             entrypoints = ["websecure"];
             tls = {
