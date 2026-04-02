@@ -18,7 +18,7 @@
   services.traefik = lib.mkIf (config.networking.hostName == "galactica") {
     enable = true;
     dataDir = "/var/lib/traefik"; # Diretório para dados persistentes do Traefik (como acme.json)
-    environmentFiles = [ builtins.readFile config.age.secrets.cloudflare-api-key.path ];
+    # environmentFiles = [ config.age.secrets.cloudflare-api-key.path ];
     group = "nginx";
 
     staticConfigOptions = {
