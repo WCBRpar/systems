@@ -24,12 +24,13 @@ in
   "default.age".publicKeys = all;
   "deploy.age".publicKeys = all;
   "alternative.age".publicKeys = all;
-  "ssh-key.age".publicKeys = admins;           # apenas admins
-  "onlyofficeDocumentServerKey.age".publicKeys = all;
-  "odooDatabaseKey.age".publicKeys = all;
-  "grafanaSecurityKey.age".publicKeys = all;
-  "openrouterApiKey.age".publicKeys = all;
+  "cloudflareApiKey.age".publicKeys = all;
   "deepseekApiKey.age".publicKeys = all;
+  "grafanaSecurityKey.age".publicKeys = all;
+  "odooDatabaseKey.age".publicKeys = all;
+  "openrouterApiKey.age".publicKeys = all;
+  "onlyofficeDocumentServerKey.age".publicKeys = all;
+  "ssh-key.age".publicKeys = admins;           # apenas admins
   "telegramBotKey.age".publicKeys = all;
 
   # Secrets das chaves privadas dos hosts - AGORA COM hostKeys INCLUÍDO

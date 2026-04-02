@@ -71,4 +71,16 @@ htmlcov/
 *.tar.bz2
 *.tar.xz
 *.tar.zst
+
+# Secrets Directory
+secrets/*.pub
+secrets/*
+!secrets/*.age
+
+# Nixos Build Outputs
+core
+result*
+
+# WCBRpar Security Issues
+systemsMap
 ```
