@@ -21,7 +21,7 @@
               middlewares = ["dbfilter-adufms"];
             };
             OD-LONGPOLLING = {
-              rule = "(Host(`crm.wcbrpar.com`) || Host(`crm.redcom.digital`)) && PathPrefix(`/longpolling`)";
+              rule = "(Host(`crm.wcbrpar.com`) || Host(`crm.redcom.digital`)) || Host(`novo.adufms.org.br`) && PathPrefix(`/longpolling`)";
               service = "odoo-longpolling-service";
               entrypoints = ["websecure"];
               tls.certResolver = "cloudflare";
@@ -65,7 +65,6 @@
           # Use age para a senha (comente a linha abaixo e descomente a segura)
           admin_password = builtins.readFile config.age.secrets.odoo-databasekey.path;
           db_password = builtins.readFile config.age.secrets.odoo-databasekey.path;
-          # db_password = "odoo";          # ⚠️ Temporário
           list_db = true;                # Habilita gerenciador web (opcional)
           proxy_mode = true;             # Necessário para confiar nos cabeçalhos
           dbfilter = ".*";               # Filtro global permissivo
