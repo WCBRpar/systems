@@ -1,8 +1,13 @@
 {
   config,
   lib,
+  pkgs,
   ...
 }: {
+
+  let
+    hostName = config.networking.hostName;
+  in
 
   #Segredos
   age.secrets = {
@@ -12,18 +17,29 @@
       owner = "traefik";
       group = "traefik";
     };
+    
+    # Client secret para autenticação OAuth2 com Kanidm
+    kanidm-traefik-secret = lib.mkIf (hostName == "galactica") {
+      file = ../../secrets/kanidmTraefikSecret.age;
+      mode = "600";
+      owner = "traefik";
+      group = "traefik";
+    };
   };
 
 
-  services.traefik = lib.mkIf (config.networking.hostName == "galactica") {
+  services.traefik = lib.mkIf (hostName == "galactica") {
     enable = true;
     dataDir = "/var/lib/traefik"; # Diretório para dados persistentes do Traefik (como acme.json)
-    environmentFiles = [ config.age.secrets.cloudflare-api-key.path ];
+    environmentFiles = [ 
+      config.age.secrets.cloudflare-api-key.path 
+      config.age.secrets.kanidm-traefik-secret.path
+    ];
     group = "nginx";
 
     staticConfigOptions = {
       log = {
-        level = "TRACE";
+        level = "INFO"; # Reduzido de TRACE para INFO em produção
         filePath = "/var/log/traefik/traefik.log"; # Logs do Traefik
       };
 
@@ -49,20 +65,18 @@
         };
       };
 
-      # Tracing (OpenTelemetry)
-      tracing = {
-        otlp = {
-          http = {
-            endpoint = "http://localhost:4318";
-          };
-        };
-      };
+      # Tracing (OpenTelemetry) - opcional, pode ser removido se não usar
+      # tracing = {
+      #   otlp = {
+      #     http = {
+      #       endpoint = "http://localhost:4318";
+      #     };
+      #   };
+      # };
 
       api = {
         dashboard = true;
-        insecure = true; # CUIDADO: Permite acesso ao dashboard sem autenticação na porta 8080.
-        # Para produção, você DEVE proteger o dashboard.
-        # Veja a seção de proteção do dashboard abaixo.
+        insecure = false; # Dashboard protegido por middleware OIDC
       };
       
       experimental = {
@@ -79,7 +93,7 @@
           address = ":80";
           http.redirections.entryPoint = {
             to = "websecure";
-      scheme = "https";
+            scheme = "https";
             permanent = false;
           };
         };
@@ -89,12 +103,6 @@
           http.tls = {
             certResolver = "cloudflare";
             options = "mytls";
-            # cipherSuites = [
-            #   "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384"
-            #   "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384"
-            # ];
-            # minVersion = "VersionTLS12";
-            # sniStrict = true;
           };
         };
 
@@ -110,12 +118,8 @@
             storage = "/var/lib/traefik/acme.json";
             dnsChallenge = {
               provider = "cloudflare";
-              # credentialsFile = config.age.secrets.cloudflare-api-key.path; # Caminho corrigido
               resolvers = ["1.1.1.1:53" "8.8.8.8:53"];
               propagation.delayBeforeChecks = 120; # Important: Increase delay for slow DNS propagation
-              
-              # TODO: Configuração específica para wildcards
-
             };
           };
         };
@@ -126,7 +130,6 @@
       http = {
         routers = {
           TK-WPR = {
-            # rule = "HostRegexp(`{subdomain:[a-z0-9-]+}.wcbrpar.com`, `{subdomain:[a-z0-9-]+}.redcom.digital`, `{subdomain:[a-z0-9-]+}.wqueiroz.adv.br`)";
             rule = "Host(`traefik.wcbrpar.com`)";
             service = "api@internal";
             entrypoints = ["websecure"];
@@ -143,6 +146,7 @@
             tls.certResolver = "cloudflare";
           };
         };
+        
         middlewares = {
           "dashboard-redirect" = {
             redirectRegex = {
@@ -151,19 +155,40 @@
               permanent = true;
             };
           };
-          "oidc-auth" = {
+          
+          "oidc-auth" = lib.mkIf (hostName == "galactica") {
             plugin = {
               "traefik-oidc-auth" = {
-                Scopes = [ "openid" "profile" "email" ];
+                # URL de callback correta
+                SessionCookieName = "_oauth2_proxy";
+                OauthStartPath = "/oauth2/start";
+                OauthCallbackPath = "/oauth2/callback";
+                
+                Scopes = [ "openid" "profile" "email" "groups" ];
                 Provider = {
-                  Url = "https://iam.wcbrpar.com:8443/oauth2/openid/traefik/.well-known/openid-configuration";
-                  ClientId = "traefik";
-                  # ClientSecret será injetado via segredo (veja abaixo)
-                  UsePkce = true;
+                  Url = "https://iam.wcbrpar.com/oauth2/openid/traefik-dashboard/.well-known/openid-configuration";
+                  ClientId = "traefik-dashboard";
+                  # ClientSecret injetado via variável de ambiente
+                  ClientSecretEnv = "KANIDM_TRAEFIK_SECRET";
+                  UsePkce = false; # PKCE não necessário para cliente confidencial
+                  InsecureSkipVerifyTls = false;
                 };
-                # Opcional: validação de audiência e claims
-                # ValidAudience = "traefik";
-                # TokenValidation = "IdToken"; # Pode ser necessário dependendo da versão do plugin[reference:7]
+                
+                # Validação de claims/grupos
+                Authorization = {
+                  Groups = [ "traefik_dashboard_access" ];
+                };
+                
+                # Headers para passar informações do usuário
+                Headers = {
+                  Request = {
+                    Set = {
+                      X-Forwarded-User = "{user}";
+                      X-Forwarded-Groups = "{groups}";
+                      X-Forwarded-Email = "{email}";
+                    };
+                  };
+                };
               };
             };
           };
@@ -172,13 +197,42 @@
     };
   };
 
+  # Configuração OAuth2 do Kanidm para o Traefik Dashboard
+  services.kanidm.provision.systems.oauth2 = lib.mkIf (hostName == "galactica") {
+    "traefik-dashboard" = {
+      displayName = "Traefik Dashboard";
+      origin = "https://traefik.wcbrpar.com";
+      
+      # Cliente CONFIDENCIAL - requer client secret
+      public = false;
+      
+      redirect_uris = [ 
+        "https://traefik.wcbrpar.com/oauth2/callback"
+      ];
+      
+      scope_maps = {
+        "openid" = [ "authenticated" ];
+        "profile" = [ "authenticated" ];
+        "email" = [ "authenticated" ];
+        "groups" = [ "authenticated" ];
+      };
+      
+      # Mapeamento de claims para grupos
+      claim_map = {
+        "groups" = {
+          "path" = "member_of";
+          "values" = [ "traefik_dashboard_access" ];
+        };
+      };
+    };
+  };
+
   networking.firewall.allowedTCPPorts = [80 443];
 
-  # Garante que o diretório de challenges exista
+  # Garante que os diretórios existam
   systemd.tmpfiles.rules = [
     "d /var/lib/traefik 0750 traefik traefik -"
     "f /var/lib/traefik/acme.json 0750 traefik traefik -"
-    "f /var/lib/traefik/acme-wildcard.json 0750 traefik traefik -"
     "d /var/log/traefik 0750 traefik traefik -"
     "f /var/log/traefik/access.log 0750 traefik traefik -"
   ];

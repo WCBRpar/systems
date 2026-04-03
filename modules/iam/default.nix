@@ -1,93 +1,91 @@
 { config, lib, pkgs, ... }:
 
+let
+  hostName = config.networking.hostName;
+in
 {
-  networking.firewall = lib.mkIf (config.networking.hostName == "galactica") {
+  networking.firewall = lib.mkIf (hostName == "galactica") {
     enable = true;
-    allowedTCPPorts = [ 80 443 8443 636 ];
-    extraCommands = "
-      iptables -A INPUT -p tcp --dport 8443 -j ACCEPT
-    ";
+    allowedTCPPorts = [ 80 443 636 8443 ];
   };
-
+  
   environment.systemPackages = with pkgs; [ kanidm_1_9 nginx ];
-
-  services.traefik = {
-
-    dynamicConfigOptions = lib.mkIf (config.networking.hostName == "galactica") {
-      http = {
-        serversTransports = {
-          kanidm-backend = {
-            insecureSkipVerify = true;
+  
+  # Configuração do Traefik para proxy reverso do Kanidm
+  services.traefik.dynamicConfigOptions = lib.mkIf (hostName == "galactica") {
+    http = {
+      serversTransports = {
+        kanidm-backend = {
+          insecureSkipVerify = true; # Kanidm rodando sem TLS localmente
+        };
+      };
+      routers = {
+        KN-IAM = {
+          rule = "Host(`iam.wcbrpar.com`) || Host(`iam.redcom.digital`)";
+          service = "kanidm-service";
+          entrypoints = ["websecure"];
+          tls = {
+            certResolver = "cloudflare";
+          };
+          middlewares = ["kanidm-headers"];
+        };
+      };
+      
+      services = {
+        kanidm-service = {
+          loadBalancer = {
+            servers = [{ url = "https://galactica.wcbrpar.com:8443 "; }];
+            passHostHeader = true;
+            serversTransport = "kanidm-backend";
           };
         };
-        routers = {
-          KN-ALL = {
-            rule = "Host(`iam.wcbrpar.com`) || Host(`iam.redcom.digital`)";
-            service = "kanidm-service";
-            entrypoints = ["websecure"];
-            tls = {
-              certResolver = "cloudflare";
+      };
+      
+      middlewares = {
+        "kanidm-headers" = {
+          headers = {
+            customRequestHeaders = {
+              X-Forwarded-Proto = "https";
+              X-Forwarded-Host = "{host}";
+              X-Real-IP = "$remote_addr";
+              X-Forwarded-For = "$proxy_add_x_forwarded_for";
             };
-            middlewares = ["fix-kanidm-headers"];
-          };
-        };
-
-        services = {
-          kanidm-service = {
-            loadBalancer = {
-              servers = [{ url = "https://galactica.wcbrpar.com:8443"; }];
-              passHostHeader = true;
-              serversTransport = "kanidm-backend";
-            };
-          };
-        };
-
-        middlewares = {
-          "fix-kanidm-headers" = {
-            headers = {
-              customRequestHeaders = {
-                X-Forwarded-Proto = "https";
-                X-Forwarded-Host = "iam.wcbrpar.com";
-                X-Real-IP = "$remote_addr";
-              };
-              sslRedirect = false;
-            };
-          };
-          "strip-kanidm-prefix" = {
-            stripPrefix = {
-              prefixes = ["/ui"];
-              forceSlash = false;
-            };
+            sslRedirect = false;
+            # Headers de segurança importantes
+            stsSeconds = 31536000;
+            stsIncludeSubdomains = true;
+            stsPreload = true;
           };
         };
       };
     };
   };
-
+  
   services.kanidm = {
     package = pkgs.kanidm_1_9;
-
+    
     client = {
       enable = true;
       settings = {
-        uri = "https://iam.wcbrpar.com";
+        uri = "https://galactica.wcbrpar.com:8443";
         verify_ca = false;
         verify_hostnames = false;
       };
     };
-
-    server = lib.mkIf (config.networking.hostName == "galactica") {
+    
+    server = lib.mkIf (hostName == "galactica") {
       enable = true;
       settings = {
         domain = "wcbrpar.com";
         origin = "https://iam.wcbrpar.com";
-        bindaddress = "0.0.0.0:8443";
-        ldapbindaddress = "0.0.0.0:636";
-        tls_chain = "/var/lib/acme/iam.wcbrpar.com/cert.pem";
-        tls_key = "/var/lib/acme/iam.wcbrpar.com/key.pem";
+        # Bind apenas em localhost - Traefik faz o proxy
+        bindaddress = "127.0.0.1:8443";
+        ldapbindaddress = "127.0.0.1:636";
+        # Remove TLS - Traefik gerencia certificados
+        # tls_chain e tls_key removidos
       };
     };
-
+    
     unix = {
       settings = {
         hsm_type = "soft";
@@ -97,53 +95,39 @@
         kanidm.pam_allowed_login_groups = [ "users" "admins" ];
       };
     };
-
-    enablePam = lib.mkIf (config.networking.hostName == "galactica") true;
-
-    provision = lib.mkIf (config.networking.hostName == "galactica") {
+    
+    enablePam = lib.mkIf (hostName == "galactica") true;
+    
+    provision = lib.mkIf (hostName == "galactica") {
       enable = true;
       autoRemove = true;
       groups = {
         "admins" = { };
         "users" = { };
+        "traefik_dashboard_access" = { }; # Grupo para controle de acesso
       };
       persons = {
         "wjjunyor" = {
           displayName = "WQJ";
           legalName = "Walter Queiroz Jr";
           mailAddresses = [ "walter@wcbrpar.com" ];
-          groups = [ "admins" "users" ];
+          groups = [ "admins" "users" "traefik_dashboard_access" ];
         };
       };
-
-      systems = {
-        oauth2 = {
-          "traefik" = {
-            # Atributos essenciais do cliente
-            displayName = "Traefik Dashboard";
-            originUrl = "https://traefik.wcbrpar.com/oidc/callback";
-          
-            # Define como um cliente público (usando PKCE)
-            public = true;
-          
-            # Mapeia os scopes padrão do OIDC
-            scopeMaps = {
-              "openid" = [ "authenticated" ];
-              "profile" = [ "authenticated" ];
-              "email" = [ "authenticated" ];
-            };
-          };
-        };
-      };
-
+      
+      # Configuração OAuth2 movida para modules/reverse-proxy/default.nix
     };
   };
-
+  
   users.users.kanidm = {
     isSystemUser = true;
     extraGroups = [ "traefik" "acme" "nginx" ];
     group = "kanidm";
   };
   users.groups.kanidm = { };
-
+  
+  # Garantir diretórios necessários
+  systemd.tmpfiles.rules = lib.mkIf (hostName == "galactica") [
+    "d /var/lib/kanidm 0750 kanidm kanidm -"
+  ];
 }
