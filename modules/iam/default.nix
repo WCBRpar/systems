@@ -121,8 +121,7 @@
           "traefik" = {
             # Atributos essenciais do cliente
             displayName = "Traefik Dashboard";
-            originUrl = "https://traefik.wcbrpar.com";
-            redirectUrls = [ "https://traefik.wcbrpar.com/oidc/callback" ];
+            originUrl = "https://traefik.wcbrpar.com/oidc/callback";
           
             # Define como um cliente público (usando PKCE)
             public = true;
