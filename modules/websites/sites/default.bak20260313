@@ -1,0 +1,273 @@
+# modules/websites/sites/default.nix
+{ config, inputs, lib, pkgs, ... }:
+
+let
+  inherit (lib) mkOption mkEnableOption types mkIf filterAttrs mapAttrs' mkDefault
+                attrNames nameValuePair listToAttrs mapAttrsToList strings trivial;
+  sources = import ../../../npins;
+  wp4nix = pkgs.callPackage inputs.wp4nix {};
+
+  countEnabledSites = sites:
+    lib.length (lib.attrNames (lib.filterAttrs (_: site: site.enable) sites));
+
+  enabledWpSites = filterAttrs (_: site: site.enable && site.siteType == "wordpress") config.mkSite;
+  enabledStaticSites = filterAttrs (_: site: site.enable && site.siteType == "estatico") config.mkSite;
+
+  phpOptionsToAttrs = phpOptionsStr:
+    let
+      lines = lib.filter (line: line != "") (lib.splitString "\n" phpOptionsStr);
+      processLine = line:
+        let
+          parts = lib.splitString "=" line;
+          trimmedParts = map (s: lib.trim s) parts;
+        in
+          if lib.length trimmedParts == 2 then
+            { name = "php_value[${lib.elemAt trimmedParts 0}]"; value = lib.elemAt trimmedParts 1; }
+          else
+            null;
+      validLines = lib.filter (x: x != null) (map processLine lines);
+    in
+      lib.listToAttrs validLines;
+
+in {
+  options.mkSite = mkOption {
+    type = types.attrsOf (types.submodule ({ name, config, ... }: {
+      options = {
+        enable = mkEnableOption "Habilitar este site específico";
+        siteType = mkOption {
+          type = types.enum [ "wordpress" "estatico" ];
+          default = "wordpress";
+          description = "Tipo da implementação do site";
+        };
+        siteFQDN = mkOption {
+          type = types.str;
+          description = "Domínio completo (FQDN) do site";
+        };
+        proxy = {
+          enable = mkOption {
+            type = types.bool;
+            default = true;
+            description = "Habilitar configuração de proxy reverso (Traefik)";
+          };
+          host = mkOption {
+            type = types.str;
+            default = "galactica";
+            description = "Hostname onde o Traefik está rodando";
+          };
+          backendUrl = mkOption {
+            type = types.str;
+            default = "https://pegasus.wcbrpar.com:7770";
+            description = "URL do backend para o Traefik (usado apenas para WordPress; para estáticos a porta é 7780)";
+          };
+        };
+        wordpress = {
+          package = mkOption {
+            type = types.package;
+            default = pkgs.wordpress;
+            description = "Pacote do WordPress a ser utilizado";
+          };
+          databaseName = mkOption {
+            type = types.str;
+            default = let
+              firstPart = builtins.head (lib.splitString "." config.siteFQDN);
+            in "wpdb_${lib.toLower firstPart}";
+            description = "Nome do banco de dados (padrão: wpdb_<primeiro componente do domínio>)";
+          };
+          themes = mkOption {
+            type = types.attrsOf types.package;
+            default = {};
+            description = "Temas WordPress";
+          };
+          plugins = mkOption {
+            type = types.attrsOf types.package;
+            default = {};
+            description = "Plugins WordPress";
+          };
+          languages = mkOption {
+            type = types.listOf types.package;
+            default = [ wp4nix.languages.pt_BR ];
+            description = "Pacotes de idiomas WordPress";
+          };
+          settings = mkOption {
+            type = types.attrs;
+            default = {};
+            description = "Configurações WP_SETTINGS";
+          };
+          extraConfig = mkOption {
+            type = types.lines;
+            default = "";
+            description = "Configurações extras do wp-config.php";
+          };
+          phpOptions = mkOption {
+            type = types.lines;
+            default = ''
+              upload_max_filesize = 128M
+              post_max_size = 128M
+              memory_limit = 256M
+            '';
+            description = "Opções extras do PHP para o pool (formato: chave = valor)";
+          };
+          poolConfig = mkOption {
+            type = types.attrs;
+            default = {
+              "pm" = "dynamic";
+              "pm.max_children" = 64;
+              "pm.max_requests" = 500;
+              "pm.max_spare_servers" = 4;
+              "pm.min_spare_servers" = 2;
+              "pm.start_servers" = 2;
+            };
+            description = "Configuração do pool PHP-FPM (sem as opções PHP, que são tratadas separadamente)";
+          };
+        };
+        siteRoot = mkOption {
+          type = types.path;
+          default = "/var/lib/www/${config.siteFQDN}";
+          description = "Caminho raiz do conteúdo estático";
+        };
+      };
+    }));
+    default = {};
+    description = "Sites configurados para servir";
+  };
+
+  config = mkIf (countEnabledSites config.mkSite > 0) (lib.mkMerge [
+    {
+      assertions = mapAttrsToList (name: site: {
+        assertion = site.enable -> site.siteFQDN != "";
+        message = "O site '${name}' está habilitado mas não possui siteFQDN definido.";
+      }) config.mkSite;
+    }
+
+    # Traefik (galactica)
+    {
+      
+      firewall.allowedTCPPorts = lib.mkIf (config.networking.hostName == "pegasus") [ 7770 7780 ];
+
+      services.traefik.dynamicConfigOptions = lib.mkIf (config.networking.hostName == "galactica") {
+        http = {
+          routers = listToAttrs (mapAttrsToList (id: site:
+            let
+              routerName = if site.siteType == "wordpress"
+                            then "WP-${strings.sanitizeDerivationName id}"
+                            else "ST-${strings.sanitizeDerivationName id}";
+              serviceName = if site.siteType == "wordpress"
+                            then "wordpress-server"
+                            else "website-server";
+            in
+            nameValuePair routerName {
+              rule = "Host(`${site.siteFQDN}`)";
+              service = serviceName;
+              entrypoints = ["websecure"];
+              tls.certResolver = "cloudflare";
+            }
+          ) (filterAttrs (_: site: site.enable && site.proxy.enable) config.mkSite));
+          services = {
+            "wordpress-server" = {
+              loadBalancer = {
+                servers = [{ url = "http://pegasus.wcbrpar.com:7770"; }];
+                passHostHeader = true;
+              };
+            };
+            "website-server" = {
+              loadBalancer = {
+                servers = [{ url = "http://pegasus.wcbrpar.com:7780"; }];
+                passHostHeader = true;
+              };
+            };
+          };
+        };
+      };
+    }
+
+    # WordPress (pegasus)
+    (lib.mkIf (lib.hasPrefix "pegasus" config.networking.hostName) {
+      services.wordpress.webserver = "nginx";
+      services.wordpress.sites = listToAttrs (mapAttrsToList (id: site:
+        nameValuePair site.siteFQDN {
+          package = site.wordpress.package;
+          database = {
+            createLocally = true;
+            name = site.wordpress.databaseName;
+          };
+          themes = site.wordpress.themes;
+          plugins = site.wordpress.plugins;
+          languages = site.wordpress.languages;
+          settings = {
+            WP_DEFAULT_THEME = mkDefault "twentytwentythree";
+            WP_SITEURL = "https://${site.siteFQDN}";
+            WP_HOME = "https://${site.siteFQDN}";
+            WPLANG = "pt_BR";
+            AUTOMATIC_UPDATER_DISABLED = true;
+            FORCE_SSL_ADMIN = true;
+            WP_MAIL_FROM = mkDefault "gcp-devops@wcbrpar.com";
+          } // site.wordpress.settings;
+          extraConfig = ''
+            if (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https') {
+              $_SERVER['HTTPS'] = 'on';
+            }
+          '' + site.wordpress.extraConfig;
+          poolConfig = site.wordpress.poolConfig // (phpOptionsToAttrs site.wordpress.phpOptions);
+
+          virtualHost = {
+            root = "${site.wordpress.package}/share/wordpress";
+            enableSSL = false;
+            listen = [ { addr = "0.0.0.0"; port = 7770; ssl = false; } ];
+            # Opções exigidas pelo módulo wp4nix, mesmo com SSL desabilitado
+            sslServerCert = "";
+            sslCertificate = "";
+            sslCertificateKey = "";
+            useACMEHost = null;
+
+            robotsEntries = ''
+              User-agent: *
+              Disallow: /feed/
+              Disallow: /trackback/
+              Disallow: /wp-admin/
+              Disallow: /wp-content/
+              Disallow: /wp-includes/
+              Disallow: /xmlrpc.php
+              Disallow: /wp-
+            '';
+
+            locations = {
+              "~* (.*\\.pdf)" = {
+                extraConfig = ''
+                  types { application/pdf .pdf; }
+                  default_type application/pdf;
+                  more_set_headers Content-Disposition "inline" always;
+                  more_set_headers X-Content-Type-Options "nosniff";
+                '';
+              };
+              "~ \\.php$" = {
+                extraConfig = ''
+                  fastcgi_pass unix:${config.services.phpfpm.pools."wordpress-${site.siteFQDN}".socket};
+                  include ${pkgs.nginx}/conf/fastcgi.conf;
+                  fastcgi_param HTTP_X_FORWARDED_PROTO $http_x_forwarded_proto;
+                  fastcgi_param HTTP_X_FORWARDED_FOR $proxy_add_x_forwarded_for;
+                  fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+                '';
+              };
+            };
+          };
+        }
+      ) enabledWpSites);
+    })
+
+    # Sites estáticos (pegasus)
+    (lib.mkIf (lib.hasPrefix "pegasus" config.networking.hostName) {
+      services.nginx.virtualHosts = listToAttrs (mapAttrsToList (id: site:
+        nameValuePair site.siteFQDN {
+          listen = [ { addr = "0.0.0.0"; port = 7780; ssl = false; } ];
+          root = site.siteRoot;
+          locations."/" = {
+            index = "index.html index.htm";
+            tryFiles = "$uri $uri/ =404";
+          };
+        }
+      ) enabledStaticSites);
+      systemd.tmpfiles.rules = mapAttrsToList (_: site: "d ${site.siteRoot} 0755 root root -") enabledStaticSites;
+    })
+  ]);
+
+}

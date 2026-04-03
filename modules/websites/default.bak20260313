@@ -1,0 +1,133 @@
+{
+  config,
+  inputs,
+  lib,
+  pkgs,
+  ...
+}:
+
+let
+  wp4nix = pkgs.callPackage inputs.wp4nix {};
+
+in
+
+{
+
+  imports = [ ./sites ];
+
+  environment.systemPackages = with pkgs; [php];
+  environment.variables.WP_VERSION = "6.9";
+
+  mkSite = {
+    "RED" = {
+      enable = true;
+      siteFQDN = "redcom.digital";
+      siteType = "wordpress";
+      wordpress = {
+        themes = {
+          inherit (pkgs.wordpressPackages.themes) twentytwentythree;
+          inherit (wp4nix.themes) astra;
+        };
+        plugins = {
+          inherit (wp4nix.plugins)
+            add-widget-after-content
+            antispam-bee
+            async-javascript
+            code-syntax-block
+            custom-post-type-ui
+            disable-xml-rpc
+            google-site-kit
+            gutenberg
+            official-facebook-pixel
+            opengraph
+            static-mail-sender-configurator
+            wp-user-avatars;
+        };
+        settings = {
+          WP_DEBUG = true;
+          WP_DEBUG_LOG = true;
+        };
+      };
+    };
+
+    "ADF" = {
+      enable = true;
+      siteFQDN = "adufms.org.br";
+      siteType = "wordpress";
+      wordpress = {
+        plugins = {
+          inherit (pkgs.wordpressPackages.plugins)
+            co-authors-plus
+            simple-mastodon-verification
+            surge
+            wordpress-seo
+            webp-converter-for-media;
+          inherit (wp4nix.plugins)
+            antispam-bee
+            async-javascript
+            code-syntax-block
+            custom-post-type-ui
+            disable-xml-rpc
+            google-site-kit
+	          notification
+	          official-facebook-pixel
+            opengraph
+	          rss-importer
+	          # simple-popup-block
+            static-mail-sender-configurator
+            webp-express
+	          # wp-popups-lite
+            wpforms-lite
+            wp-gdpr-compliance
+            wp-user-avatars
+	          wp-rss-aggregator
+            wp-swiper;
+        };
+        themes = {
+          inherit (pkgs.wordpressPackages.themes) twentytwentythree twentytwentyfive;
+          inherit (wp4nix.themes) astra;
+        };
+        settings = {
+          FORCE_SSL_ADMIN = false;
+        };
+      };
+    };
+
+    "CMS" = {
+      enable = true;
+      siteFQDN = "cutms.org.br";
+      siteType = "wordpress";
+      wordpress = {
+        plugins = {
+          inherit (pkgs.wordpressPackages.plugins)
+            co-authors-plus
+            simple-mastodon-verification
+            surge
+            wordpress-seo
+            webp-converter-for-media;
+          inherit (wp4nix.plugins)
+            antispam-bee
+            async-javascript
+            google-site-kit
+            official-facebook-pixel
+            wpforms-lite;
+        };
+        themes = {
+          inherit (pkgs.wordpressPackages.themes) twentytwentythree twentytwentyfive;
+          inherit (wp4nix.themes) astra;
+        };
+        settings = {
+          FORCE_SSL_ADMIN = false;
+        };
+      };
+    };
+
+    "STR" = {
+      enable = true;
+      siteFQDN = "setra.com.br";
+      siteType = "estatico";
+      proxy.enable = true;
+    };
+  };
+}
+
