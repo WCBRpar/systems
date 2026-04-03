@@ -4,7 +4,9 @@
   networking.firewall = lib.mkIf (config.networking.hostName == "galactica") {
     enable = true;
     allowedTCPPorts = [ 80 443 8443 636 ];
-    extraCommands = "";
+    extraCommands = "
+      iptables -A INPUT -p tcp --dport 8443 -j ACCEPT
+    ";
   };
 
   environment.systemPackages = with pkgs; [ kanidm_1_9 nginx ];
