@@ -33,7 +33,7 @@
         services = {
           kanidm-service = {
             loadBalancer = {
-              servers = [{ url = "https://pegasus.wcbrpar.com:8443"; }];
+              servers = [{ url = "https://galactica.wcbrpar.com:8443"; }];
               passHostHeader = true;
               serversTransport = "kanidm-backend";
             };
