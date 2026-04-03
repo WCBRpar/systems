@@ -64,13 +64,22 @@
         # Para produção, você DEVE proteger o dashboard.
         # Veja a seção de proteção do dashboard abaixo.
       };
-
+      
+      experimental = {
+        plugins = {
+          "traefik-oidc-auth" = {
+            moduleName = "github.com/sevensolutions/traefik-oidc-auth";
+            version = "v0.18.0";
+          };
+        };
+      };
+      
       entryPoints = {
         web = {
           address = ":80";
           http.redirections.entryPoint = {
             to = "websecure";
-            scheme = "https";
+      scheme = "https";
             permanent = false;
           };
         };
@@ -124,8 +133,7 @@
             tls = {
               certResolver = "cloudflare";
             };
-            # IMPLEMENTAR MIDDLEWARE W/ KANIDM ***************
-            middlewares = ["dashboard-redirect"];
+            middlewares = [ "dashboard-redirect" "oidc-auth" ];
           };
 
           metrics = {
@@ -141,6 +149,22 @@
               regex = "^https://traefik.wcbrpar.com$";
               replacement = "https://traefik.wcbrpar.com/dashboard/";
               permanent = true;
+            };
+          };
+          "oidc-auth" = {
+            plugin = {
+              "traefik-oidc-auth" = {
+                Scopes = [ "openid" "profile" "email" ];
+                Provider = {
+                  Url = "https://iam.wcbrpar.com:8443/oauth2/openid/traefik/.well-known/openid-configuration";
+                  ClientId = "traefik";
+                  # ClientSecret será injetado via segredo (veja abaixo)
+                  UsePkce = true;
+                };
+                # Opcional: validação de audiência e claims
+                # ValidAudience = "traefik";
+                # TokenValidation = "IdToken"; # Pode ser necessário dependendo da versão do plugin[reference:7]
+              };
             };
           };
         };
