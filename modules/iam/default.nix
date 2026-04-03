@@ -121,14 +121,14 @@
           "traefik" = {
             # Atributos essenciais do cliente
             displayName = "Traefik Dashboard";
-            origin = "https://traefik.wcbrpar.com";
-            redirect_urls = [ "https://traefik.wcbrpar.com/oidc/callback" ];
+            originUrl = "https://traefik.wcbrpar.com";
+            redirectUrls = [ "https://traefik.wcbrpar.com/oidc/callback" ];
           
             # Define como um cliente público (usando PKCE)
             public = true;
           
             # Mapeia os scopes padrão do OIDC
-            scope_map = {
+            scopeMap = {
               "openid" = [ "authenticated" ];
               "profile" = [ "authenticated" ];
               "email" = [ "authenticated" ];
