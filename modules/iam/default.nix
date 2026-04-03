@@ -127,7 +127,7 @@
             public = true;
           
             # Mapeia os scopes padrão do OIDC
-            scopeMap = {
+            scopeMaps = {
               "openid" = [ "authenticated" ];
               "profile" = [ "authenticated" ];
               "email" = [ "authenticated" ];
