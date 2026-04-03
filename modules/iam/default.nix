@@ -120,7 +120,7 @@
         oauth2 = {
           "traefik" = {
             # Atributos essenciais do cliente
-            displayname = "Traefik Dashboard";
+            displayName = "Traefik Dashboard";
             origin = "https://traefik.wcbrpar.com";
             redirect_urls = [ "https://traefik.wcbrpar.com/oidc/callback" ];
           
