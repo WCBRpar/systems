@@ -7,7 +7,7 @@
     extraCommands = "";
   };
 
-  environment.systemPackages = with pkgs; [ kanidm_1_9 nginx jq extractCertScript ];
+  environment.systemPackages = with pkgs; [ kanidm_1_9 nginx ];
 
   services.traefik = {
 
