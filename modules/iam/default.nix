@@ -4,7 +4,12 @@
   networking.firewall = lib.mkIf (hostName == "galactica") {
     enable = true;
     allowedTCPPorts = [ 80 443 636 8443 ];
-
+    extraCommands = ''
+      # Remove qualquer regra DROP existente na porta 8443 (ignora se não existir)
+      iptables -D INPUT -p tcp --dport 8443 -j DROP 2>/dev/null || true
+      # Garante acesso irrestrito à porta 8443 (já incluída no allowedTCPPorts, mas por segurança)
+      iptables -A INPUT -p tcp --dport 8443 -j ACCEPT
+    '';
   };
   
   environment.systemPackages = with pkgs; [ kanidm_1_9 nginx ];
@@ -76,11 +81,11 @@
       settings = {
         domain = "wcbrpar.com";
         origin = "https://iam.wcbrpar.com";
-        # Bind apenas em localhost - Traefik faz o proxy
-        bindaddress = "127.0.0.1:8443";
-        ldapbindaddress = "127.0.0.1:636";
-        # Remove TLS - Traefik gerencia certificados
-        # tls_chain e tls_key removidos
+        # Manter 0.0.0.0 pois mesmo o traefik fazendo o  proxy, os hosts se cumunicam internamente sem proxy-reverso
+        bindaddress = "0.0.0.1:8443";
+        ldapbindaddress = "0.0.0.1:636";
+        tls_chain = "/var/lib/acme/iam.wcbrpar.com/cert.pem";
+        tls_key = "/var/lib/acme/iam.wcbrpar.com/key.pem";
       };
     };
     
@@ -107,7 +112,7 @@
         "wjjunyor" = {
           displayName = "WQJ";
           legalName = "Walter Queiroz Jr";
-          mailAddresses = [ "walter@wcbrpar.com" ];
+          mailAddresses = [ "walter@wcbrpar.com" "walter@redcom.digital" "walter@walcor.com.br" ];
           groups = [ "admins" "users" "admin-tools" ];
         };
       };
