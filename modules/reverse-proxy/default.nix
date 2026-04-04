@@ -16,14 +16,6 @@
       owner = "traefik";
       group = "traefik";
     };
-    
-    # Client secret para autenticação OAuth2 com Kanidm
-    kanidm-traefik-secret = lib.mkIf (hostName == "galactica") {
-      file = ../../secrets/kanidmTraefikSecret.age;
-      mode = "600";
-      owner = "traefik";
-      group = "traefik";
-    };
   };
 
 
@@ -32,7 +24,6 @@
     dataDir = "/var/lib/traefik"; # Diretório para dados persistentes do Traefik (como acme.json)
     environmentFiles = [ 
       config.age.secrets.cloudflare-api-key.path 
-      config.age.secrets.kanidm-traefik-secret.path
     ];
     group = "nginx";
 
@@ -166,15 +157,18 @@
                 Provider = {
                   Url = "https://iam.wcbrpar.com/oauth2/openid/traefik-dashboard/.well-known/openid-configuration";
                   ClientId = "traefik-dashboard";
-                  # ClientSecret injetado via variável de ambiente
-                  ClientSecretEnv = "KANIDM_TRAEFIK_SECRET";
-                  UsePkce = false; # PKCE não necessário para cliente confidencial
+                  UsePkce = true; 
                   InsecureSkipVerifyTls = false;
                 };
                 
                 # Validação de claims/grupos
                 Authorization = {
-                  Groups = [ "admin-tools" ];
+                  AssertClaims = [
+                    {
+                      Name = "groups"; # Nome da claim que será verificada
+                      AnyOf = [ "admin-tools" ]; # Valor que ela deve conter
+                    }
+                  ];
                 };
                 
                 # Headers para passar informações do usuário
@@ -199,29 +193,10 @@
   services.kanidm.provision.systems.oauth2 = lib.mkIf (hostName == "galactica") {
     "traefik-dashboard" = {
       displayName = "Traefik Dashboard";
-      origin = "https://traefik.wcbrpar.com";
-      
-      # Cliente CONFIDENCIAL - requer client secret
+      originUrl = "https://traefik.wcbrpar.com";
+      originLanding = "https://traefik.wcbrpar.com";
       public = false;
       
-      redirect_uris = [ 
-        "https://traefik.wcbrpar.com/oauth2/callback"
-      ];
-      
-      scope_maps = {
-        "openid" = [ "authenticated" ];
-        "profile" = [ "authenticated" ];
-        "email" = [ "authenticated" ];
-        "groups" = [ "authenticated" ];
-      };
-      
-      # Mapeamento de claims para grupos
-      claim_map = {
-        "groups" = {
-          "path" = "member_of";
-          "values" = [ "admin-tools" ];
-        };
-      };
     };
   };
 
