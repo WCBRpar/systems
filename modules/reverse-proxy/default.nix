@@ -29,7 +29,7 @@
 
     staticConfigOptions = {
       log = {
-        level = "INFO"; 
+        level = "DEBUG"; 
         filePath = "/var/log/traefik/traefik.log"; # Logs do Traefik
       };
 
@@ -65,14 +65,13 @@
 
       api = {
         dashboard = true;
-        insecure = true; # Dashboard protegido por middleware OIDC
+        insecure = false; # Dashboard protegido por middleware OIDC
       };
       
       experimental = {
-        plugins = {
+        localPlugins = {
           "traefik-oidc-auth" = {
             moduleName = "github.com/sevensolutions/traefik-oidc-auth";
-            version = "v0.18.0";
           };
         };
       };
@@ -155,18 +154,25 @@
                 
                 Scopes = [ "openid" "profile" "email" "groups" ];
                 Provider = {
-                  Url = "https://iam.wcbrpar.com/oauth2/openid/traefik-dashboard/.well-known/openid-configuration";
+                  Url = "https://iam.wcbrpar.com/oauth2/openid/traefik-dashboard/";
                   ClientId = "traefik-dashboard";
                   UsePkce = true; 
                   InsecureSkipVerifyTls = false;
                 };
                 
+                ClaimMappings = {
+                  Email = "mail_primary";
+                  Name = "displayname";
+                  Groups = "groups";
+                };
+                
+                LogLevel = "debug";
                 # Validação de claims/grupos
                 Authorization = {
                   AssertClaims = [
                     {
                       Name = "groups"; # Nome da claim que será verificada
-                      AnyOf = [ "admin-tools" ]; # Valor que ela deve conter
+                      AnyOf = [ "admin-tools@wcbrpar.com" "admins@wcbrpar.com" ]; # Valor que ela deve conter
                     }
                   ];
                 };
@@ -177,7 +183,7 @@
                     Set = {
                       X-Forwarded-User = "{user}";
                       X-Forwarded-Groups = "{groups}";
-                      X-Forwarded-Email = "{email}";
+                      X-Forwarded-Email = "{email}"; 
                     };
                   };
                 };
@@ -193,10 +199,26 @@
   services.kanidm.provision.systems.oauth2 = lib.mkIf (hostName == "galactica") {
     "traefik-dashboard" = {
       displayName = "Traefik Dashboard";
-      originUrl = "https://traefik.wcbrpar.com";
-      originLanding = "https://traefik.wcbrpar.com";
-      public = false;
-      
+      originUrl = [
+        "https://traefik.wcbrpar.com/oauth2/callback"
+        "https://traefik.wcbrpar.com/oidc/callback"
+      ];
+      originLanding = "https://traefik.wcbrpar.com/dashboard/";
+      imageFile = ../../media-assets/iam-auth-badges/traefik-auth.svg;
+      public = true;
+      scopeMaps = {
+        "admins" = [ "openid" "profile" "email" "groups" ];
+        "admin-tools" = [ "openid" "profile" "email" "groups" ];
+      }; 
+      claimMaps = {
+        "groups" = {
+          joinType = "array";
+          valuesByGroup = {
+            "admins" = [ "admins" ];
+            "admin-tools" = [ "admin-tools" ];
+          };
+        };
+      };
     };
   };
 

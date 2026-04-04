@@ -79,6 +79,7 @@
     server = lib.mkIf (hostName == "galactica") {
       enable = true;
       settings = {
+        log_level = "debug";
         domain = "wcbrpar.com";
         origin = "https://iam.wcbrpar.com";
         # Manter 0.0.0.0 pois mesmo o traefik fazendo o  proxy, os hosts se cumunicam internamente sem proxy-reverso
