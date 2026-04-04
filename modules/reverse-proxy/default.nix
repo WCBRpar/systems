@@ -199,7 +199,7 @@
   services.kanidm.provision.systems.oauth2 = lib.mkIf (hostName == "galactica") {
     "traefik-dashboard" = {
       displayName = "Traefik Dashboard";
-      origin = "https://traefik.wcbrpar.com";
+      originUrl = "https://traefik.wcbrpar.com";
       
       # Cliente CONFIDENCIAL - requer client secret
       public = false;
@@ -208,7 +208,7 @@
         "https://traefik.wcbrpar.com/oauth2/callback"
       ];
       
-      scope_maps = {
+      scopeMaps = {
         "openid" = [ "authenticated" ];
         "profile" = [ "authenticated" ];
         "email" = [ "authenticated" ];
@@ -216,7 +216,7 @@
       };
       
       # Mapeamento de claims para grupos
-      claim_map = {
+      claimMaps = {
         "groups" = {
           "path" = "member_of";
           "values" = [ "admin-tools" ];
