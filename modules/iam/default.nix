@@ -1,12 +1,10 @@
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, hostName, ... }:
 
-let
-  hostName = config.networking.hostName;
-in
 {
   networking.firewall = lib.mkIf (hostName == "galactica") {
     enable = true;
     allowedTCPPorts = [ 80 443 636 8443 ];
+
   };
   
   environment.systemPackages = with pkgs; [ kanidm_1_9 nginx ];
@@ -93,29 +91,27 @@ in
         home_attr = "uuid";
         home_prefix = "/home/";
         kanidm.pam_allowed_login_groups = [ "users" "admins" ];
+        enablePam = lib.mkIf (hostName == "galactica") true;
       };
     };
-    
-    enablePam = lib.mkIf (hostName == "galactica") true;
-    
+
     provision = lib.mkIf (hostName == "galactica") {
       enable = true;
       autoRemove = true;
       groups = {
         "admins" = { };
         "users" = { };
-        "traefik_dashboard_access" = { }; # Grupo para controle de acesso
+        "admin-tools" = { }; # Grupo para controle de acesso
       };
       persons = {
         "wjjunyor" = {
           displayName = "WQJ";
           legalName = "Walter Queiroz Jr";
           mailAddresses = [ "walter@wcbrpar.com" ];
-          groups = [ "admins" "users" "traefik_dashboard_access" ];
+          groups = [ "admins" "users" "admin-tools" ];
         };
       };
       
-      # Configuração OAuth2 movida para modules/reverse-proxy/default.nix
     };
   };
   

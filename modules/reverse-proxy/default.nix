@@ -2,15 +2,14 @@
   config,
   lib,
   pkgs,
+  hostName,
   ...
 }: {
 
-  let
-    hostName = config.networking.hostName;
-  in
 
-  #Segredos
-  age.secrets = {
+  #Segredos Necessários para o funcinamento
+    age.secrets = {
+    # Client secret para API da Cloudflare
     cloudflare-api-key = {
       file = ../../secrets/cloudflareApiKey.age;
       mode = "600";
@@ -39,7 +38,7 @@
 
     staticConfigOptions = {
       log = {
-        level = "INFO"; # Reduzido de TRACE para INFO em produção
+        level = "INFO"; 
         filePath = "/var/log/traefik/traefik.log"; # Logs do Traefik
       };
 
@@ -65,14 +64,13 @@
         };
       };
 
-      # Tracing (OpenTelemetry) - opcional, pode ser removido se não usar
-      # tracing = {
-      #   otlp = {
-      #     http = {
-      #       endpoint = "http://localhost:4318";
-      #     };
-      #   };
-      # };
+      tracing = {
+        otlp = {
+          http = {
+            endpoint = "http://localhost:4318";
+          };
+        };
+      };
 
       api = {
         dashboard = true;
@@ -176,7 +174,7 @@
                 
                 # Validação de claims/grupos
                 Authorization = {
-                  Groups = [ "traefik_dashboard_access" ];
+                  Groups = [ "admin-tools" ];
                 };
                 
                 # Headers para passar informações do usuário
@@ -221,7 +219,7 @@
       claim_map = {
         "groups" = {
           "path" = "member_of";
-          "values" = [ "traefik_dashboard_access" ];
+          "values" = [ "admin-tools" ];
         };
       };
     };
