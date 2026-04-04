@@ -6,9 +6,9 @@
     allowedTCPPorts = [ 80 443 636 8443 ];
     extraCommands = ''
       # Remove qualquer regra DROP existente na porta 8443 (ignora se não existir)
-      iptables -D INPUT -p tcp --dport 8443 -j DROP 2>/dev/null || true
+      # iptables -D INPUT -p tcp --dport 8443 -j DROP 2>/dev/null || true
       # Garante acesso irrestrito à porta 8443 (já incluída no allowedTCPPorts, mas por segurança)
-      iptables -A INPUT -p tcp --dport 8443 -j ACCEPT
+      # iptables -A INPUT -p tcp --dport 8443 -j ACCEPT
     '';
   };
   
@@ -37,7 +37,7 @@
       services = {
         kanidm-service = {
           loadBalancer = {
-            servers = [{ url = "https://galactica.wcbrpar.com:8443 "; }];
+            servers = [{ url = "https://galactica.wcbrpar.com:8443"; }];
             passHostHeader = true;
             serversTransport = "kanidm-backend";
           };
@@ -70,7 +70,7 @@
     client = {
       enable = true;
       settings = {
-        uri = "https://galactica.wcbrpar.com:8443";
+        uri = "https://iam.wcbrpar.com:8443";
         verify_ca = false;
         verify_hostnames = false;
       };
@@ -81,9 +81,9 @@
       settings = {
         domain = "wcbrpar.com";
         origin = "https://iam.wcbrpar.com";
-        # Bind apenas em localhost - Traefik faz o proxy
-        bindaddress = "127.0.0.1:8443";
-        ldapbindaddress = "127.0.0.1:636";
+        # Manter 0.0.0.0 pois mesmo o traefik fazendo o  proxy, os hosts se cumunicam internamente sem proxy-reverso
+        bindaddress = "0.0.0.0:8443";
+        ldapbindaddress = "0.0.0.0:636";
         tls_chain = "/var/lib/acme/iam.wcbrpar.com/cert.pem";
         tls_key = "/var/lib/acme/iam.wcbrpar.com/key.pem";
       };
