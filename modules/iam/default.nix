@@ -79,8 +79,8 @@
         # Bind apenas em localhost - Traefik faz o proxy
         bindaddress = "127.0.0.1:8443";
         ldapbindaddress = "127.0.0.1:636";
-        # Remove TLS - Traefik gerencia certificados
-        # tls_chain e tls_key removidos
+        tls_chain = "/var/lib/acme/iam.wcbrpar.com/cert.pem";
+        tls_key = "/var/lib/acme/iam.wcbrpar.com/key.pem";
       };
     };
     
@@ -107,7 +107,7 @@
         "wjjunyor" = {
           displayName = "WQJ";
           legalName = "Walter Queiroz Jr";
-          mailAddresses = [ "walter@wcbrpar.com" ];
+          mailAddresses = [ "walter@wcbrpar.com" "walter@redcom.digital" "walter@walcor.com.br" ];
           groups = [ "admins" "users" "admin-tools" ];
         };
       };
