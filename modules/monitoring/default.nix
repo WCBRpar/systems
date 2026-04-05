@@ -13,6 +13,14 @@ let
 in
 
 {
+  
+  age.secrets.grafana-securitykey = {
+    file = ../../secrets/grafanaSecurityKey.age;
+    owner = "grafana";
+    group = "grafana";
+    mode = "400";
+  };
+
   services = {
 
     traefik = lib.mkIf (hostName == "galactica") {
@@ -26,11 +34,16 @@ in
               tls = {
                 certResolver = "cloudflare";
               };
+              # middlewares = ["oidc-grafana"];
             };
           };
+
+          middlewares = {
+          };
+
           services = {
             grafana-service = {
-              loadbalancer = {
+              loadBalancer = {
                 servers = [{ url = "http://${toString config.services.grafana.settings.server.http_addr}:${toString config.services.grafana.settings.server.http_port}"; }];
                 passHostHeader = true;
               };
@@ -53,9 +66,55 @@ in
           domain = "grafana.wcbrpar.com";
           http_port = 3000;
           http_addr = "192.168.13.10";
+          root_url = "https://grafana.wcbrpar.com/";
         };
         security = {
+          # O segredo deve apontar para o PATH do arquivo descriptografado pelo agenix
           secret_key = config.age.secrets.grafana-securitykey.path;
+        };
+
+        # Desabilitar autenticação interna do Grafana pois o Grafana já faz isso via OIDC
+         auth = {
+           disable_login_form = true;
+           disable_signout_menu = true;
+         };
+
+        # Configuração OIDC Nativa (auth.generic_oauth)
+        "auth.generic_oauth" = {
+          enabled = true;
+          name = "Kanidm";
+          client_id = "grafana";
+          use_pkce = true;
+        
+          log_token_payload = true;  # Desativar na conclusão. 
+        
+          scopes = "openid profile email groups";
+          auth_url = "https://iam.wcbrpar.com/ui/oauth2";
+          token_url = "https://iam.wcbrpar.com/oauth2/token";
+          api_url = "https://iam.wcbrpar.com/oauth2/openid/grafana/userinfo";
+        
+          # login_attribute_name = "mail_primary";
+          login_attribute_path = "preferreed_username"; 
+          # email_attribute_name = "mail_primary";
+          email_attribute_path = "mail_primary";
+          name_attribute_name = "displayname";
+          # Mapeamento de Roles (Admin/Editor/Viewer) baseado nos grupos do Kanidm
+          role_attribute_path = "contains(groups[*], 'admins@wcbrpar.com') && 'Admin' || contains(groups[*], 'admin-tools@wcbrpar.com') && 'Admin' || 'Viewer'";
+          grafana_admin_attribute_path = "contains(groups[*], 'admin-tools@wcbrpar.com')";
+
+          allow_assign_grafana_admin = true;
+          oauth_allow_insecure_email_lookup = true;
+          force_user_sync = true; 
+          allow_sign_up = true;
+        };
+
+        # Configurar autenticação proxy para confiar nos headers do Grafana
+        "auth.proxy" = {
+          enabled = false;
+          # header_name = "X-Forwarded-User";
+          # header_property = "username";
+          # auto_sign_up = true;
+          # ldap_sync_ttl = "5m";
         };
       };
 
@@ -91,6 +150,34 @@ in
         }];
       };
     };
+    
+    # Configuração OAuth2 do Kanidm para o Grafana
+    kanidm = lib.mkIf (hostName == "galactica") {
+      provision.systems.oauth2 = {
+        "grafana" = {
+          displayName = "Grafana Monitoring";
+          originUrl = [
+            "https://grafana.wcbrpar.com/login/generic_oauth"
+          ];
+          originLanding = "https://grafana.wcbrpar.com";
+          imageFile = ../../media-assets/iam-auth-badges/grafana-auth.svg;
+          public = true;
+          scopeMaps = {
+            "admins" = [ "openid" "profile" "email" "groups" ];
+            "admin-tools" = [ "openid" "profile" "email" "groups" ];
+          };
+          # claimMaps = {
+          #   "groups" = {
+          #     valuesByGroup = {
+          #       "admins" = [ "admins@wcbrpar.com" ];
+          #       "admin-tools" = [ "admin-tools@wcbrpar.com" ];
+          #     };
+          #   };
+          # };
+        };
+      };
+    };
+
 
     # Loki - Servidor central de logs (apenas no galactica)
     loki = lib.mkIf (hostName == "galactica") {

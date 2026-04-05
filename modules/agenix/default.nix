@@ -30,7 +30,6 @@ in
     group = "nginx";
   };
   age.secrets.odoo-databasekey.file = ../../secrets/odooDatabaseKey.age;
-  age.secrets.grafana-securitykey.file = ../../secrets/grafanaSecurityKey.age;
 
   # Script bootstrap movido para cá
   systemd.services.ssh-host-key-bootstrap = {
