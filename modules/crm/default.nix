@@ -1,4 +1,4 @@
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, hostName, ... }:
 
 {
   services = {
@@ -6,8 +6,8 @@
       dynamicConfigOptions = {
         http = {
           routers = {
-            OD-ALL = {
-              rule = "Host(`crm.wcbrpar.com`) || Host(`crm.redcom.digital`)";
+            OD-WPR = {
+              rule = "Host(`crm.wcbrpar.com`) || Host(`crm.redcom.digital`) || Host(`redcom.digital`)";
               service = "odoo-service";
               entrypoints = ["websecure"];
               tls.certResolver = "cloudflare";
@@ -20,8 +20,15 @@
               tls.certResolver = "cloudflare";
               middlewares = ["dbfilter-adufms"];
             };
+            OD-P13 = {
+              rule = "Host(`pt13ms.redcom.digital`)";
+              service = "odoo-service";
+              entrypoints = ["websecure"];
+              tls.certResolver = "cloudflare";
+              middlewares = ["dbfilter-pt13ms"];
+            };
             OD-LONGPOLLING = {
-              rule = "(Host(`crm.wcbrpar.com`) || Host(`crm.redcom.digital`)) || Host(`novo.adufms.org.br`) && PathPrefix(`/longpolling`)";
+              rule = "(Host(`crm.wcbrpar.com`) || Host(`crm.redcom.digital`) || Host(`novo.adufms.org.br`) || Host(`pt13ms.redcom.digital`)) && PathPrefix(`/longpolling`)";
               service = "odoo-longpolling-service";
               entrypoints = ["websecure"];
               tls.certResolver = "cloudflare";
@@ -38,10 +45,18 @@
             dbfilter-adufms = {
               headers = {
                 customRequestHeaders = {
-                  X-Odoo-dbfilter = "^adufms$";
+                  X-Odoo-dbfilter = "^oddb-adufms$";
                 };
               };
             };
+            dbfilter-pt13ms = {
+              headers = {
+                customRequestHeaders = {
+                  X-Odoo-dbfilter = "^oddb-pt13ms$";
+                };
+              };
+            };
+ 
           };
           services = {
             odoo-service.loadBalancer.servers = [{ url = "http://pegasus.wcbrpar.com:8011"; }];
@@ -62,7 +77,6 @@
           db_host = "localhost";
           db_port = 5432;
           db_user = "odoo";
-          # Use age para a senha (comente a linha abaixo e descomente a segura)
           admin_password = builtins.readFile config.age.secrets.odoo-databasekey.path;
           db_password = builtins.readFile config.age.secrets.odoo-databasekey.path;
           list_db = true;                # Habilita gerenciador web (opcional)
@@ -158,4 +172,14 @@
       ];
     };
   };
+
+  systemd.services."odoo.service" = {
+    serviceConfig = {
+      Restart = "on-failure";
+      RestartSec = "5s";
+      StartLimitInterval = "200s";
+      StartLimitBurst = "5";
+    };
+  };
+
 }

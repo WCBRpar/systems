@@ -23,7 +23,7 @@
         };
       };
       routers = {
-        KN-IAM = {
+        KN-WPR = {
           rule = "Host(`iam.wcbrpar.com`) || Host(`iam.redcom.digital`)";
           service = "kanidm-service";
           entrypoints = ["websecure"];

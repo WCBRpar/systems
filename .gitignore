@@ -9,6 +9,7 @@ result*
 
 # WCBRpar Security Issues
 systemsMap
+.devtools/
 
 # Compiled and build artifacts
 *.pyc

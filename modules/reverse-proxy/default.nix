@@ -225,7 +225,7 @@
   networking.firewall.allowedTCPPorts = [80 443];
 
   # Garante que os diretórios existam
-  systemd.tmpfiles.rules = [
+  systemd.tmpfiles.rules = lib.mkIf (hostName == "galactica") [
     "d /var/lib/traefik 0750 traefik traefik -"
     "f /var/lib/traefik/acme.json 0600 traefik traefik -"
     "d /var/log/traefik 0750 traefik traefik -"

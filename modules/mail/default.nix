@@ -2,13 +2,13 @@
 
 {
 
-  # imports = [
+  imports = [
     (builtins.fetchTarball {
       # Pick a release version you are interested in and set its hash, e.g.
-      url = "https://gitlab.com/simple-nixos-mailserver/nixos-mailserver/-/archive/nixos-24.11/nixos-mailserver-nixos-24.11.tar.gz";
+      url = "https://gitlab.com/simple-nixos-mailserver/nixos-mailserver/-/archive/main/nixos-mailserver-nixos-main.tar.gz";
       # To get the sha256 of the nixos-mailserver tarball, we can use the nix-prefetch-url command:
       # release="nixos-23.05"; nix-prefetch-url "https://gitlab.com/simple-nixos-mailserver/nixos-mailserver/-/archive/${release}/nixos-mailserver-${release}.tar.gz" --unpack
-      sha256 = "05k4nj2cqz1c5zgqa0c6b8sp3807ps385qca74fgs6cdc415y3qw";
+      sha256 = "sha256:1wk7fsmabngy98596rkpf6pxxajpkz2g25cimwzx3brr4bc2ck0l";
     })
 
     # calDAV e AntiSpam
@@ -20,6 +20,9 @@
     enable = true;
     fqdn = "mail.wcbrpar.com";
     domains = [ "wcbrpar.com" "redcom.digital" "ẅalcor.com.br" "wqueiroz.adv.br" ];
+
+    enableNixpkgsReleaseCheck = true;
+    stateVersion = 1;
 
     # A list of all login accounts. To create the password hashes, use
     # nix-shell -p mkpasswd --run 'mkpasswd -sm bcrypt'
@@ -35,14 +38,14 @@
 
       bind = { 
         dn = "cn=mail,ou=accounts,dc=example,dc=com";
-	passwordFile = config.age.secrets.default.path;
+	      passwordFile = config.age.secrets.default.path;
       };
       searchBase = "cn=mail,ou=accounts,dc=example,dc=com";
     };
-
-    # Use Let's Encrypt certificates. Note that this needs to set up a stripped
-    # down nginx and opens port 80.
-    certificateScheme = "acme-nginx";
+    x509 = {
+      certificateFile = "/var/lib/acme/mail.wcbrpar.com/cert.pem"; 
+      privateKeyFile = "/var/lib/acme/mail.wcbrpar.com/key.pem";
+    };
   };
 
   # services.opendkim = {             # Corrigir no dkim do SNM o diretório 
