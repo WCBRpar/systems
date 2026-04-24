@@ -244,74 +244,74 @@ in
     };
 
     # Promtail - Agente de coleta de logs (todos os hosts)
-    promtail = {
-      enable = true;
-      configuration = {
-        server = {
-          http_listen_address = "0.0.0.0";
-          http_listen_port = 9080;
-          grpc_listen_port = 0;
-        };
-
-        clients = [{
-          url = "http://${lokiServer}:3100/loki/api/v1/push";
-        }];
-
-        positions = {
-          filename = "/tmp/positions.yaml";
-        };
-
-        scrape_configs = [
-          {
-            job_name = "journal";
-            journal = {
-              max_age = "12h";
-              labels = {
-                job = "systemd-journal";
-                host = hostName;
-              };
-            };
-            relabel_configs = [
-              {
-                source_labels = ["__journal__systemd_unit"];
-                target_label = "unit";
-              }
-              {
-                source_labels = ["__journal_syslog_identifier"];
-                target_label = "syslog_identifier";
-              }
-            ];
-          }
-          {
-            job_name = "system";
-            static_configs = [
-              {
-                targets = ["localhost"];
-                labels = {
-                  job = "varlogs";
-                  host = hostName;
-                  __path__ = "/var/log/*log";
-                };
-              }
-            ];
-          }
-          {
-            job_name = "traefik";
-            static_configs = [
-              {
-                targets = ["localhost"];
-                labels = {
-                  job = "traefik";
-                  host = hostName;
-                  __path__ = "/var/log/traefik/*.log";
-                };
-              }
-            ];
-          }
-        ];
-      };
-    };
-
+    # promtail = {
+    #   enable = false;
+    #   configuration = {
+    #     server = {
+    #       http_listen_address = "0.0.0.0";
+    #       http_listen_port = 9080;
+    #       grpc_listen_port = 0;
+    #     };
+    #
+    #     clients = [{
+    #       url = "http://${lokiServer}:3100/loki/api/v1/push";
+    #     }];
+    #
+    #     positions = {
+    #       filename = "/tmp/positions.yaml";
+    #     };
+    #
+    #     scrape_configs = [
+    #       {
+    #         job_name = "journal";
+    #         journal = {
+    #           max_age = "12h";
+    #           labels = {
+    #             job = "systemd-journal";
+    #             host = hostName;
+    #           };
+    #         };
+    #         relabel_configs = [
+    #           {
+    #             source_labels = ["__journal__systemd_unit"];
+    #             target_label = "unit";
+    #           }
+    #           {
+    #             source_labels = ["__journal_syslog_identifier"];
+    #             target_label = "syslog_identifier";
+    #           }
+    #         ];
+    #       }
+    #       {
+    #         job_name = "system";
+    #         static_configs = [
+    #           {
+    #             targets = ["localhost"];
+    #             labels = {
+    #               job = "varlogs";
+    #               host = hostName;
+    #               __path__ = "/var/log/*log";
+    #             };
+    #           }
+    #         ];
+    #       }
+    #       {
+    #         job_name = "traefik";
+    #         static_configs = [
+    #           {
+    #             targets = ["localhost"];
+    #             labels = {
+    #               job = "traefik";
+    #               host = hostName;
+    #               __path__ = "/var/log/traefik/*.log";
+    #             };
+    #           }
+    #         ];
+    #       }
+    #     ];
+    #   };
+    # };
+    
     # Prometheus: servidor (apenas no galactica) + node exporter (todos os hosts)
     prometheus = lib.mkMerge [
       (lib.mkIf (hostName == "galactica") {

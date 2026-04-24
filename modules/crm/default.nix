@@ -77,7 +77,7 @@
           db_host = "localhost";
           db_port = 5432;
           db_user = "odoo";
-          admin_password = builtins.readFile config.age.secrets.odoo-databasekey.path;
+          admin_passwd = builtins.readFile config.age.secrets.odoo-databasekey.path;
           db_password = builtins.readFile config.age.secrets.odoo-databasekey.path;
           list_db = true;                # Habilita gerenciador web (opcional)
           proxy_mode = true;             # Necessário para confiar nos cabeçalhos
@@ -99,6 +99,9 @@
       };
       autoInit = true;
       addons = with pkgs.odooAddons; [
+        # Módulos específicos PT/Política
+        contacts-political-party-PT
+
         # Módulos base / infraestrutura / sequencias
         bus-alt-connection
         dbfilter-from-header
@@ -137,6 +140,47 @@
         res-partner-industry-multi-company
         utm-medium-multi-company
         utm-source-multi-company
+
+        # Módulos Contratos OCA
+        contract
+        agreement-rebate-partner-company-group
+        contract-analytic-tag
+        contract-forecast 
+        contract-forecast-variable-quantity
+        contract-invoice-auto-validate 
+        contract-invoice-manually
+        contract-invoice-start-end-dates 
+        contract-line-successor 
+        contract-mandate 
+        contract-payment-mode 
+        contract-price-revision 
+        contract-queue-job 
+        contract-refund-on-stop
+        contract-sale 
+        contract-sale-generation 
+        contract-sale-invoicing 
+        contract-sale-mandate 
+        contract-sale-payment-mode
+        contract-sale-transmit-method 
+        contract-termination 
+        contract-transmit-method
+        contract-update-last-date-invoiced
+        contract-variable-qty-prorated 
+        contract-variable-qty-timesheet 
+        contract-variable-quantity 
+        product-contract 
+        product-contract-recurrence-in-price 
+        product-contract-variable-quantity 
+        subscription-oca 
+
+        # Módulos DMS
+        dms
+        dms-auto-classification
+        dms-field
+        dms-field-auto-classification
+        dms-user-role
+        hr-dms-field
+        web-editor-media-dialog-dms
 
         # Módulos de localização brasileira (l10n_br)
         l10n-br-account-due-list
@@ -177,7 +221,7 @@
     serviceConfig = {
       Restart = "on-failure";
       RestartSec = "5s";
-      StartLimitInterval = "200s";
+      StartLimitIntervalSec = "200s";
       StartLimitBurst = "5";
     };
   };
