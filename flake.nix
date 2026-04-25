@@ -39,7 +39,7 @@
       url = "github:nlewo/comin";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    +    # Simple NixOS Mailserver
+    # Simple NixOS Mailserver
     nixos-mailserver = {
       url = "github:simple-nixos-mailserver/nixos-mailserver";
       inputs.nixpkgs.follows = "nixpkgs";
