@@ -11,23 +11,19 @@
 
   services = {
 
-    pangolin = {
-      enable = lib.mkForce false;  # Tentando resolver as cagadas no refactor do Traefik
-    };
-
     picoclaw = lib.mkIf ( config.networking.hostName == "yashuman" ) {
       enable = true;
-      model = "deepseek/deepseek-coder:1.3b"; 
+      model = "openrouter/auto"; 
       providers = {
-        deepseek = {
-          api_key = builtins.readFile config.age.secrets.deepseek-apikey.path;
-        };
+        # deepseek = {
+        #   api_key = builtins.readFile config.age.secrets.deepseek-apikey.path;
+        # };
         openrouter = {
           api_key = builtins.readFile config.age.secrets.openrouter-apikey.path;
         };
-        ollama = {
-          api_base = "http://yashuman.wcbrpar.com:11434/v1";
-        };
+        # ollama = {
+        #   api_base = "http://yashuman.wcbrpar.com:11434/v1";
+        # };
       };
       channels = {
         telegram = {
@@ -64,7 +60,7 @@
     open-webui = lib.mkIf ( config.networking.hostName == "pegasus" ) {
       enable = true;
       port = 9999;
-      host = "0.0.0.0";
+      host = "192.168.13.20";
       openFirewall = true;
       environment = {
         OLLAMA_BASE_URL = "http://yashuman.wcbrpar.com:11434";

@@ -26,11 +26,11 @@
 
     # A list of all login accounts. To create the password hashes, use
     # nix-shell -p mkpasswd --run 'mkpasswd -sm bcrypt'
-    # loginAccounts = {
-    #   "walter@wcbrpar.com" = {
-    #     hashedPasswordFile = config.age.secrets.default.path;
-    #     aliases = ["postmaster@wcbrpar.com"];
-    #   };
+    loginAccounts = {
+      "walter@wcbrpar.com" = {
+        hashedPasswordFile = config.age.secrets.default.path;
+        aliases = ["postmaster@wcbrpar.com"];
+      };
     
     ldap = {
       enable = true;
@@ -52,6 +52,6 @@
   #   enable = true;                  # dos arquivos de /var/dkim para /var/lib/dkim... se 
   #   domains = "csl:mail.wcbrpar.com,wcbrpar.com,redcom.digital,walcor.com.br,wqueiroz.adv.br";
   # };
-
+  };
 }
 
