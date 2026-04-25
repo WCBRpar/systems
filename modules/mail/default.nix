@@ -70,6 +70,20 @@
 
     # Versão do estado
     stateVersion = 1;
+
+    # Configurações de migração requeridas pelo SNM
+    # Migração 1: Novo formato do mailLocation (NixOS Mailserver 2.x)
+    # O SNM agora usa formato indexado com namespaces
+    mailLocation = "maildir:~/Maildir:LAYOUT=fs:INDEX=~/.imap/indexes";
+
+    # Migração 2: Habilitar UUID para home directories no LDAP
+    # Necessário para compatibilidade com Dovecot 2.3+
+    # Adiciona atributos necessários para lookup de UID/GID via LDAP
+    ldap.dovecot.passAttrs = "uid gid home uidNumber gidNumber";
+
+    # Script de migração será executado automaticamente pelo SNM
+    # Para mais detalhes: https://nixos-mailserver.readthedocs.io/en/latest/migrations.html
+
   };
 
   # Certificado ACME para mail.wcbrpar.com via DNS challenge Cloudflare
