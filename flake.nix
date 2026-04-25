@@ -36,12 +36,12 @@
     };
 
     comin = {
-      url = "gitlab:nlewo/comin";
+      url = "github:nlewo/comin";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     # Simple NixOS Mailserver
     nixos-mailserver = {
-      url = "github:simple-nixos-mailserver/nixos-mailserver";
+      url = "gitlab:simple-nixos-mailserver/nixos-mailserver/main";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };

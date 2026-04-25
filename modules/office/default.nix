@@ -5,8 +5,8 @@
   ...
 }: {
   environment.systemPackages = [
-    pkgs.onlyoffice-workspace.communityServer
-    pkgs.onlyoffice-workspace.documentServer
+    # pkgs.onlyoffice-workspace.communityServer
+    # pkgs.onlyoffice-workspace.documentServer
   ];
 
   services = {
@@ -49,11 +49,11 @@
       };
     };
 
-    onlyoffice.workspace = lib.mkIf (config.networking.hostName == "pegasus") {
-      enable = true;
-      domain = "office.wcbrpar.com";
-      enableBackup = true; # Ativa backups automáticos do MySQL e PostgreSQL
-    };
+    # onlyoffice.workspace = lib.mkIf (config.networking.hostName == "pegasus") {
+    #   enable = true;
+    #   domain = "office.wcbrpar.com";
+    #   enableBackup = true; # Ativa backups automáticos do MySQL e PostgreSQL
+    # };
 
     nginx.virtualHosts."office.wcbrpar.com" = lib.mkIf (config.networking.hostName == "pegasus") {
       extraConfig = ''

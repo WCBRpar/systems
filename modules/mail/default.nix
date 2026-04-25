@@ -18,14 +18,18 @@
 
     # Certificados SSL via ACME com DNS challenge Cloudflare
     # O SNM gerencia seus próprios certificados via security.acme
-    certificateScheme = "acme";
-    acmeCertificateDomain = "mail.wcbrpar.com";
-
+    x509 = { 
+      # certificateScheme = "acme";
+      # acmeCertificateDomains = "mail.wcbrpar.com";
+      useACMEHost = config.mailserver.fqdn;
+    };
+    
     # Contas declarativas
-    loginAccounts = {
+    accounts = {
       "walter@wcbrpar.com" = {
         hashedPasswordFile = config.age.secrets.mail-walter-password.path;
-        aliases = [ "postmaster@wcbrpar.com" "admin@wcbrpar.com" ];
+        aliases = [ "postmaster@wcbrpar.com" "admin@wcbrpar.com" "abuse@wcbrpar,com" "dev-ops@wcbrpar.com" ];
+        catchAll = [ "wcbrpar.com" "redcom.digital" "walcor.com.br" "wqueiroz.adv.br" ]; 
       };
     };
 
