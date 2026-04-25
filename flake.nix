@@ -39,9 +39,14 @@
       url = "github:nlewo/comin";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    +    # Simple NixOS Mailserver
+    nixos-mailserver = {
+      url = "github:simple-nixos-mailserver/nixos-mailserver";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = { self, nixpkgs, home-manager, agenix, agenix-rekey, nixos-hardware, comin, ... }@inputs: 
+  outputs = { self, nixpkgs, home-manager, agenix, agenix-rekey, nixos-hardware, comin, nixos-mailserver, ... }@inputs: 
   let
     system = "x86_64-linux";
     hostConfigs = import ./hosts/default.nix;
@@ -98,6 +103,7 @@
         ./configuration.nix
         agenix.nixosModules.default
         home-manager.nixosModules.home-manager
+        nixos-mailserver.nixosModules.mailserver
         
         # Configuração do Comin - VERSÃO MÍNIMA E FUNCIONAL
         ({ config, pkgs, lib, hostName, ... }: {

@@ -3,55 +3,102 @@
 {
 
   imports = [
-    (builtins.fetchTarball {
-      # Pick a release version you are interested in and set its hash, e.g.
-      url = "https://gitlab.com/simple-nixos-mailserver/nixos-mailserver/-/archive/main/nixos-mailserver-nixos-main.tar.gz";
-      # To get the sha256 of the nixos-mailserver tarball, we can use the nix-prefetch-url command:
-      # release="nixos-23.05"; nix-prefetch-url "https://gitlab.com/simple-nixos-mailserver/nixos-mailserver/-/archive/${release}/nixos-mailserver-${release}.tar.gz" --unpack
-      sha256 = "sha256:16jsmwqb6mddaw50cgvic8viizajchnxp8kscrsk5ngbysj9n190";
-    })
+    # SNM agora é importado via flake.nix (nixos-mailserver.nixosModules.mailserver)
+    # Não mais necessário o fetchTarball
 
     # calDAV e AntiSpam
-    # ./agenda.nix
-    # ./antispam.nix
+    ./agenda.nix
+    # ./antispam.nix  # rspamd do SNM substitui
   ];
 
   mailserver = lib.mkIf ( config.networking.hostName == "galactica" ) {
     enable = true;
     fqdn = "mail.wcbrpar.com";
-    domains = [ "wcbrpar.com" "redcom.digital" "ẅalcor.com.br" "wqueiroz.adv.br" ];
+    domains = [ "wcbrpar.com" "redcom.digital" "walcor.com.br" "wqueiroz.adv.br" ];
 
-    enableNixpkgsReleaseCheck = true;
-    stateVersion = 1;
+    # Certificados SSL via ACME com DNS challenge Cloudflare
+    # O SNM gerencia seus próprios certificados via security.acme
+    certificateScheme = "acme";
+    acmeCertificateDomain = "mail.wcbrpar.com";
 
-    # A list of all login accounts. To create the password hashes, use
-    # nix-shell -p mkpasswd --run 'mkpasswd -sm bcrypt'
+    # Contas declarativas
     loginAccounts = {
       "walter@wcbrpar.com" = {
-        hashedPasswordFile = config.age.secrets.default.path;
-        aliases = ["postmaster@wcbrpar.com"];
+        hashedPasswordFile = config.age.secrets.mail-walter-password.path;
+        aliases = [ "postmaster@wcbrpar.com" "admin@wcbrpar.com" ];
       };
-    
+    };
+
+    # Integração LDAP (Dovecot + Postfix) — formato Kanidm
+    # Kanidm expõe LDAP read-only. O bind DN usa o formato spn=<account>@<domain>
+    # A searchBase no Kanidm é dc=<domain components>
     ldap = {
       enable = true;
       uris = [ "ldaps://ldap.wcbrpar.com" ];
-
       bind = { 
-        dn = "cn=mail,ou=accounts,dc=example,dc=com";
-	      passwordFile = config.age.secrets.default.path;
+        dn = "spn=mail_bind@wcbrpar.com";
+        passwordFile = config.age.secrets.ldap-mail-password.path;
       };
-      searchBase = "cn=mail,ou=accounts,dc=example,dc=com";
+      searchBase = "dc=wcbrpar,dc=com";
+      dovecot = {
+        # Kanidm usa objectClass=account e atributo 'mail' para email
+        userFilter = "(&(objectClass=account)(mail=%u))";
+        passFilter = "(&(objectClass=account)(mail=%u))";
+      };
+      postfix = {
+        filter = "(&(objectClass=account)(mail=%s))";
+      };
     };
-    x509 = {
-      certificateFile = "/var/lib/acme/mail.wcbrpar.com/cert.pem"; 
-      privateKeyFile = "/var/lib/acme/mail.wcbrpar.com/key.pem";
+
+    # Anti-spam via rspamd (integrado ao SNM)
+    fullTextSearch = {
+      enable = true;
+      enforced = "body";
     };
+
+    # Hierarquia de pastas IMAP
+    hierarchySeparator = "/";
+
+    # DKIM — SNM gera automaticamente em /var/dkim/
+    dkimSigning = true;
+    dkimKeyDirectory = "/var/dkim";
+
+    # Versão do estado
+    stateVersion = 1;
   };
 
-  # services.opendkim = {             # Corrigir no dkim do SNM o diretório 
-  #   enable = true;                  # dos arquivos de /var/dkim para /var/lib/dkim... se 
-  #   domains = "csl:mail.wcbrpar.com,wcbrpar.com,redcom.digital,walcor.com.br,wqueiroz.adv.br";
-  # };
+  # Certificado ACME para mail.wcbrpar.com via DNS challenge Cloudflare
+  security.acme.certs."mail.wcbrpar.com" = lib.mkIf ( config.networking.hostName == "galactica" ) {
+    dnsProvider = "cloudflare";
+    dnsResolver = "1.1.1.1:53";
+    environmentFile = config.age.secrets.cloudflare-api-key.path;
+    # Postfix e Dovecot precisam ler os certificados
+    group = "mail";
+    reloadServices = [ "postfix" "dovecot2" ];
+  };
+
+  # Firewall: portas de email
+  networking.firewall.allowedTCPPorts = lib.mkIf ( config.networking.hostName == "galactica" ) [ 
+    25    # SMTP
+    465   # SMTPS
+    587   # Submission
+    993   # IMAPS
+    4190  # ManageSieve
+  ];
+
+  # Segredos para o Mailserver
+  age.secrets = lib.mkIf ( config.networking.hostName == "galactica" ) {
+    ldap-mail-password = {
+      file = ../../secrets/ldapMailPassword.age;
+      owner = "root";
+      group = "root";
+      mode = "400";
+    };
+    mail-walter-password = {
+      file = ../../secrets/mailWalterPassword.age;
+      owner = "root";
+      group = "root";
+      mode = "400";
+    };
   };
 }
-

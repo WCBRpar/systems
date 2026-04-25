@@ -16,8 +16,7 @@ let
   # Listas úteis
   admins = [ primary devops ];
   all = admins ++ hostKeys;   # todos que podem ler secrets de aplicação
-  # hostKeyRecipients = admins ++ [ deployKey ];   # apenas admin + deployKey
-  hostKeyRecipients = admins ++ [ deployKey ] ++ hostKeys;  # ADICIONADO: hosts podem ler suas próprias chaves
+  hostKeyRecipients = admins ++ [ deployKey ] ++ hostKeys;
 in
 {
   # Secrets de aplicação (acessíveis por admins e todos os hosts)
@@ -30,11 +29,15 @@ in
   "odooDatabaseKey.age".publicKeys = all;
   "openrouterApiKey.age".publicKeys = all;
   "onlyofficeDocumentServerKey.age".publicKeys = all;
-  "ssh-key.age".publicKeys = admins;           # apenas admins
+  "ssh-key.age".publicKeys = admins;
   "telegramBotKey.age".publicKeys = all;
 
-  # Secrets das chaves privadas dos hosts - AGORA COM hostKeys INCLUÍDO
+  # Secrets do Simple NixOS Mailserver (SNM)
+  "ldapMailPassword.age".publicKeys = all;
+  "mailWalterPassword.age".publicKeys = all;
+
+  # Secrets das chaves privadas dos hosts
 } // builtins.listToAttrs (map (name: {
   name = "host-${name}-key.age";
-  value = { publicKeys = hostKeyRecipients; };  # Agora inclui admins + deployKey + todos os hosts
+  value = { publicKeys = hostKeyRecipients; };
 }) (builtins.attrNames hostConfigs))
