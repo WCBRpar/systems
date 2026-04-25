@@ -32,7 +32,7 @@
     };
 
     nixos-hardware = {
-      url = "github:NixOS/nixos-hardware/master";
+      url = "gitlab:NixOS/nixos-hardware/master";
     };
 
     comin = {
