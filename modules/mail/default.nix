@@ -1,4 +1,4 @@
-{ config, lib, pkgs, ... }: 
+{ config, lib, pkgs, hostName, ... }: 
 
 {
 
@@ -11,7 +11,7 @@
     # ./antispam.nix  # rspamd do SNM substitui
   ];
 
-  mailserver = lib.mkIf ( config.networking.hostName == "galactica" ) {
+  mailserver = lib.mkIf ( hostName == "galactica" ) {
     enable = true;
     fqdn = "mail.wcbrpar.com";
     domains = [ "wcbrpar.com" "redcom.digital" "walcor.com.br" "wqueiroz.adv.br" ];
@@ -57,7 +57,8 @@
     # Anti-spam via rspamd (integrado ao SNM)
     fullTextSearch = {
       enable = true;
-      enforced = "body";
+      fallback = true;
+      # enforced = "body";
     };
 
     # Hierarquia de pastas IMAP
@@ -72,7 +73,7 @@
   };
 
   # Certificado ACME para mail.wcbrpar.com via DNS challenge Cloudflare
-  security.acme.certs."mail.wcbrpar.com" = lib.mkIf ( config.networking.hostName == "galactica" ) {
+  security.acme.certs."mail.wcbrpar.com" = lib.mkIf ( hostName == "galactica" ) {
     dnsProvider = "cloudflare";
     dnsResolver = "1.1.1.1:53";
     environmentFile = config.age.secrets.cloudflare-api-key.path;
@@ -82,7 +83,7 @@
   };
 
   # Firewall: portas de email
-  networking.firewall.allowedTCPPorts = lib.mkIf ( config.networking.hostName == "galactica" ) [ 
+  networking.firewall.allowedTCPPorts = lib.mkIf ( hostName == "galactica" ) [ 
     25    # SMTP
     465   # SMTPS
     587   # Submission
@@ -91,7 +92,7 @@
   ];
 
   # Segredos para o Mailserver
-  age.secrets = lib.mkIf ( config.networking.hostName == "galactica" ) {
+  age.secrets = lib.mkIf ( hostName == "galactica" ) {
     ldap-mail-password = {
       file = ../../secrets/ldapMailPassword.age;
       owner = "root";

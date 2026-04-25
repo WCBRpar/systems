@@ -12,7 +12,7 @@
     ./home-manager
     ./iam
     ./llm
-    ./mail
+    # ./mail
     # ./meeting
     ./monitoring
     ./n8n
