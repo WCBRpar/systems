@@ -32,11 +32,11 @@
     };
 
     nixos-hardware = {
-      url = "gitlab:NixOS/nixos-hardware/master";
+      url = "github:NixOS/nixos-hardware/master";
     };
 
     comin = {
-      url = "github:nlewo/comin";
+      url = "gitlab:nlewo/comin";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     # Simple NixOS Mailserver
