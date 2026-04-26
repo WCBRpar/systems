@@ -28,7 +28,7 @@
     accounts = {
       "walter@wcbrpar.com" = {
         hashedPasswordFile = config.age.secrets.mail-walter-password.path;
-        aliases = [ "postmaster@wcbrpar.com" "admin@wcbrpar.com" "abuse@wcbrpar,com" "dev-ops@wcbrpar.com" ];
+        aliases = [ "postmaster@wcbrpar.com" "admin@wcbrpar.com" "abuse@wcbrpar.com" "dev-ops@wcbrpar.com" ];
         catchAll = [ "wcbrpar.com" "redcom.digital" "walcor.com.br" "wqueiroz.adv.br" ]; 
       };
     };
@@ -62,7 +62,7 @@
     };
 
     # Hierarquia de pastas IMAP
-    hierarchySeparator = "/";
+    hierarchySeparator = "/"; 
 
     # DKIM — SNM gera automaticamente em /var/dkim/
     dkimSigning = true;
@@ -75,30 +75,27 @@
     # SNM 2.x usa mailDirectory para o caminho base
     mailDirectory = "/var/mail/vhosts";
 
-    # Configuração do formato do maildir para Dovecot
-    # No SNM 2.x, isso é configurado via dovecot.extraConfig
-    dovecot.extraConfig = ''
-      namespace inbox {
-        inbox = yes
-        separator = /
-        mailbox Drafts {
-          auto = subscribe
-          specialuse = \Drafts
-        }
-        mailbox Junk {
-          auto = subscribe
-          specialuse = \Junk
-        }
-        mailbox Sent {
-          auto = subscribe
-          specialuse = \Sent
-        }
-        mailbox Trash {
-          auto = subscribe
-          specialuse = \Trash
-        }
-      }
-    '';
+    # Configuração do Dovecot via localConfiguration (SNM 2.x)
+    mailboxes = {
+      Drafts = {
+        auto = "subscribe";
+        special_use = "\\Drafts";
+      };
+      Junk = {
+        auto = "subscribe";
+        fts_autoindex = false;
+        special_use = "\\Junk";
+      };
+      Sent = {
+        auto = "subscribe";
+        special_use = "\\Sent";
+      };
+      Trash = {
+        auto = "no";
+        fts_autoindex = false;
+        special_use = "\\Trash";
+      };
+    };
 
     # Migração 2: Habilitar UUID para home directories no LDAP
     # Necessário para compatibilidade com Dovecot 2.3+

@@ -12,7 +12,7 @@
         # Kanidm: objectClass=account, bind via spn
         ldap_filter = "(&(objectClass=account)(uid=%u))";
         ldap_bind_dn = "spn=mail_bind@wcbrpar.com";
-        ldap_bind_pw_file = "/run/agenix/ldap-mail-password";
+        ldap_bind_pw_file = config.age.secrets.ldap-mail-password.path;
         ldap_use_ssl = true;
       };
       server = {
