@@ -156,21 +156,10 @@
             }
           ];
         })
-        
-        # Nix-on-Droid para tablet
-        ({ config, pkgs, lib, hostName, ... }: {
-          imports = [ nix-on-droid.nixosModules.nix-on-droid ];
-
-          nix-on-droid = {
-            enable = true;
-            targetUser = "wjjunyor";
-          };
-        })
-
       ];
     };
 
-    # Função para workstations
+    # Função para workstations NixOS
     mkWorkstation = hostname: nixpkgs.lib.nixosSystem {
       inherit system;
       specialArgs = {
@@ -213,14 +202,27 @@
       ];
     };
 
+    # Função para dispositivos nix-on-droid (Android/tablets)
+    # Usa arquitetura aarch64-linux e o módulo nix-on-droid
+    mkNixOnDroid = hostname: nix-on-droid.lib.nixOnDroidConfiguration {
+      pkgs = import nixpkgs { system = "aarch64-linux"; };
+      modules = [
+        ./workstations/${hostname}.nix
+      ];
+    };
+
   in {
     nixosConfigurations = {
       galactica = mkHost "galactica";
       pegasus   = mkHost "pegasus";
       yashuman  = mkHost "yashuman";
       t800      = mkWorkstation "t800";
-      redpad002 = mkWorkstation "redpad002";
     };
+    # Configurações nix-on-droid para dispositivos Android
+    nixOnDroidConfigurations = {
+      redpad002 = mkNixOnDroid "redpad002";
+    };
+
     apps.${system}.agenix-rekey = {
       agenix-rekey = {
         type = "app";
