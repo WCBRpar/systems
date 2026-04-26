@@ -21,7 +21,9 @@
     x509 = { 
       # certificateScheme = "acme";
       # acmeCertificateDomains = "mail.wcbrpar.com";
-      useACMEHost = config.mailserver.fqdn;
+      # useACMEHost = config.mailserver.fqdn;
+      certificateFile = "/var/lib/acme/${config.mailserver.fqdn}/fullchain.pem";
+      privateKeyFile = "/var/lib/acme/${config.mailserver.fqdn}/privatekey.pem";
     };
     
     # Contas declarativas
@@ -108,16 +110,6 @@
     # Script de migração será executado automaticamente pelo SNM
     # Para mais detalhes: https://nixos-mailserver.readthedocs.io/en/latest/migrations.html
 
-  };
-
-  # Certificado ACME para mail.wcbrpar.com via DNS challenge Cloudflare
-  security.acme.certs."mail.wcbrpar.com" = lib.mkIf ( hostName == "galactica" ) {
-    dnsProvider = "cloudflare";
-    dnsResolver = "1.1.1.1:53";
-    environmentFile = config.age.secrets.cloudflare-api-key.path;
-    # Postfix e Dovecot precisam ler os certificados
-    group = "mail";
-    reloadServices = [ "postfix" "dovecot2" ];
   };
 
   # Firewall: portas de email
