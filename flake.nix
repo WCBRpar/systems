@@ -44,9 +44,15 @@
       url = "gitlab:simple-nixos-mailserver/nixos-mailserver/main";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    # Nix-on-Droid para tablet Android
+    nix-on-droid = {
+      url = "github:t184256/nix-on-droid/master";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
   };
 
-  outputs = { self, nixpkgs, home-manager, agenix, agenix-rekey, nixos-hardware, comin, nixos-mailserver, ... }@inputs: 
+  outputs = { self, nixpkgs, home-manager, agenix, agenix-rekey, nixos-hardware, comin, nixos-mailserver, nix-on-droid, ... }@inputs: 
   let
     system = "x86_64-linux";
     hostConfigs = import ./hosts/default.nix;
@@ -150,6 +156,17 @@
             }
           ];
         })
+        
+        # Nix-on-Droid para tablet
+        ({ config, pkgs, lib, hostName, ... }: {
+          imports = [ nix-on-droid.nixosModules.nix-on-droid ];
+
+          nix-on-droid = {
+            enable = true;
+            targetUser = "wjjunyor";
+          };
+        })
+
       ];
     };
 
@@ -202,6 +219,7 @@
       pegasus   = mkHost "pegasus";
       yashuman  = mkHost "yashuman";
       t800      = mkWorkstation "t800";
+      redpad002 = mkWorkstation "redpad002";
     };
     apps.${system}.agenix-rekey = {
       agenix-rekey = {

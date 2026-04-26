@@ -71,10 +71,34 @@
     # Versão do estado
     stateVersion = 1;
 
-    # Configurações de migração requeridas pelo SNM
-    # Migração 1: Novo formato do mailLocation (NixOS Mailserver 2.x)
-    # O SNM agora usa formato indexado com namespaces
-    mailLocation = "maildir:~/Maildir:LAYOUT=fs:INDEX=~/.imap/indexes";
+    # Configurações de armazenamento
+    # SNM 2.x usa mailDirectory para o caminho base
+    mailDirectory = "/var/mail/vhosts";
+
+    # Configuração do formato do maildir para Dovecot
+    # No SNM 2.x, isso é configurado via dovecot.extraConfig
+    dovecot.extraConfig = ''
+      namespace inbox {
+        inbox = yes
+        separator = /
+        mailbox Drafts {
+          auto = subscribe
+          specialuse = \Drafts
+        }
+        mailbox Junk {
+          auto = subscribe
+          specialuse = \Junk
+        }
+        mailbox Sent {
+          auto = subscribe
+          specialuse = \Sent
+        }
+        mailbox Trash {
+          auto = subscribe
+          specialuse = \Trash
+        }
+      }
+    '';
 
     # Migração 2: Habilitar UUID para home directories no LDAP
     # Necessário para compatibilidade com Dovecot 2.3+
