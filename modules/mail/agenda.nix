@@ -1,8 +1,8 @@
-{ config, pkgs, lib, ... }:
+{ config, pkgs, lib, hostName, ... }:
 
 {
   # Radicale CalDAV/CardDAV com autenticação LDAP
-  services.radicale = lib.mkIf ( config.networking.hostName == "galactica" ) {
+  services.radicale = lib.mkIf ( hostName == "galactica" ) {
     enable = true;
     settings = {
       auth = {
@@ -11,8 +11,10 @@
         ldap_base = "dc=wcbrpar,dc=com";
         # Kanidm: objectClass=account, bind via spn
         ldap_filter = "(&(objectClass=account)(uid=%u))";
-        ldap_bind_dn = "spn=mail_bind@wcbrpar.com";
-        ldap_bind_pw_file = config.age.secrets.ldap-mail-password.path;
+        # Correção: Radicale usa nomes de opções sem o prefixo 'ldap_' para sub-opções em algumas versões
+        # ou nomes específicos como 'bind_dn' e 'bind_pw'
+        bind_dn = "spn=mail_bind@wcbrpar.com";
+        bind_pw_file = config.age.secrets.ldap-mail-password.path;
         ldap_use_ssl = true;
       };
       server = {

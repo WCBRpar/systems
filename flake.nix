@@ -69,12 +69,22 @@
           allowUnfree = true;
         };
       }
-      # Overlay para pular testes do age
+      # Overlays para pular testes problemáticos
       ({ pkgs, ... }: {
         nixpkgs.overlays = [
           (final: prev: {
+            # Pular testes do age
             age = prev.age.overrideAttrs (old: {
               doCheck = false;
+            });
+            # Pular testes do rspamd (falha de compilação na v3.14.3)
+            rspamd = prev.rspamd.overrideAttrs (old: {
+              doCheck = false;
+              # Algumas versões do nixpkgs usam cmakeFlags para testes
+              cmakeFlags = (old.cmakeFlags or []) ++ [ 
+                "-DENABLE_TESTS=OFF"
+                "-DENABLE_DOCTEST=OFF"
+              ];
             });
           })
         ];

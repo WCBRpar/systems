@@ -69,7 +69,7 @@
     dkimKeyDirectory = "/var/dkim";
 
     # Versão do estado
-    stateVersion = 1;
+    stateVersion = 22;
 
     # Configurações de armazenamento
     # SNM 2.x usa mailDirectory para o caminho base
@@ -100,7 +100,10 @@
     # Migração 2: Habilitar UUID para home directories no LDAP
     # Necessário para compatibilidade com Dovecot 2.3+
     # Adiciona atributos necessários para lookup de UID/GID via LDAP
-    ldap.dovecot.passAttrs = "uid gid home uidNumber gidNumber";
+    # Migração para SNM 2.x e Dovecot 2.3+ com Kanidm
+    # O SNM agora usa passAttrs/userAttrs em vez de opções específicas como gidAttr.
+    # ldap.dovecot.passAttrs = "uidNumber=uid,gidNumber=gid,homeDirectory=home";
+    # ldap.dovecot.userAttrs = "uidNumber=uid,gidNumber=gid,homeDirectory=home";
 
     # Script de migração será executado automaticamente pelo SNM
     # Para mais detalhes: https://nixos-mailserver.readthedocs.io/en/latest/migrations.html
