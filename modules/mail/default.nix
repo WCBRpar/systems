@@ -4,11 +4,7 @@
 
   imports = [
     # SNM agora é importado via flake.nix (nixos-mailserver.nixosModules.mailserver)
-    # Não mais necessário o fetchTarball
-
-    # calDAV e AntiSpam
     ./agenda.nix
-    # ./antispam.nix  # rspamd do SNM substitui
   ];
 
   mailserver = lib.mkIf ( hostName == "galactica" ) {
@@ -16,12 +12,8 @@
     fqdn = "mail.wcbrpar.com";
     domains = [ "wcbrpar.com" "redcom.digital" "walcor.com.br" "wqueiroz.adv.br" ];
 
-    # Certificados SSL via ACME com DNS challenge Cloudflare
-    # O SNM gerencia seus próprios certificados via security.acme
+    # Certificados SSL via ACME (Gerenciados pelo Traefik e exportados pelo Dumper)
     x509 = { 
-      # certificateScheme = "acme";
-      # acmeCertificateDomains = "mail.wcbrpar.com";
-      # useACMEHost = config.mailserver.fqdn;
       certificateFile = "/var/lib/acme/${config.mailserver.fqdn}/fullchain.pem";
       privateKeyFile = "/var/lib/acme/${config.mailserver.fqdn}/privatekey.pem";
     };
@@ -36,8 +28,6 @@
     };
 
     # Integração LDAP (Dovecot + Postfix) — formato Kanidm
-    # Kanidm expõe LDAP read-only. O bind DN usa o formato spn=<account>@<domain>
-    # A searchBase no Kanidm é dc=<domain components>
     ldap = {
       enable = true;
       uris = [ "ldaps://ldap.wcbrpar.com" ];
@@ -46,8 +36,12 @@
         passwordFile = config.age.secrets.ldap-mail-password.path;
       };
       searchBase = "dc=wcbrpar,dc=com";
+      
+      attributes = {
+        password = "mail";
+      };
+
       dovecot = {
-        # Kanidm usa objectClass=account e atributo 'mail' para email
         userFilter = "(&(objectClass=account)(mail=%u))";
         passFilter = "(&(objectClass=account)(mail=%u))";
       };
@@ -60,7 +54,6 @@
     fullTextSearch = {
       enable = true;
       fallback = true;
-      # enforced = "body";
     };
 
     # Hierarquia de pastas IMAP
@@ -74,10 +67,9 @@
     stateVersion = 22;
 
     # Configurações de armazenamento
-    # SNM 2.x usa mailDirectory para o caminho base
     mailDirectory = "/var/mail/vhosts";
 
-    # Configuração do Dovecot via localConfiguration (SNM 2.x)
+    # Configuração do Dovecot
     mailboxes = {
       Drafts = {
         auto = "subscribe";
@@ -99,18 +91,22 @@
       };
     };
 
-    # Migração 2: Habilitar UUID para home directories no LDAP
-    # Necessário para compatibilidade com Dovecot 2.3+
-    # Adiciona atributos necessários para lookup de UID/GID via LDAP
-    # Migração para SNM 2.x e Dovecot 2.3+ com Kanidm
-    # O SNM agora usa passAttrs/userAttrs em vez de opções específicas como gidAttr.
-    # ldap.dovecot.passAttrs = "uidNumber=uid,gidNumber=gid,homeDirectory=home";
-    # ldap.dovecot.userAttrs = "uidNumber=uid,gidNumber=gid,homeDirectory=home";
-
-    # Script de migração será executado automaticamente pelo SNM
-    # Para mais detalhes: https://nixos-mailserver.readthedocs.io/en/latest/migrations.html
-
   };
+
+  # Permissões: Dovecot e Postfix precisam ler os certificados em /var/lib/acme
+  users.users.dovecot2.extraGroups = [ "traefik" "acme" ];
+  users.users.postfix.extraGroups = [ "traefik" "acme" ];
+
+  # Pre-start para evitar falha do Dovecot se o dumper ainda não exportou os arquivos
+  systemd.services.dovecot2.preStart = lib.mkBefore ''
+    mkdir -p /var/lib/acme/mail.wcbrpar.com
+    if [ ! -f /var/lib/acme/mail.wcbrpar.com/fullchain.pem ]; then
+      touch /var/lib/acme/mail.wcbrpar.com/fullchain.pem
+      touch /var/lib/acme/mail.wcbrpar.com/privatekey.pem
+      chown -R traefik:traefik /var/lib/acme/mail.wcbrpar.com
+      chmod -R 750 /var/lib/acme/mail.wcbrpar.com
+    fi
+  '';
 
   # Firewall: portas de email
   networking.firewall.allowedTCPPorts = lib.mkIf ( hostName == "galactica" ) [ 
