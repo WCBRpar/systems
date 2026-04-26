@@ -94,11 +94,17 @@
   };
 
   # Permissões: Dovecot e Postfix precisam ler os certificados em /var/lib/acme
-  users.users.dovecot2.extraGroups = [ "traefik" "acme" ];
-  users.users.postfix.extraGroups = [ "traefik" "acme" ];
+  users.groups.dovecot = {};
+  users.groups.snm = {};
+  users.users.dovecot = {
+    isSystemUser = true;
+    group = "dovecot";
+    extraGroups = [ "traefik" "acme" "snm" ];
+  };
+  users.users.postfix.extraGroups = [ "traefik" "acme" "snm" ];
 
   # Pre-start para evitar falha do Dovecot se o dumper ainda não exportou os arquivos
-  systemd.services.dovecot2.preStart = lib.mkBefore ''
+  systemd.services.dovecot.preStart = lib.mkBefore ''
     mkdir -p /var/lib/acme/mail.wcbrpar.com
     if [ ! -f /var/lib/acme/mail.wcbrpar.com/fullchain.pem ]; then
       touch /var/lib/acme/mail.wcbrpar.com/fullchain.pem
@@ -122,14 +128,14 @@
     ldap-mail-password = {
       file = ../../secrets/ldapMailPassword.age;
       owner = "root";
-      group = "root";
-      mode = "400";
+      group = "snm";
+      mode = "440";
     };
     mail-walter-password = {
       file = ../../secrets/mailWalterPassword.age;
       owner = "root";
       group = "root";
-      mode = "400";
+      mode = "440";
     };
   };
 }
