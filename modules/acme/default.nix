@@ -62,7 +62,9 @@
     serviceConfig = {
       Type = "simple";
       ExecStart = ''
-        ${pkgs.traefik-certs-dumper}/bin/traefik-certs-dumper watch \
+        ${pkgs.traefik-certs-dumper}/bin/traefik-certs-dumper file
+          --version v3 \
+          --watch \
           --source /var/lib/traefik/acme.json \
           --dest /var/lib/acme \
           --crt-name=fullchain \
