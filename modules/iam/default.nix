@@ -85,8 +85,8 @@
         # Manter 0.0.0.0 pois mesmo o traefik fazendo o  proxy, os hosts se cumunicam internamente sem proxy-reverso
         bindaddress = "0.0.0.0:8443";
         ldapbindaddress = "0.0.0.0:636";
-        tls_chain = "/var/lib/acme/iam.wcbrpar.com/cert.pem";
-        tls_key = "/var/lib/acme/iam.wcbrpar.com/key.pem";
+        tls_chain = "/var/lib/acme/iam.wcbrpar.com/fullchain.pem";
+        tls_key = "/var/lib/acme/iam.wcbrpar.com/privatekey.pem";
       };
     };
     
@@ -123,7 +123,7 @@
   
   users.users.kanidm = {
     isSystemUser = true;
-    extraGroups = [ "traefik" "acme" "nginx" ];
+    extraGroups = [ "traefik" "acme" "nginx" "snm" ];
     group = "kanidm";
   };
   users.groups.kanidm = { };

@@ -8,14 +8,17 @@
     # group = "radicale";
     settings = {
       auth = {
-        type = "ldap";
-        ldap_uri = "ldaps://ldap.wcbrpar.com";
-        ldap_base = "dc=wcbrpar,dc=com";
-        # Filtro para o Kanidm
-        ldap_filter = "(mail=%u)";
-        # Opções de bind para o plugin LDAP do Radicale (formato atual)
-        ldap_reader_dn = "spn=mail_bind@wcbrpar.com";
-        ldap_secret_file = config.age.secrets.ldap-mail-password.path;
+        # Usando autenticação por header para integrar com o Traefik OIDC
+        type = "http_remote_user";
+        # remote_user_header = "HTTP_X_FORWARDED_USER";
+        # type = "ldap";
+        # ldap_uri = "ldaps://ldap.wcbrpar.com";
+        # ldap_base = "dc=wcbrpar,dc=com";
+        # # Filtro para o Kanidm
+        # ldap_filter = "(mail=%u)";
+        # # Opções de bind para o plugin LDAP do Radicale (formato atual)
+        # ldap_reader_dn = "spn=mail_bind@wcbrpar.com";
+        # ldap_secret_file = config.age.secrets.ldap-mail-password.path;
       };
       server = {
         hosts = [ "127.0.0.1:5232" "[::1]:5232" ];
@@ -35,26 +38,84 @@
   };
 
   # Rotas Traefik para Radicale
-  services.traefik = lib.mkIf ( hostName == "galactica" ) {
-    dynamicConfigOptions = {
-      http = {
-        routers = {
-          AG-ALL = {
-            rule = "Host(`cal.wcbrpar.com`) || Host(`cal.redcom.digital`) || Host(`cal.walcor.com.br`) || Host(`cal.wqueiroz.adv.br`)";
-            service = "radicale-service";
-            entrypoints = [ "websecure" ];
-            tls = {
-              certResolver = "cloudflare";
+  services = { 
+    traefik = lib.mkIf ( hostName == "galactica" ) {
+      dynamicConfigOptions = {
+        http = {
+          routers = {
+            AG-ALL = {
+              rule = "Host(`cal.wcbrpar.com`) || Host(`cal.redcom.digital`) || Host(`cal.walcor.com.br`) || Host(`cal.wqueiroz.adv.br`)";
+              service = "radicale-service";
+              entrypoints = [ "websecure" ];
+              # Aplicando o middleware de autenticação OIDC do Kanidm
+              middlewares = [ "oidc-auth-radicale" ];
+              tls = {
+                certResolver = "cloudflare";
+              };
+            };
+          };
+          services = {
+            radicale-service = {
+              loadBalancer = {
+                servers = [{ url = "http://127.0.0.1:5232"; }];
+                passHostHeader = true;
+              };
+            };
+          };
+          middlewares = {
+            "oidc-auth-radicale" = {
+              plugin = {
+                "traefik-oidc-auth" = {
+                  SessionCookieName = "_radicale_session";
+                  OauthStartPath = "/oauth2/start";
+                  OauthCallbackPath = "/oidc/callback";
+                  
+                  Scopes = [ "openid" "profile" "email" "groups" ];
+                  Provider = {
+                    Url = "https://iam.wcbrpar.com/oauth2/openid/radicale/";
+                    ClientId = "radicale";
+                    UsePkce = true; 
+                    InsecureSkipVerifyTls = false;
+                  };
+                  
+                  ClaimMappings = {
+                    # Mapeia o e-mail ou username para o header que o Radicale vai ler
+                    User = "mail_primary";
+                  };
+                  
+                  LogLevel = "info";
+                  
+                  # Headers para passar o usuário autenticado para o Radicale
+                  Headers = {
+                    Request = {
+                      Set = {
+                        X-Forwarded-User = "{user}";
+                      };
+                    };
+                  };
+                };
+              };
             };
           };
         };
-        services = {
-          radicale-service = {
-            loadBalancer = {
-              servers = [{ url = "http://127.0.0.1:5232"; }];
-              passHostHeader = true;
-            };
-          };
+      };
+    };
+
+    # Configuração OAuth2 do Kanidm para o Radicale (Centralizada aqui)
+    kanidm.provision.systems.oauth2 = lib.mkIf (hostName == "galactica") {
+      "radicale" = {
+        displayName = "Radicale Agenda";
+        originUrl = [
+          "https://cal.wcbrpar.com/oidc/callback"
+          "https://cal.redcom.digital/oidc/callback"
+          "https://cal.walcor.com.br/oidc/callback"
+          "https://cal.wqueiroz.adv.br/oidc/callback"
+        ];
+        originLanding = "https://cal.wcbrpar.com/";
+        imageFile = ../../media-assets/iam-auth-badges/radicale-auth.svg;
+        public = true;
+        scopeMaps = {
+          "users" = [ "openid" "profile" "email" "groups" ];
         };
       };
     };

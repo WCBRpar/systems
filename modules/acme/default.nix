@@ -70,7 +70,7 @@
           --dest /var/lib/acme \
           --crt-name=fullchain \
           --crt-ext=.pem \
-          --key-name=privatekey.pem \
+          --key-name=privatekey \
           --key-ext=.pem \
           --domain-subdir=true
       '';
@@ -85,6 +85,9 @@
   # Criamos um diretório com permissões de grupo para que postfix/dovecot acessem
   systemd.tmpfiles.rules = lib.mkIf (hostName == "galactica") [
     "d /var/lib/traefik/certs 0755 traefik traefik -"
+    
+    # Garante ao Kanidm acesso aos certificados
+    "z /var/lib/acme/*/privatekey.pem 0640 traefik traefik -"
   
     # Garante que o diretório de challenges exista
     "d /var/lib/acme/.challenges 0755 acme acme -"

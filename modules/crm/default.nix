@@ -7,7 +7,7 @@
         http = {
           routers = {
             OD-WPR = {
-              rule = "Host(`crm.wcbrpar.com`) || Host(`crm.redcom.digital`) || Host(`redcom.digital`)";
+              rule = "Host(`crm.wcbrpar.com`) || Host(`crm.redcom.digital`) || Host(`redcom.digital`) || Host(`wcbrpar.com`)";
               service = "odoo-service";
               entrypoints = ["websecure"];
               tls.certResolver = "cloudflare";
