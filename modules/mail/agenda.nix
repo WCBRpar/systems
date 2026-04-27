@@ -39,7 +39,7 @@
     dynamicConfigOptions = {
       http = {
         routers = {
-          CAL-ALL = {
+          AG-ALL = {
             rule = "Host(`cal.wcbrpar.com`) || Host(`cal.redcom.digital`) || Host(`cal.walcor.com.br`) || Host(`cal.wqueiroz.adv.br`)";
             service = "radicale-service";
             entrypoints = [ "websecure" ];

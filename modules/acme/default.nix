@@ -57,6 +57,7 @@
   systemd.services.traefik-certs-dumper = lib.mkIf (hostName == "galactica") {
     description = "Dump Traefik certificates from acme.json";
     after = [ "traefik.service" ];
+    wants = [ "trarfik.service" ];
     wantedBy = [ "multi-user.target" ];
     
     serviceConfig = {

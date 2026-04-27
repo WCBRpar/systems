@@ -7,6 +7,27 @@
     ./agenda.nix
   ];
 
+  services = {
+
+    # Gerar os certificados pelo Traefik! 
+    traefik = lib.mkIf (hostName == "galactica") {
+      dynamicConfigOptions = {
+        http = {
+          routers = {
+            MS-ALL = {
+              rule = "Host(`mail.wcbrpar.com`) || Host(`mail.redcom.digital`) || Host(`mail.walcor.com.br`) || Host(`mail.wqueiroz.adv.br`)";
+              service = "noop@internal"; 
+              entrypoints = ["websecure"];
+              tls = {
+                certResolver = "cloudflare";
+              };
+            };
+          };
+        };
+      };
+    };
+  };
+
   mailserver = lib.mkIf ( hostName == "galactica" ) {
     enable = true;
     fqdn = "mail.wcbrpar.com";
