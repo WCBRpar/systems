@@ -44,10 +44,11 @@
 
       # Increase the maximum file upload size to avoid problems uploading videos.
       maxUploadSize = "16G";
+      
       https = false;
       nginx.enable = false; 
-      configureRedis = true;
       listen = [{ addr = "127.0.0.1"; port = 8185; ssl = false; }];
+      
       enableBrokenCiphersForSSE = false;
 
       autoUpdateApps.enable = true;
@@ -65,7 +66,7 @@
         dbtype = "pgsql";
         adminuser = "admin";
         adminpassFile = config.age.secrets.nextcloud-admin-password.path;
-        trusted_proxies = [ "127.0.0.1" "::1" "192.168.13.10" ];
+        trustedProxies = [ "127.0.0.1" "::1" "192.168.13.10" ];
       };
     };
 
@@ -73,6 +74,7 @@
 
       enable = true;
       hostname = "office.wcbrpar.com";
+      jwtSecretFile = config.age.secrets.onlyoffice-jwt-secret.path;
 
     };
 
