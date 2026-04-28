@@ -138,6 +138,7 @@
       "z /var/lib/acme/*/fullchain.pem 0644 traefik traefik -"
       "z /var/lib/acme/*/privatekey.pem 0640 traefik traefik -"
     ];
+    services."kanidm.service".after = [ "traefik.service" "traefik-certs-dumper.service" "systemd-tmpfiles-resetup.service"];
     services."kanidm.service".requires = [ "traefik-certs-dumper.service" ];
   };
 }

@@ -83,16 +83,23 @@
 
   # Ajuste de permissões para que outros serviços (como mail) possam ler os certificados
   # Criamos um diretório com permissões de grupo para que postfix/dovecot acessem
-  systemd.tmpfiles.rules = lib.mkIf (hostName == "galactica") [
-    "d /var/lib/traefik/certs 0755 traefik traefik -"
+  systemd = {
+    tmpfiles.rules = lib.mkIf (hostName == "galactica") [
+      "d /var/lib/traefik/certs 0755 traefik traefik -"
     
-    # Garante ao Kanidm acesso aos certificados
-    "z /var/lib/acme/*/fullchain.pem 0644 traefik traefik -"
-    "z /var/lib/acme/*/privatekey.pem 0640 traefik traefik -"
+      # Garante ao Kanidm, Mail e outros serviços acesso aos certificados
+      "z /var/lib/acme/*/fullchain.pem 0644 traefik traefik -"
+      "z /var/lib/acme/*/privatekey.pem 0640 traefik traefik -"
   
-    # Garante que o diretório de challenges exista
-    "d /var/lib/acme/.challenges 0755 acme acme -"
-  ];
+      # Garante que o diretório de challenges exista
+      "d /var/lib/acme/.challenges 0755 acme acme -"
+    ];
+    services = {
+      "systemd-tmpfiles-resetup.service".after = [ "traefik.service" "traefik-certs-dumper.service" ];
+      "systemd-tmpfiles-resetup.service".requires = [ "traefik-certs-dumper.service" ];
+    };
+  };
+  
 
   # /var/lib/acme/.challenges must be writable by the ACME user
   # and readable by the Nginx user. The easiest way to achieve

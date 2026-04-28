@@ -2,11 +2,6 @@
 
 {
 
-  imports = [
-    # SNM agora é importado via flake.nix (nixos-mailserver.nixosModules.mailserver)
-    ./agenda.nix
-  ];
-
   services = {
 
     # Gerar os certificados pelo Traefik! 
@@ -37,8 +32,10 @@
 
     # Certificados SSL via ACME (Gerenciados pelo Traefik e exportados pelo Dumper)
     x509 = { 
-      certificateFile = "/var/lib/acme/${config.mailserver.fqdn}/fullchain.pem";
-      privateKeyFile = "/var/lib/acme/${config.mailserver.fqdn}/privatekey.pem";
+      certificateFile = "/var/lib/acme/wcbrpar.com}/fullchain.pem";
+      privateKeyFile = "/var/lib/acme/wcbrpar.com}/privatekey.pem";
+      # certificateFile = "/var/lib/acme/${config.mailserver.fqdn}/fullchain.pem";
+      # privateKeyFile = "/var/lib/acme/${config.mailserver.fqdn}/privatekey.pem";
     };
     
     # Contas declarativas
@@ -125,17 +122,6 @@
     extraGroups = [ "traefik" "acme" "snm" ];
   };
   users.users.postfix.extraGroups = [ "traefik" "acme" "snm" ];
-
-  # Pre-start para evitar falha do Dovecot se o dumper ainda não exportou os arquivos
-  # systemd.services.dovecot.preStart = lib.mkBefore ''
-  #   mkdir -p /var/lib/acme/mail.wcbrpar.com
-  #   if [ ! -f /var/lib/acme/mail.wcbrpar.com/fullchain.pem ]; then
-  #     touch /var/lib/acme/mail.wcbrpar.com/fullchain.pem
-  #     touch /var/lib/acme/mail.wcbrpar.com/privatekey.pem
-  #     chown -R traefik:traefik /var/lib/acme/mail.wcbrpar.com
-  #     chmod -R 750 /var/lib/acme/mail.wcbrpar.com
-  #   fi
-  # '';
 
   # Firewall: portas de email
   networking.firewall.allowedTCPPorts = lib.mkIf ( hostName == "galactica" ) [ 
