@@ -11,7 +11,7 @@
           routers = {
             MS-ALL = {
               rule = "Host(`mail.wcbrpar.com`) || Host(`mail.redcom.digital`) || Host(`mail.walcor.com.br`) || Host(`mail.wqueiroz.adv.br`)";
-              service = "noop-service"; 
+              service = "noop@internal"; 
               entrypoints = ["websecure"];
               tls = {
                 certResolver = "cloudflare";
@@ -19,7 +19,7 @@
             };
           };
         # Serviço dummy que não faz nada
-        services.noop-service.loadBalancer.servers = [ { url = "http://localhost"; } ];
+        # services.noop-service.loadBalancer.servers = [ { url = "http://localhost"; } ];
         };
       };
     };

@@ -9,14 +9,86 @@
     # pkgs.onlyoffice-workspace.documentServer
   ];
 
+  # Segredos para o NextCloud e para o OnlyOffice
+  age.secrets = lib.mkIf ( hostName == "galactica" ) {
+    nextcloud-admin-password = {
+      file = ../../secrets/nextcloudAdminPassword.age;
+      owner = "root";
+      group = "nextcloud";
+      mode = "440";
+    };
+    onlyoffice-jwt-secret = {
+      file = ../../secrets/onlyofficeJwtSecret.age;
+      owner = "root";
+      group = "onlyoffice";
+      mode = "440";
+    };
+  };
+
   services = {
+    
+    nextcloud = {
+      enable = true;
+      hostName = "cloud.wcbrpar.com";
+
+       # Need to manually increment with every major upgrade.
+      package = pkgs.nextcloud33;
+
+      # Let NixOS install and configure the database automatically.
+      database.createLocally = true;
+
+      # Let NixOS install and configure Redis caching automatically.
+      configureRedis = true;
+
+      # Increase the maximum file upload size to avoid problems uploading videos.
+      maxUploadSize = "16G";
+      https = false;
+      nginx.enable = false; 
+      configureRedis = true;
+      listen = [{ addr = "127.0.0.1"; port = 8185; ssl = false; }];
+      enableBrokenCiphersForSSE = false;
+
+      autoUpdateApps.enable = true;
+      extraAppsEnable = true;
+      extraApps = with config.services.nextcloud.package.packages.apps; {
+        # List of apps we want to install and are already packaged in
+        # https://github.com/NixOS/nixpkgs/blob/master/pkgs/servers/nextcloud/packages/nextcloud-apps.json
+        inherit calendar contacts mail notes onlyoffice tasks;
+
+      };
+
+      settings = {
+        overwriteProtocol = "https";
+        defaultPhoneRegion = "BR";
+        dbtype = "pgsql";
+        adminuser = "admin";
+        adminpassFile = config.age.secrets.nextcloud-admin-pssword.path;
+        trusted_proxies = [ "127.0.0.1" "::1" "192.168.13.10" ];
+      };
+    };
+
+    onlyoffice = {
+      enable = true;
+      hostname = "office.wcbrpar.com";
+
+    };
+
     traefik = lib.mkIf (config.networking.hostName == "galactica") {
       dynamicConfigOptions = {
         http = {
           routers = {
-            OO-ALL = {
-              rule = "Host(`office.wcbrpar.com`) || Host(`office.redcom.digital`)";
+            NC-ALL = {
+              rule = "Host(`cloud.wcbrpar.com`) || Host(`cloud.redcom.digital`) || Host(`cloud.walcor.com.br`) || Host(`cloud.wqueioz.adv.br`)";
               service = "onlyoffice-service";
+              entrypoints = ["websecure"];
+              tls = {
+                certResolver = "cloudflare";
+              };
+              # middlewares = ["onlyoffice-prefix"];
+            };
+            OO-ALL = {
+              rule = "Host(`office.wcbrpar.com`) || Host(`office.redcom.digital`) || Host(`office.walcor.com.br`) || Host(`office.wqueiroz.adv.br`)";
+              service = "nextcloud-service";
               entrypoints = ["websecure"];
               tls = {
                 certResolver = "cloudflare";
@@ -25,6 +97,12 @@
             };
           };
           services = {
+            nextcloud-service = {
+              loadBalancer = {
+                servers = [{url = "http://pegasus.wcbrpar.com:8185";}];
+                passHostHeader = true;
+              };
+            };
             onlyoffice-service = {
               loadBalancer = {
                 servers = [{url = "http://pegasus.wcbrpar.com:8008";}];
@@ -55,11 +133,11 @@
     #   enableBackup = true; # Ativa backups automáticos do MySQL e PostgreSQL
     # };
 
-    nginx.virtualHosts."office.wcbrpar.com" = lib.mkIf (config.networking.hostName == "pegasus") {
-      extraConfig = ''
-        absolute_redirect off;
-      '';
-    };
+    # nginx.virtualHosts."office.wcbrpar.com" = lib.mkIf (config.networking.hostName == "pegasus") {
+    #   extraConfig = ''
+    #     absolute_redirect off;
+    #   '';
+    # };
   };
 
   fonts.fontDir = lib.mkIf (config.networking.hostName == "pegasus") { 
