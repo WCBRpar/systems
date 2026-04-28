@@ -2,6 +2,7 @@
   config,
   lib,
   pkgs,
+  hostName, 
   ...
 }: {
   environment.systemPackages = [
@@ -10,7 +11,7 @@
   ];
 
   # Segredos para o NextCloud e para o OnlyOffice
-  age.secrets = lib.mkIf ( hostName == "galactica" ) {
+  age.secrets = lib.mkIf ( hostName == "pegasus" ) {
     nextcloud-admin-password = {
       file = ../../secrets/nextcloudAdminPassword.age;
       owner = "root";
@@ -27,7 +28,8 @@
 
   services = {
     
-    nextcloud = {
+    nextcloud = lib.mkIf ( hostName == "pegasus" ) {
+
       enable = true;
       hostName = "cloud.wcbrpar.com";
 
@@ -67,7 +69,8 @@
       };
     };
 
-    onlyoffice = {
+    onlyoffice = lib.mkIf ( hostName == "pegasus" ) {
+
       enable = true;
       hostname = "office.wcbrpar.com";
 
