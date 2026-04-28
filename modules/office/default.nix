@@ -24,6 +24,13 @@
       group = "onlyoffice";
       mode = "440";
     };
+    onlyoffice-security-nonce = {
+      file = ../../secrets/onlyofficeSecurityNonce.age;
+      owner = "root";
+      group = "onlyoffice";
+      mode = "440";
+    };
+
   };
 
   services = {
@@ -46,8 +53,6 @@
       maxUploadSize = "16G";
       
       https = false;
-      nginx.enable = false; 
-      listen = [{ addr = "127.0.0.1"; port = 8185; ssl = false; }];
       
       enableBrokenCiphersForSSE = false;
 
@@ -75,6 +80,7 @@
       enable = true;
       hostname = "office.wcbrpar.com";
       jwtSecretFile = config.age.secrets.onlyoffice-jwt-secret.path;
+      securityNonceFile = config.age.secrets.onlyoffice-security-nonce.path;
 
     };
 
@@ -104,7 +110,7 @@
           services = {
             nextcloud-service = {
               loadBalancer = {
-                servers = [{url = "http://pegasus.wcbrpar.com:8185";}];
+                servers = [{url = "http://pegasus.wcbrpar.com";}];
                 passHostHeader = true;
               };
             };
