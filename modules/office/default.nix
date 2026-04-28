@@ -59,12 +59,12 @@
 
       };
 
-      settings = {
+      config = {
         overwriteProtocol = "https";
         defaultPhoneRegion = "BR";
         dbtype = "pgsql";
         adminuser = "admin";
-        adminpassFile = config.age.secrets.nextcloud-admin-pssword.path;
+        adminpassFile = config.age.secrets.nextcloud-admin-password.path;
         trusted_proxies = [ "127.0.0.1" "::1" "192.168.13.10" ];
       };
     };
@@ -81,8 +81,8 @@
         http = {
           routers = {
             NC-ALL = {
-              rule = "Host(`cloud.wcbrpar.com`) || Host(`cloud.redcom.digital`) || Host(`cloud.walcor.com.br`) || Host(`cloud.wqueioz.adv.br`)";
-              service = "onlyoffice-service";
+              rule = "Host(`cloud.wcbrpar.com`) || Host(`cloud.redcom.digital`) || Host(`cloud.walcor.com.br`) || Host(`cloud.wqueiroz.adv.br`)";
+              service = "nextcloud-service";
               entrypoints = ["websecure"];
               tls = {
                 certResolver = "cloudflare";
@@ -91,7 +91,7 @@
             };
             OO-ALL = {
               rule = "Host(`office.wcbrpar.com`) || Host(`office.redcom.digital`) || Host(`office.walcor.com.br`) || Host(`office.wqueiroz.adv.br`)";
-              service = "nextcloud-service";
+              service = "onlyoffice-service";
               entrypoints = ["websecure"];
               tls = {
                 certResolver = "cloudflare";

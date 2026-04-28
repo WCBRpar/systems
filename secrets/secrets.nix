@@ -32,6 +32,10 @@ in
   "ssh-key.age".publicKeys = admins;
   "telegramBotKey.age".publicKeys = all;
 
+  # Secrets do Módulo Office (NextCloud + OnlyOffice)
+  "nextcloudAdminPassword.age".publicKeys = all;
+  "onlyofficeJwtSecret.age".publicKeys = all;
+
   # Secrets do Simple NixOS Mailserver (SNM)
   "ldapMailPassword.age".publicKeys = all;
   "mailWalterPassword.age".publicKeys = all;
