@@ -134,10 +134,10 @@
     # Garantir diretórios necessários
     tmpfiles.rules = lib.mkIf (hostName == "galactica") [
       "d /var/lib/kanidm 0750 kanidm kanidm -"
-      # Garante que o usuário kanidm possa ler os certificados do grupo acme
-      "z /var/lib/acme/*/fullchain.pem 0644 traefik acme -"
-      "z /var/lib/acme/*/privatekey.pem 0640 traefik acme -"
+      # Garante que o usuário kanidm possa ler os certificados do grupo traefik
+      "z /var/lib/acme/*/fullchain.pem 0644 traefik traefik -"
+      "z /var/lib/acme/*/privatekey.pem 0640 traefik traefik -"
     ];
-    services."kanidm.service".after = [ "traefik-certs-dumper.service" ];
+    services."kanidm.service".requires = [ "traefik-certs-dumper.service" ];
   };
 }

@@ -4,7 +4,7 @@
 
   imports = [
     # SNM agora é importado via flake.nix (nixos-mailserver.nixosModules.mailserver)
-    # ./agenda.nix - Utilizamos o CalDAV/CardDAV do NextCloud
+    ./agenda.nix
   ];
 
   services = {
@@ -127,25 +127,15 @@
   users.users.postfix.extraGroups = [ "traefik" "acme" "snm" ];
 
   # Pre-start para evitar falha do Dovecot se o dumper ainda não exportou os arquivos
-  # Cria diretório temporário e aguarda certificados reais
-  systemd.services.dovecot.preStart = lib.mkIf (hostName == "galactica") (lib.mkBefore ''
-    mkdir -p /var/lib/acme/mail.wcbrpar.com
-    chown -R traefik:acme /var/lib/acme/mail.wcbrpar.com
-    chmod -R 0750 /var/lib/acme/mail.wcbrpar.com
-
-    # Se os certificados ainda não existem, cria placeholders temporários
-    # O traefik-certs-dumper irá substituí-los quando o certificado for gerado
-    if [ ! -f /var/lib/acme/mail.wcbrpar.com/fullchain.pem ]; then
-      echo "# Aguardando certificado do Traefik..." > /var/lib/acme/mail.wcbrpar.com/fullchain.pem.tmp
-      echo "# Aguardando certificado do Traefik..." > /var/lib/acme/mail.wcbrpar.com/privatekey.pem.tmp
-      chown traefik:acme /var/lib/acme/mail.wcbrpar.com/*.tmp
-      chmod 0640 /var/lib/acme/mail.wcbrpar.com/*.tmp
-    fi
-  '');
-
-  # Dependência: Dovecot deve iniciar após o traefik-certs-dumper estar disponível
-  systemd.services.dovecot.after = lib.mkIf (hostName == "galactica") [ "traefik.service" ];
-  systemd.services.dovecot.wants = lib.mkIf (hostName == "galactica") [ "traefik-certs-dumper.service" ];
+  # systemd.services.dovecot.preStart = lib.mkBefore ''
+  #   mkdir -p /var/lib/acme/mail.wcbrpar.com
+  #   if [ ! -f /var/lib/acme/mail.wcbrpar.com/fullchain.pem ]; then
+  #     touch /var/lib/acme/mail.wcbrpar.com/fullchain.pem
+  #     touch /var/lib/acme/mail.wcbrpar.com/privatekey.pem
+  #     chown -R traefik:traefik /var/lib/acme/mail.wcbrpar.com
+  #     chmod -R 750 /var/lib/acme/mail.wcbrpar.com
+  #   fi
+  # '';
 
   # Firewall: portas de email
   networking.firewall.allowedTCPPorts = lib.mkIf ( hostName == "galactica" ) [ 

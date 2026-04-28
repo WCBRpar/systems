@@ -10,7 +10,7 @@
       auth = {
         # Usando autenticação por header para integrar com o Traefik OIDC
         type = "http_remote_user";
-        # remote_user_variable = "X-Forwarded-User";
+        # remote_user_header = "HTTP_X_FORWARDED_USER";
         # type = "ldap";
         # ldap_uri = "ldaps://ldap.wcbrpar.com";
         # ldap_base = "dc=wcbrpar,dc=com";
@@ -25,14 +25,12 @@
       };
       storage = {
         filesystem_folder = "/var/lib/radicale/collections";
-        type = "multifilesystem";
       };
     };
   };
   
   # Permitir que o radicale acesse o segredo do agenix
   users.groups.snm = {};
-  users.groups.radicale = {};
   users.users.radicale = {
     isSystemUser = true;
     group = "radicale";
@@ -60,7 +58,7 @@
             radicale-service = {
               loadBalancer = {
                 servers = [{ url = "http://127.0.0.1:5232"; }];
-                passHostHeader = false;
+                passHostHeader = true;
               };
             };
           };
@@ -82,16 +80,16 @@
                   
                   ClaimMappings = {
                     # Mapeia o e-mail ou username para o header que o Radicale vai ler
-                    Email = "mail_primary";
+                    User = "mail_primary";
                   };
                   
-                  LogLevel = "debug";
+                  LogLevel = "info";
                   
                   # Headers para passar o usuário autenticado para o Radicale
                   Headers = {
                     Request = {
                       Set = {
-                        X-Remote-User = "{email}";
+                        X-Forwarded-User = "{user}";
                       };
                     };
                   };
