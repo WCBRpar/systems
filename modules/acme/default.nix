@@ -56,12 +56,17 @@
   # Este serviço monitora o acme.json do Traefik e extrai os certificados para arquivos .pem individuais
   systemd.services.traefik-certs-dumper = lib.mkIf (hostName == "galactica") {
     description = "Dump Traefik certificates from acme.json";
-    after = [ "traefik.service" ];
+    after = [ "network-online.target" "traefik.service" ];
     wants = [ "traefik.service" ];
     wantedBy = [ "multi-user.target" ];
     
     serviceConfig = {
       Type = "simple";
+      ExecStartPre = ''
+        ${pkgs.coreutils}/bin/mkdir -p /var/lib/acme
+        ${pkgs.coreutils}/bin/chown traefik:acme /var/lib/acme
+        ${pkgs.coreutils}/bin/chmod 0750 /var/lib/acme
+      '';
       ExecStart = ''
         ${pkgs.traefik-certs-dumper}/bin/traefik-certs-dumper file \
           --version v3 \
@@ -77,7 +82,8 @@
       Restart = "on-failure";
       # O dumper precisa ler o acme.json (propriedade do traefik)
       User = "traefik";
-      Group = "traefik";
+      Group = "acme";
+      SupplementaryGroups = [ "traefik" ];
     };
   };
 
@@ -86,13 +92,21 @@
   systemd.tmpfiles.rules = lib.mkIf (hostName == "galactica") [
     "d /var/lib/traefik/certs 0755 traefik traefik -"
     
-    # Garante ao Kanidm acesso aos certificados
-    "z /var/lib/acme/*/fullchain.pem 0644 traefik traefik -"
-    "z /var/lib/acme/*/privatekey.pem 0640 traefik traefik -"
-  
+    # Diretório base para certificados ACME - grupo acme para permitir acesso de dovecot/postfix
+    "d /var/lib/acme 0750 traefik acme -"
+
+    # Garante ao Kanidm acesso aos certificados (permissões mais abertas para leitura)
+    "z /var/lib/acme/*/fullchain.pem 0644 traefik acme -"
+    "z /var/lib/acme/*/privatekey.pem 0640 traefik acme -"
+
+
     # Garante que o diretório de challenges exista
     "d /var/lib/acme/.challenges 0755 acme acme -"
   ];
+
+  # Adiciona dovecot e postfix ao grupo acme para poderem ler os certificados
+  users.users.dovecot.extraGroups = lib.mkIf (hostName == "galactica") [ "acme" ];
+  users.users.postfix.extraGroups = lib.mkIf (hostName == "galactica") [ "acme" ];
 
   # /var/lib/acme/.challenges must be writable by the ACME user
   # and readable by the Nginx user. The easiest way to achieve
