@@ -127,13 +127,17 @@
     group = "kanidm";
   };
   users.groups.kanidm = { };
-  
+  users.groups.traefik = { };
+
   # Garantir diretórios necessários
   systemd = {
     # Garantir diretórios necessários
     tmpfiles.rules = lib.mkIf (hostName == "galactica") [
       "d /var/lib/kanidm 0750 kanidm kanidm -"
+      # Garante que o usuário kanidm possa ler os certificados do grupo traefik
+      "z /var/lib/acme/*/fullchain.pem 0644 traefik traefik -"
+      "z /var/lib/acme/*/privatekey.pem 0640 traefik traefik -"
     ];
-    services."kanidm.service".after = [ "traefik.service" "traefik-certs-dumper.service" "systemd-tmpfiles-setup.service"];
+    services."kanidm.service".requires = [ "traefik-certs-dumper.service" ];
   };
 }

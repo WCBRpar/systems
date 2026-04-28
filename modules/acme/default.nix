@@ -57,7 +57,7 @@
   systemd.services.traefik-certs-dumper = lib.mkIf (hostName == "galactica") {
     description = "Dump Traefik certificates from acme.json";
     after = [ "traefik.service" ];
-    wants = [ "trarfik.service" ];
+    wants = [ "traefik.service" ];
     wantedBy = [ "multi-user.target" ];
     
     serviceConfig = {
@@ -87,6 +87,7 @@
     "d /var/lib/traefik/certs 0755 traefik traefik -"
     
     # Garante ao Kanidm acesso aos certificados
+    "z /var/lib/acme/*/fullchain.pem 0644 traefik traefik -"
     "z /var/lib/acme/*/privatekey.pem 0640 traefik traefik -"
   
     # Garante que o diretório de challenges exista
