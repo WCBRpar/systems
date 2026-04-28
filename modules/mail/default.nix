@@ -127,15 +127,15 @@
   users.users.postfix.extraGroups = [ "traefik" "acme" "snm" ];
 
   # Pre-start para evitar falha do Dovecot se o dumper ainda não exportou os arquivos
-  systemd.services.dovecot.preStart = lib.mkBefore ''
-    mkdir -p /var/lib/acme/mail.wcbrpar.com
-    if [ ! -f /var/lib/acme/mail.wcbrpar.com/fullchain.pem ]; then
-      touch /var/lib/acme/mail.wcbrpar.com/fullchain.pem
-      touch /var/lib/acme/mail.wcbrpar.com/privatekey.pem
-      chown -R traefik:traefik /var/lib/acme/mail.wcbrpar.com
-      chmod -R 750 /var/lib/acme/mail.wcbrpar.com
-    fi
-  '';
+  # systemd.services.dovecot.preStart = lib.mkBefore ''
+  #   mkdir -p /var/lib/acme/mail.wcbrpar.com
+  #   if [ ! -f /var/lib/acme/mail.wcbrpar.com/fullchain.pem ]; then
+  #     touch /var/lib/acme/mail.wcbrpar.com/fullchain.pem
+  #     touch /var/lib/acme/mail.wcbrpar.com/privatekey.pem
+  #     chown -R traefik:traefik /var/lib/acme/mail.wcbrpar.com
+  #     chmod -R 750 /var/lib/acme/mail.wcbrpar.com
+  #   fi
+  # '';
 
   # Firewall: portas de email
   networking.firewall.allowedTCPPorts = lib.mkIf ( hostName == "galactica" ) [ 

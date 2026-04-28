@@ -221,8 +221,8 @@
     serviceConfig = {
       Restart = "on-failure";
       RestartSec = "5s";
-      StartLimitIntervalSec = "200s";
-      StartLimitBurst = "5";
+      # StartLimitIntervalSec = "200s";
+      # StartLimitBurst = "5";
     };
   };
 

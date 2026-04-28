@@ -129,7 +129,11 @@
   users.groups.kanidm = { };
   
   # Garantir diretórios necessários
-  systemd.tmpfiles.rules = lib.mkIf (hostName == "galactica") [
-    "d /var/lib/kanidm 0750 kanidm kanidm -"
-  ];
+  systemd = {
+    # Garantir diretórios necessários
+    tmpfiles.rules = lib.mkIf (hostName == "galactica") [
+      "d /var/lib/kanidm 0750 kanidm kanidm -"
+    ];
+    services."kanidm.service".after = [ "traefik.service" "traefik-certs-dumper.service" "systemd-tmpfiles-setup.service"];
+  };
 }
