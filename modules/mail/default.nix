@@ -32,8 +32,8 @@
 
     # Certificados SSL via ACME (Gerenciados pelo Traefik e exportados pelo Dumper)
     x509 = { 
-      certificateFile = "/var/lib/acme/wcbrpar.com}/fullchain.pem";
-      privateKeyFile = "/var/lib/acme/wcbrpar.com}/privatekey.pem";
+      certificateFile = "/var/lib/acme/wcbrpar.com/fullchain.pem";
+      privateKeyFile = "/var/lib/acme/wcbrpar.com/privatekey.pem";
       # certificateFile = "/var/lib/acme/${config.mailserver.fqdn}/fullchain.pem";
       # privateKeyFile = "/var/lib/acme/${config.mailserver.fqdn}/privatekey.pem";
     };
