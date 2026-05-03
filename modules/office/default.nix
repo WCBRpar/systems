@@ -33,15 +33,26 @@
 
   };
 
-  systemd.services.nextcloud-setup = {
-    requires = [ "postgresql.service" ];
-    after = [ "postgresql.service" ];
+  systemd = lib.mkIf (hostName == "pegasus") {
+    services.nextcloud-setup ={
+      requires = [ "postgresql.service" ];
+      after = [ "postgresql.service" ];
+      unitConfig.JoinsNamespaceOf = "postgresql.service"; 
+    };
+    tmpfiles.rules = [
+      # d: diretório, modo 0750, usuário nextcloud, grupo nextcloud
+      # Z: aplica recursivamente o dono e permissões (importante para o diretório config)
+      "d /var/lib/nextcloud 0750 nextcloud nextcloud -"
+      "Z /var/lib/nextcloud 0750 nextcloud nextcloud -"
+      "d /var/lib/nextcloud/config 0750 nextcloud nextcloud -"
+    ];
   };
 
   services = {
 
     # Configura os privilégios do NexCloud para a DB personalizada. 
     postgresql = lib.mkIf (hostName == "pegasus") {
+      enable = true;
       ensureDatabases = [ "ncdb-wcbrpar" "nextcloud" ];
       ensureUsers = [ { name = "nextcloud"; ensureDBOwnership = true; } ];
     };
@@ -80,7 +91,11 @@
 
         config_is_read_only = false;
         default_phone_region = "BR";
+        default_language = "pt_BR";
+        default_locale = "pt_BR";
+
         overwriteprotocol = "https";
+
         trusted_proxies = [ "127.0.0.1" "::1" "192.168.13.10" ];
         trusted_domains = [ "cloud.redcom.digital" "cloud.walcor.com.br" "cloud.wqueiroz.adv.br" ];
 
@@ -88,9 +103,10 @@
 
       config = {
         dbtype = "pgsql";
-        dbname = "ncdb-wcbrpar";
+        # dbname = "ncdb-wcbrpar";
         dbuser = "nextcloud";
         # dbpassFile = config.age.secrets.nextcloud-admin-password.path;
+        dbhost = "/run/postgresql";
         adminuser = "admin";
         adminpassFile = config.age.secrets.nextcloud-admin-password.path;
       };
