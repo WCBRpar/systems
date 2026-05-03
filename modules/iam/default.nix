@@ -1,11 +1,23 @@
 { config, lib, pkgs, hostName, ... }:
 
 {
+  
+  age.secrets = {
+    # Configurar um password para a conta idm_admin do Traefik
+    kanidm-idm-admin-password = {
+      file = ../../secrets/kanidmIdmAdminPassword.age;
+      mode = "600";
+      owner = "kanidm";
+      group = "kanidm";
+    };
+ 
+  };
+
   networking.firewall = lib.mkIf (hostName == "galactica") {
     enable = true;
     allowedTCPPorts = [ 80 443 636 8443 ];
     extraCommands = ''
-      # Remove qualquer regra DROP existente na porta 8443 (ignora se não existir)
+      # Remove qualq/uer regra DROP existente na porta 8443 (ignora se não existir)
       # iptables -D INPUT -p tcp --dport 8443 -j DROP 2>/dev/null || true
       # Garante acesso irrestrito à porta 8443 (já incluída no allowedTCPPorts, mas por segurança)
       # iptables -A INPUT -p tcp --dport 8443 -j ACCEPT
@@ -96,7 +108,19 @@
         verify_hostnames = false;
       };
     };
-    
+
+    unix = {
+      enable = true;
+      settings = {
+        hsm_type = "soft";
+        default_shell = "/bin/zsh";
+        home_attr = "uuid";
+        home_prefix = "/home/";
+        kanidm.pam_allowed_login_groups = [ "users" "admins" ];
+        enablePam = true;
+      };
+    };    
+
     server = lib.mkIf (hostName == "galactica") {
       enable = true;
 
@@ -112,20 +136,10 @@
       };
     };
     
-    unix = {
-      settings = {
-        hsm_type = "soft";
-        default_shell = "/bin/zsh";
-        home_attr = "uuid";
-        home_prefix = "/home/";
-        kanidm.pam_allowed_login_groups = [ "users" "admins" ];
-        enablePam = lib.mkIf (hostName == "galactica") true;
-      };
-    };
-
     provision = lib.mkIf (hostName == "galactica") {
       enable = true;
       autoRemove = true;
+      idmAdminPasswordFile = config.age.secrets.kanidm-idm-admin-password.path;
       groups = {
         "admins" = { };
         "users" = { };

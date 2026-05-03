@@ -10,18 +10,20 @@
     #Segredos Necessários para o funcinamento
     
     users = {
-      traefik = { isSystemUser = true; group = "traefik"; };
+      users = {
+        traefik = { isSystemUser = true; group = "traefik"; };
+      };
     };
 
     age.secrets = {
-    # Client secret para API da Cloudflare
-    cloudflare-api-key = {
-      file = ../../secrets/cloudflareApiKey.age;
-      mode = "600";
-      owner = "traefik";
-      group = "traefik";
+      # Client secret para API da Cloudflare
+      cloudflare-api-key = {
+        file = ../../secrets/cloudflareApiKey.age;
+        mode = "600";
+        owner = "traefik";
+        group = "traefik";
+      };
     };
-  };
 
 
   services.traefik = lib.mkIf (hostName == "galactica") {
@@ -88,6 +90,9 @@
             to = "websecure";
             scheme = "https";
             permanent = false;
+            forwardedHeaders = {
+              trustedIPs = [ "127.0.0.1/32" "192.168.13.0/24" ];
+            };
           };
         };
 
@@ -96,7 +101,7 @@
           http.tls = {
             certResolver = "cloudflare";
             options = "mytls";
-            forwardHeaders = {
+            forwardedHeaders = {
               trustedIPs = [ "127.0.0.1/32" "192.168.13.0/24" ];
             };
           };

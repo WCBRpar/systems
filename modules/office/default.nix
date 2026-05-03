@@ -68,25 +68,25 @@
   services = {
 
     # Configuração OAuth2 do Kanidm para o NextCloud
-    kanidm = lib.mkIf (hostName == "galactica") {
-      provision.systems.oauth2 = {
-        "nextcloud" = {
-          displayName = "NextCloud Office";
-          originUrl = [
-            "https://cloud.wcbrpar.com/apps/oidc_login/oidc"
-          ];
-          originLanding = "https://cloud.wcbrpar.com";
-          imageFile = ../../media-assets/iam-auth-badges/nextcloud-auth.svg;
-          public = true;
-          scopeMaps = {
-            "users" = [  "openid" "profile" "email" "groups" ];
-            "admins" = [ "openid" "profile" "email" "groups" ];
-            "admin-tools" = [ "openid" "profile" "email" "groups" ];
-          };
-          basicSecretFile = config.age.secrets.nextcloud-oauth-secret.path;
-        };
-      };
-    };
+    # kanidm = lib.mkIf (hostName == "galactica") {
+    #   provision.systems.oauth2 = {
+    #     "nextcloud" = {
+    #       displayName = "NextCloud Office";
+    #       originUrl = [
+    #         "https://cloud.wcbrpar.com/apps/oidc_login/oidc"
+    #       ];
+    #       originLanding = "https://cloud.wcbrpar.com";
+    #       imageFile = ../../media-assets/iam-auth-badges/nextcloud-auth.svg;
+    #       public = true;
+    #       scopeMaps = {
+    #         "users" = [  "openid" "profile" "email" "groups" ];
+    #         "admins" = [ "openid" "profile" "email" "groups" ];
+    #         "admin-tools" = [ "openid" "profile" "email" "groups" ];
+    #       };
+    #       basicSecretFile = config.age.secrets.nextcloud-oauth-secret.path;
+    #     };
+    #   };
+    # };
 
     # Configura os privilégios do NexCloud para a DB personalizada. 
     postgresql = lib.mkIf (hostName == "pegasus") {

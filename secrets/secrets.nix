@@ -31,6 +31,9 @@ in
   "ssh-key.age".publicKeys = admins;
   "telegramBotKey.age".publicKeys = all;
 
+  # Secrets do Módulo Kanidm 
+  "kanidmIdmAdminPassword.age".publicKeys = all; 
+
   # Secrets do Módulo Office (NextCloud + OnlyOffice)
   "nextcloudAdminPassword.age".publicKeys = all;
   "nextcloudOauthSecret.age".publicKeys = all;
