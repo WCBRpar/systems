@@ -11,7 +11,7 @@
       # iptables -A INPUT -p tcp --dport 8443 -j ACCEPT
     '';
   };
-  
+
   environment.systemPackages = with pkgs; [ kanidm_1_9 nginx ];
   
   # Configuração do Traefik para proxy reverso do Kanidm
@@ -24,7 +24,7 @@
       };
       routers = {
         KN-WPR = {
-          rule = "Host(`iam.wcbrpar.com`) || Host(`iam.redcom.digital`)";
+          rule = "Host(`iam.wcbrpar.com`) || Host(`iam.redcom.digital`) || Host(`iam.walcor.com.br`) || Host(`iam.wqueiroz.adv.br`)";
           service = "kanidm-service";
           entrypoints = ["websecure"];
           tls = {
@@ -32,8 +32,18 @@
           };
           middlewares = ["kanidm-headers"];
         };
-      };
-      
+
+        LD-WPR = {
+          rule = "Host(`ldap.wcbrpar.com`) || Host(`ldap.redcom.digital`) || Host(`ldap.walcor.com.br`) || Host(`ldap.wqueiroz.adv.br`)";
+          service = "ldap-service";
+          entrypoints = ["websecure"];
+          tls = {
+            certResolver = "cloudflare";
+          };
+          middlewares = [ "intranet" ];
+        };
+      };      
+
       services = {
         kanidm-service = {
           loadBalancer = {
@@ -43,6 +53,16 @@
           };
         };
       };
+
+      services = {
+        ldap-service = {
+          loadBalancer = {
+            servers = [{ url = "ldaps://galactica.wcbrpar.com:636"; }];
+            passHostHeader = true;
+          };
+        };
+      };
+ 
       
       middlewares = {
         "kanidm-headers" = {

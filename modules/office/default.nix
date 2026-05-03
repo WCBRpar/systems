@@ -31,7 +31,7 @@
     };
     nextcloud-oauth-secret = {
       file = ../../secrets/nextcloudOauthSecret.age;
-      owner = "root";
+      owner = "kanidm";
       group = "office";
       mode = "440";
     };

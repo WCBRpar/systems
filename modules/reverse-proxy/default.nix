@@ -7,7 +7,12 @@
 }: {
 
 
-  #Segredos Necessários para o funcinamento
+    #Segredos Necessários para o funcinamento
+    
+    users = {
+      traefik = { isSystemUser = true; group = "traefik"; };
+    };
+
     age.secrets = {
     # Client secret para API da Cloudflare
     cloudflare-api-key = {
@@ -91,6 +96,9 @@
           http.tls = {
             certResolver = "cloudflare";
             options = "mytls";
+            forwardHeaders = {
+              trustedIPs = [ "127.0.0.1/32" "192.168.13.0/24" ];
+            };
           };
         };
 
@@ -143,8 +151,15 @@
               permanent = true;
             };
           };
-          
-          "oidc-auth" = lib.mkIf (hostName == "galactica") {
+          "intranet" = {
+            ipAllowList = {
+              sourceRange = [
+                "127.0.0.1/32"
+                "192.168.13.0/24"
+              ];
+            };
+          };
+          "oidc-auth" = {
             plugin = {
               "traefik-oidc-auth" = {
                 # URL de callback correta
