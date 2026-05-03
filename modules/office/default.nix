@@ -11,23 +11,37 @@
   ];
 
   # Segredos para o NextCloud e para o OnlyOffice
+  # Ajustes de permissões para acesso aos segredos!
+  users = {
+    groups.office = {};
+    users = {
+      nextcloud.extraGroups = [ "office" ];
+      kanidm.extraGroups = [ "office" ];
+    };
+  };
   age.secrets = lib.mkIf ( hostName == "pegasus" ) {
     nextcloud-admin-password = {
       file = ../../secrets/nextcloudAdminPassword.age;
       owner = "root";
-      group = "nextcloud";
+      group = "office";
+      mode = "440";
+    };
+    nextcloud-oauth-secret = {
+      file = ../../secrets/nextcloudOauthSecret.age;
+      owner = "root";
+      group = "office";
       mode = "440";
     };
     onlyoffice-jwt-secret = {
       file = ../../secrets/onlyofficeJwtSecret.age;
       owner = "root";
-      group = "onlyoffice";
+      group = "office";
       mode = "440";
     };
     onlyoffice-security-nonce = {
       file = ../../secrets/onlyofficeSecurityNonce.age;
       owner = "root";
-      group = "onlyoffice";
+      group = "office";
       mode = "440";
     };
 
@@ -49,6 +63,27 @@
   };
 
   services = {
+
+    # Configuração OAuth2 do Kanidm para o NextCloud
+    kanidm = lib.mkIf (hostName == "galactica") {
+      provision.systems.oauth2 = {
+        "nextcloud" = {
+          displayName = "NextCloud Office";
+          originUrl = [
+            "https://cloud.wcbrpar.com/apps/oidc_login/oidc"
+          ];
+          originLanding = "https://cloud.wcbrpar.com";
+          imageFile = ../../media-assets/iam-auth-badges/nextcloud-auth.svg;
+          public = true;
+          scopeMaps = {
+            "users" = [  "openid" "profile" "email" "groups" ];
+            "admins" = [ "openid" "profile" "email" "groups" ];
+            "admin-tools" = [ "openid" "profile" "email" "groups" ];
+          };
+          basicSecret = builtins.readFile config.age.secrets.nextcloud-oauth-secret.age.path;
+        };
+      };
+    };
 
     # Configura os privilégios do NexCloud para a DB personalizada. 
     postgresql = lib.mkIf (hostName == "pegasus") {
@@ -81,7 +116,7 @@
       extraApps = with config.services.nextcloud.package.packages.apps; {
         # List of apps we want to install and are already packaged in
         # https://github.com/NixOS/nixpkgs/blob/master/pkgs/servers/nextcloud/packages/nextcloud-apps.json
-        inherit calendar contacts mail notes onlyoffice tasks;
+        inherit calendar contacts mail notes onlyoffice tasks oidc oidc_login user_oidc;
 
       };
 
@@ -98,7 +133,29 @@
 
         trusted_proxies = [ "127.0.0.1" "::1" "192.168.13.10" ];
         trusted_domains = [ "cloud.redcom.digital" "cloud.walcor.com.br" "cloud.wqueiroz.adv.br" ];
+        
+        # Configurações OIDC
+        oidc_login_client_id = "nextcloud";
+        oidc_login_provider_url = "https://iam.wcbrpar.com/oauth2/openid/nextcloud";
+        oidc_login_logout_url = "https://iam.wcbrpar.com/ui/logout";
 
+        # Mapeamentos e Comportamento
+        oidc_login_attributes = {
+          id = "preferred_username";
+          mail = "email";
+          display_name = "name";
+          groups = "groups";
+        };
+        # Auto-criação de usuários e login automático (opcional )
+        oidc_login_auto_redirect = false; # Mantenha false para testar o botão primeiro
+        oidc_login_redir_fallback = true;
+        oidc_login_tls_verify = true;
+        oidc_login_disable_registration = false;
+        
+        # Secrets! 
+        secrets = {
+          oidc_login_client_secret = config.age.secrets.nextcloud-oauth-secret.path;
+        };
       };
 
       config = {
