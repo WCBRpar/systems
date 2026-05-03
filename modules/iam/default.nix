@@ -65,7 +65,8 @@
   };
   
   services.kanidm = {
-    package = pkgs.kanidm_1_10;
+    # package = pkgs.kanidm_1_10;
+    package = pkgs.kanidmWithSecretProvisioning_1_9;
     
     client = {
       enable = true;
@@ -78,6 +79,7 @@
     
     server = lib.mkIf (hostName == "galactica") {
       enable = true;
+
       settings = {
         log_level = "debug";
         domain = "wcbrpar.com";

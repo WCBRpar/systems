@@ -13,13 +13,16 @@
   # Segredos para o NextCloud e para o OnlyOffice
   # Ajustes de permissões para acesso aos segredos!
   users = {
-    groups.office = {};
+    groups = {
+      nextcloud = {};
+      office = {};
+    };
     users = {
-      nextcloud.extraGroups = [ "office" ];
-      kanidm.extraGroups = [ "office" ];
+      nextcloud = { isSystemUser = true; group = "nextcloud"; extraGroups = [ "office" ]; };
+      kanidm = { isSystemUser = true; group = "kanidm"; extraGroups = [ "office" ]; };
     };
   };
-  age.secrets = lib.mkIf ( hostName == "pegasus" ) {
+  age.secrets = {
     nextcloud-admin-password = {
       file = ../../secrets/nextcloudAdminPassword.age;
       owner = "root";
@@ -80,7 +83,7 @@
             "admins" = [ "openid" "profile" "email" "groups" ];
             "admin-tools" = [ "openid" "profile" "email" "groups" ];
           };
-          basicSecret = builtins.readFile config.age.secrets.nextcloud-oauth-secret.age.path;
+          basicSecretFile = config.age.secrets.nextcloud-oauth-secret.path;
         };
       };
     };
