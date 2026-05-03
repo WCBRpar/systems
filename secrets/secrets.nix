@@ -33,6 +33,7 @@ in
 
   # Secrets do Módulo Office (NextCloud + OnlyOffice)
   "nextcloudAdminPassword.age".publicKeys = all;
+  "nextcloudOauthSecret.age".publicKeys = all;
   "onlyofficeJwtSecret.age".publicKeys = all;
   "onlyofficeSecurityNonce.age".publicKeys = all;
 
