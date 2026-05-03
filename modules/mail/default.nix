@@ -114,14 +114,20 @@
   };
 
   # Permissões: Dovecot e Postfix precisam ler os certificados em /var/lib/acme
-  users.groups.dovecot = {};
-  users.groups.snm = {};
-  users.users.dovecot = {
-    isSystemUser = true;
-    group = "dovecot";
-    extraGroups = [ "traefik" "acme" "snm" ];
+  users = lib.mkIf ( hostName == "galactica" ) { 
+    groups = {
+      dovecot = {};
+      snm = {};
+    };
+    users = {
+      dovecot = {
+        isSystemUser = true;
+        group = "dovecot";
+        extraGroups = [ "traefik" "acme" "snm" ];
+      };
+      postfix.extraGroups = [ "traefik" "acme" "snm" ];
+    };
   };
-  users.users.postfix.extraGroups = [ "traefik" "acme" "snm" ];
 
   # Firewall: portas de email
   networking.firewall.allowedTCPPorts = lib.mkIf ( hostName == "galactica" ) [ 

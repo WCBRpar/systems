@@ -33,14 +33,25 @@
 
   };
 
+  systemd.services.nextcloud-setup = {
+    requires = [ "postgresql.service" ];
+    after = [ "postgresql.service" ];
+  };
+
   services = {
+
+    # Configura os privilégios do NexCloud para a DB personalizada. 
+    postgresql = lib.mkIf (hostName == "pegasus") {
+      ensureDatabases = [ "ncdb-wcbrpar" "nextcloud" ];
+      ensureUsers = [ { name = "nextcloud"; ensureDBOwnership = true; } ];
+    };
     
     nextcloud = lib.mkIf ( hostName == "pegasus" ) {
 
       enable = true;
       hostName = "cloud.wcbrpar.com";
 
-       # Need to manually increment with every major upgrade.
+      # Need to manually increment with every major upgrade.
       package = pkgs.nextcloud33;
 
       # Let NixOS install and configure the database automatically.
@@ -50,12 +61,10 @@
       configureRedis = true;
 
       # Increase the maximum file upload size to avoid problems uploading videos.
-      maxUploadSize = "16G";
+      maxUploadSize = "25G";
       
       https = false;
       
-      enableBrokenCiphersForSSE = false;
-
       autoUpdateApps.enable = true;
       extraAppsEnable = true;
       extraApps = with config.services.nextcloud.package.packages.apps; {
@@ -65,13 +74,25 @@
 
       };
 
+      settings = {
+
+        loglevel = 0;
+
+        config_is_read_only = false;
+        default_phone_region = "BR";
+        overwriteprotocol = "https";
+        trusted_proxies = [ "127.0.0.1" "::1" "192.168.13.10" ];
+        trusted_domains = [ "cloud.redcom.digital" "cloud.walcor.com.br" "cloud.wqueiroz.adv.br" ];
+
+      };
+
       config = {
-        overwriteProtocol = "https";
-        defaultPhoneRegion = "BR";
         dbtype = "pgsql";
+        dbname = "ncdb-wcbrpar";
+        dbuser = "nextcloud";
+        # dbpassFile = config.age.secrets.nextcloud-admin-password.path;
         adminuser = "admin";
         adminpassFile = config.age.secrets.nextcloud-admin-password.path;
-        trustedProxies = [ "127.0.0.1" "::1" "192.168.13.10" ];
       };
     };
 

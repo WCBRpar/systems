@@ -38,7 +38,7 @@
             dbfilter-wcbrpar = {
               headers = {
                 customRequestHeaders = {
-                  X-Odoo-dbfilter = "^WCBRpar$";
+                  X-Odoo-dbfilter = "^oddb-wcbrpar$";
                 };
               };
             };
