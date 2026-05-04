@@ -14,6 +14,18 @@ in
 
 {
   
+  # Cria u usuário Grafana em todas as máquinas
+  users = {
+    groups.grafana = {};
+    users = {
+      grafana = {
+        isSystemUser = true;
+        group = "grafana";
+      };
+    };
+  };
+
+  # Segredos necessários ao módulo Grafana
   age.secrets.grafana-securitykey = {
     file = ../../secrets/grafanaSecurityKey.age;
     owner = "grafana";

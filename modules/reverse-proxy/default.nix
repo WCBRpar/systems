@@ -90,9 +90,9 @@
             to = "websecure";
             scheme = "https";
             permanent = false;
-            forwardedHeaders = {
-              trustedIPs = [ "127.0.0.1/32" "192.168.13.0/24" ];
-            };
+          };
+          forwardedHeaders = {
+            trustedIPs = [ "127.0.0.1/32" "192.168.13.0/24" ];
           };
         };
 
@@ -101,9 +101,9 @@
           http.tls = {
             certResolver = "cloudflare";
             options = "mytls";
-            forwardedHeaders = {
-              trustedIPs = [ "127.0.0.1/32" "192.168.13.0/24" ];
-            };
+          };
+          forwardedHeaders = {
+            trustedIPs = [ "127.0.0.1/32" "192.168.13.0/24" ];
           };
         };
 
