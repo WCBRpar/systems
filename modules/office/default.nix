@@ -83,7 +83,7 @@
     #         "admins" = [ "openid" "profile" "email" "groups" ];
     #         "admin-tools" = [ "openid" "profile" "email" "groups" ];
     #       };
-    #       basicSecretFile = config.age.secrets.nextcloud-oauth-secret.path;
+          basicSecretFile = config.age.secrets.nextcloud-oauth-secret.path;
         };
       };
     };
