@@ -3,7 +3,6 @@
 {
 
   imports = [ ./patches.nix ];
-
   
   services = {
     traefik = lib.mkIf (config.networking.hostName == "galactica") {
