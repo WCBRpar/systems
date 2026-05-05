@@ -5,7 +5,7 @@
 {
   nixpkgs.overlays = [
     (final: prev: {
-      # Sobrescreve o interpretador Python 3.12 para incluir os novos pacotes
+      # 1. Modificamos o conjunto de pacotes Python 3.12
       python312 = prev.python312.override {
         packageOverrides = pythonFinal: pythonPrev: {
           rlPyCairo = pythonPrev.buildPythonPackage ({
@@ -35,7 +35,6 @@
             };
           });
 
-          # Novo nome para evitar conflitos e reconstruções desnecessárias
           new-freetype-py = pythonPrev.freetype-py.overrideAttrs (old: {
             pname = "freetype-py";
             version = "2.3.0";
@@ -53,12 +52,10 @@
         };
       };
 
-      # Sobrescreve o odoo19 para garantir que ele use o Python com as novas dependências
-      odoo19 = (prev.odoo19.override {
-        python = final.python312;
-      }).overrideAttrs (old: {
-        # Algumas versões do Odoo no nixpkgs podem precisar que as dependências 
-        # sejam explicitamente adicionadas ao ambiente de build ou propagadas
+      # 2. Modificamos o odoo19 usando apenas overrideAttrs para evitar erros de argumentos inesperados
+      odoo19 = prev.odoo19.overrideAttrs (old: {
+        # Adicionamos as bibliotecas diretamente às dependências propagadas.
+        # O Nix irá injetar estas bibliotecas no PYTHONPATH do wrapper do Odoo.
         propagatedBuildInputs = (old.propagatedBuildInputs or []) ++ [
           final.python312Packages.rlPyCairo
           final.python312Packages.new-freetype-py
