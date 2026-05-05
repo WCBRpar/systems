@@ -5,6 +5,7 @@
 {
   nixpkgs.overlays = [
     (final: prev: {
+      # 1. Modificamos o conjunto de pacotes Python 3.12
       python312 = prev.python312.override {
         packageOverrides = pythonFinal: pythonPrev: {
           rlPyCairo = pythonPrev.buildPythonPackage ({
@@ -46,26 +47,15 @@
               hash = "sha256-dZyULhsogicYniXRDaPFAq+tkGiG14SZsjM/raKtNxU=";
             };
 
-            # Usamos build-system (PEP 517) para declarar dependências de build
-            # Isso evita que o hook do cmake ative a fase de configuração automática do Nix
-            # mas mantém o binário disponível para o setuptools/pypa build.
-            nativeBuildInputs = (old.nativeBuildInputs or []) ++ [ 
-              prev.cmake 
-              pythonPrev.setuptools
-              pythonPrev.setuptools-scm
-            ];
-
-            # Forçamos o Nix a não rodar o setup do cmake
-            dontUseCmakeConfigure = true;
-            
-            propagatedBuildInputs = (old.propagatedBuildInputs or []) ++ [
-              pythonPrev.certifi
-            ];
+            nativeBuildInputs = (old.nativeBuildInputs or []) ++ [ pythonPrev.setuptools ];
           });
         };
       };
 
+      # 2. Modificamos o odoo19 usando apenas overrideAttrs para evitar erros de argumentos inesperados
       odoo19 = prev.odoo19.overrideAttrs (old: {
+        # Adicionamos as bibliotecas diretamente às dependências propagadas.
+        # O Nix irá injetar estas bibliotecas no PYTHONPATH do wrapper do Odoo.
         propagatedBuildInputs = (old.propagatedBuildInputs or []) ++ [
           final.python312Packages.rlPyCairo
           final.python312Packages.new-freetype-py

@@ -1,0 +1,63 @@
+{ config
+, pkgs
+, lib
+, ...
+}:
+
+let
+  pythonEnvironment = pkgs.python312.withPackages (ps: [
+    ps.rlPyCairo # Required for odoo, not included in upstream requirements (py>=3.12.0)
+  ]);
+in
+{
+  nixpkgs.overlays = [
+    (_final: previous: {
+      python312 = previous.python312.override {
+        packageOverrides = packagesFinal: packagesPrevious: {
+          rlPyCairo = packagesPrevious.buildPythonPackage ({
+            pname = "rlPyCairo";
+            version = "0.3.0";
+            pyproject = true;
+
+            src = previous.fetchhg {
+              url = "https://hg.reportlab.com/hg-public/rlPyCairo";
+              rev = "3c6cc9281052";
+              hash = "sha256-KlGG1Qw/TYkq96cE2cwqftZKozprbbufh4xpWoXLOL8=";
+            };
+
+            build-system = [
+              packagesPrevious.setuptools
+            ];
+
+            dependencies = [
+              packagesPrevious.pycairo
+              packagesFinal.new-freetype-py
+            ];
+
+            meta = {
+              description = "Plugin backend renderer for reportlab.graphics.renderPM";
+              homepage = "https://www.reportlab.com/";
+              license = lib.licenses.bsd3;
+            };
+          });
+
+          # New name to not cause high amount of downstream rebuilds
+          new-freetype-py = packagesPrevious.freetype-py.overrideAttrs (old: {
+            pname = "freetype-py";
+            version = "2.3.0";
+            pyproject = true;
+
+            src = previous.fetchFromGitHub {
+              owner = "rougier";
+              repo = "freetype-py";
+              rev = "v2.3.0";
+              hash = "sha256-dZyULhsogicYniXRDaPFAq+tkGiG14SZsjM/raKtNxU=";
+            };
+
+            nativeBuildInputs = (old.nativeBuildInputs or [ ]) ++ [ packagesPrevious.setuptools ];
+          });
+        };
+      };
+    })
+  ];
+}
