@@ -19,13 +19,15 @@
     };
     users = {
       nextcloud = { isSystemUser = true; group = "nextcloud"; extraGroups = [ "office" ]; };
+      nginx = { isSystemUser = true; group = "nginx"; extraGroups = [ "office" ]; };
       kanidm = { isSystemUser = true; group = "kanidm"; extraGroups = [ "office" ]; };
     };
   };
   age.secrets = {
     nextcloud-admin-password = {
       file = ../../secrets/nextcloudAdminPassword.age;
-      owner = "root";
+      # Se for o Galactica, o dono é o Kanidm. Se for o Pegasus, o dono é o Nextcloud.
+      owner = if hostName == "galactica" then "kanidm" else "nextcloud";
       group = "office";
       mode = "440";
     };
@@ -119,7 +121,7 @@
       extraApps = with config.services.nextcloud.package.packages.apps; {
         # List of apps we want to install and are already packaged in
         # https://github.com/NixOS/nixpkgs/blob/master/pkgs/servers/nextcloud/packages/nextcloud-apps.json
-        inherit calendar contacts mail notes onlyoffice tasks oidc oidc_login user_oidc;
+        inherit calendar contacts mail notes onlyoffice tasks oidc_login ;
 
       };
 
@@ -157,7 +159,7 @@
         
         # Secrets! 
         secrets = {
-          oidc_login_client_secret = config.age.secrets.nextcloud-oauth-secret.path;
+          oidc_login_client_secret_file = config.age.secrets.nextcloud-oauth-secret.path;
         };
       };
 

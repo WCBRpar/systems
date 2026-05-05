@@ -1,6 +1,10 @@
 { config, lib, pkgs, hostName, ... }:
 
 {
+
+  imports = [ ./patches.nix ];
+
+  
   services = {
     traefik = lib.mkIf (config.networking.hostName == "galactica") {
       dynamicConfigOptions = {
@@ -38,7 +42,7 @@
             dbfilter-wcbrpar = {
               headers = {
                 customRequestHeaders = {
-                  X-Odoo-dbfilter = "^oddb-wcbrpar$";
+                  X-Odoo-dbfilter = "^WCBRpar$";
                 };
               };
             };
