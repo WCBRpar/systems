@@ -2,7 +2,7 @@
 
 {
 
-  imports = [ ./patches.nix ];
+  # imports = [ ./patches.nix ];
   
   services = {
     traefik = lib.mkIf (config.networking.hostName == "galactica") {
@@ -73,6 +73,7 @@
       enable = true;
       package = pkgs.odoo19;
       domain = "redcom.digital";
+
       settings = {
         options = {
           http_port = 8011; 

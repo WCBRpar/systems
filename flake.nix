@@ -64,6 +64,7 @@
           permittedInsecurePackages = [
             "dotnet-sdk-7.0.410"
             "jitsi-meet-1.0.8043"
+            "python3.12-pypdf2-2.12.1"
             "python3.12-pypdf2-3.0.1"
           ];
           allowUnfree = true;

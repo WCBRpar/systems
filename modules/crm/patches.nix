@@ -1,76 +1,49 @@
-{
-  config, pkgs, lib, ...
-}:
+{ pkgs, ... }:
 
 {
   nixpkgs.overlays = [
     (final: prev: {
-      python312 = prev.python312.override {
-        packageOverrides = pythonFinal: pythonPrev: {
-          rlPyCairo = pythonPrev.buildPythonPackage ({
-            pname = "rlPyCairo";
-            version = "0.3.0";
-            pyproject = true;
-
-            src = prev.fetchhg {
-              url = "https://hg.reportlab.com/hg-public/rlPyCairo";
-              rev = "3c6cc9281052";
-              hash = "sha256-KlGG1Qw/TYkq96cE2cwqftZKozprbbufh4xpWoXLOL8=";
-            };
-
-            build-system = [
-              pythonPrev.setuptools
-            ];
-
-            dependencies = [
-              pythonPrev.pycairo
-              pythonFinal.new-freetype-py
-            ];
-
-            meta = {
-              description = "Plugin backend renderer for reportlab.graphics.renderPM";
-              homepage = "https://www.reportlab.com/";
-              license = lib.licenses.bsd3;
-            };
-          });
-
-          new-freetype-py = pythonPrev.freetype-py.overrideAttrs (old: {
-            pname = "freetype-py";
-            version = "2.3.0";
-            pyproject = true;
-
-            src = prev.fetchFromGitHub {
-              owner = "rougier";
-              repo = "freetype-py";
-              rev = "v2.3.0";
-              hash = "sha256-dZyULhsogicYniXRDaPFAq+tkGiG14SZsjM/raKtNxU=";
-            };
-
-            # Usamos build-system (PEP 517) para declarar dependências de build
-            # Isso evita que o hook do cmake ative a fase de configuração automática do Nix
-            # mas mantém o binário disponível para o setuptools/pypa build.
-            nativeBuildInputs = (old.nativeBuildInputs or []) ++ [ 
-              prev.cmake 
-              pythonPrev.setuptools
-              pythonPrev.setuptools-scm
-            ];
-
-            # Forçamos o Nix a não rodar o setup do cmake
-            dontUseCmakeConfigure = true;
-            
-            propagatedBuildInputs = (old.propagatedBuildInputs or []) ++ [
-              pythonPrev.certifi
-            ];
-          });
-        };
-      };
-
-      odoo19 = prev.odoo19.overrideAttrs (old: {
-        propagatedBuildInputs = (old.propagatedBuildInputs or []) ++ [
-          final.python312Packages.rlPyCairo
-          final.python312Packages.new-freetype-py
+      odoo19 = prev.odoo19.overrideAttrs (oldAttrs: {
+        # 1. Corrigimos o build-system: removemos distutils (que não existe no 3.12)
+        build-system = with final.python312Packages; [
+          setuptools
+          wheel
         ];
+
+        # 2. Atualizamos as dependências: trocamos pypdf2 por pypdf e adicionamos as novas
+        dependencies = (oldAttrs.dependencies or [ ]) ++ (with final.python312Packages; [
+          pypdf        # Odoo 17+ usa pypdf, não pypdf2
+          reportlab
+          pycairo
+          
+          # Ponte rlpycairo (inline)
+          (buildPythonPackage rec {
+            pname = "rlpycairo";
+            version = "0.4.0";
+            format = "setuptools";
+            src = fetchPypi {
+              inherit pname version;
+              hash = "sha256-B8LDxHgo6D2cCWV6VOy80al6rJ3BmXgCNEVtNHP6rcc=";
+            };
+            propagatedBuildInputs = [ reportlab pycairo ];
+            doCheck = false;
+          })
+        ]);
+
+        # 3. Patch no setup.py: O Odoo 19 nightly tem scripts que chamam distutils
+        # Vamos remover essas chamadas para que o wheel build funcione no Python 3.12
+        postPatch = (oldAttrs.postPatch or "") + ''
+          if [ -f setup.py ]; then
+            substituteInPlace setup.py \
+              --replace "from distutils.util import byte_compile" "" \
+              --replace "byte_compile(files, prefix=prefix, base_dir=base_dir)" "pass" || true
+          fi
+        '';
+
+        # 4. Desabilitamos a byte-compilação interna do pip que invoca o distutils
+        pipInstallFlags = [ "--no-compile" ];
       });
     })
   ];
 }
+

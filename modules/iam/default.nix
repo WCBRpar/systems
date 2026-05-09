@@ -26,6 +26,13 @@
 
   environment.systemPackages = with pkgs; [ kanidm_1_9 nginx ];
   
+  # Declara o ldaps.<fqdn> para o host galactica! 
+  networking = { 
+    hosts = {
+      "192.168.13.10" = [ "ldap.wcbrpar.com" "ldap.redcom.digital" "ldap.walcor.com.br" "ldap.wqueiroz.adv.br" ];
+    };
+  };
+
   # Configuração do Traefik para proxy reverso do Kanidm
   services.traefik.dynamicConfigOptions = lib.mkIf (hostName == "galactica") {
     http = {

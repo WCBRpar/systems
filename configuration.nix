@@ -16,6 +16,7 @@ in
     "dotnet-sdk-7.0.410"
     "jitsi-meet-1.0.8043"
     "kanidm-1.4.6"
+    "python3.12-pypdf2-2.12.1"
   ];
 
   imports = [
