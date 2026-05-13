@@ -48,6 +48,17 @@
           entrypoints = ["websecure"];
           tls = {
             certResolver = "cloudflare";
+            domains = [
+              {
+                main = "iam.wcbrpar.com";
+                sans = [ 
+                  "ldap.wcbrpar.com" 
+                  "iam.redcom.digital" "ldap.redcom.digital"
+                  "iam.walcor.com.br" "ldap.walcor.com.br"
+                  "iam.wqueiroz.adv.br" "ldap.wqueiroz.adv.br"
+                ];
+              }
+            ];
           };
           middlewares = ["kanidm-headers"];
         };
@@ -58,6 +69,17 @@
           entrypoints = ["websecure"];
           tls = {
             certResolver = "cloudflare";
+            domains = [
+              {
+                main = "iam.wcbrpar.com";
+                sans = [ 
+                  "ldap.wcbrpar.com" 
+                  "iam.redcom.digital" "ldap.redcom.digital"
+                  "iam.walcor.com.br" "ldap.walcor.com.br"
+                  "iam.wqueiroz.adv.br" "ldap.wqueiroz.adv.br"
+                ];
+              }
+            ];
           };
           middlewares = [ "intranet" ];
         };

@@ -9,8 +9,8 @@
       dynamicConfigOptions = {
         http = {
           routers = {
-            MS-ALL = {
-              rule = "Host(`mail.wcbrpar.com`) || Host(`mail.redcom.digital`) || Host(`mail.walcor.com.br`) || Host(`mail.wqueiroz.adv.br`)";
+            MS-WPR = {
+              rule = "Host(`mail.wcbrpar.com`) || Host(`mail.redcom.digital`) || Host(`mail.walcor.com.br`) || Host(`mail.wqueiroz.adv.br`) || Host(`wcbrpar.com`) ";
               service = "noop@internal"; 
               entrypoints = ["websecure"];
               tls = {
@@ -27,15 +27,15 @@
 
   mailserver = lib.mkIf ( hostName == "galactica" ) {
     enable = true;
-    fqdn = "mail.wcbrpar.com";
+    fqdn = "wcbrpar.com";
     domains = [ "wcbrpar.com" "redcom.digital" "walcor.com.br" "wqueiroz.adv.br" ];
 
     # Certificados SSL via ACME (Gerenciados pelo Traefik e exportados pelo Dumper)
     x509 = { 
-      certificateFile = "/var/lib/acme/wcbrpar.com/fullchain.pem";
-      privateKeyFile = "/var/lib/acme/wcbrpar.com/privatekey.pem";
-      # certificateFile = "/var/lib/acme/${config.mailserver.fqdn}/fullchain.pem";
-      # privateKeyFile = "/var/lib/acme/${config.mailserver.fqdn}/privatekey.pem";
+      # certificateFile = "/var/lib/acme/wcbrpar.com/fullchain.pem";
+      # privateKeyFile = "/var/lib/acme/wcbrpar.com/privatekey.pem";
+      certificateFile = "/var/lib/acme/${config.mailserver.fqdn}/fullchain.pem";
+      privateKeyFile = "/var/lib/acme/${config.mailserver.fqdn}/privatekey.pem";
     };
     
     # Contas declarativas
@@ -50,7 +50,7 @@
     # Integração LDAP (Dovecot + Postfix) — formato Kanidm
     ldap = {
       enable = true;
-      uris = [ "ldaps://ldap.wcbrpar.com" ];
+      uris = [ "ldaps://iam.wcbrpar.com" ];
       bind = { 
         dn = "spn=mail_bind@wcbrpar.com";
         passwordFile = config.age.secrets.ldap-mail-password.path;
@@ -80,8 +80,25 @@
     hierarchySeparator = "/"; 
 
     # DKIM — SNM gera automaticamente em /var/dkim/
-    dkimSigning = true;
-    dkimKeyDirectory = "/var/dkim";
+    dkim = { 
+      enable = true;
+      keyDirectory = "/var/lib/dovecot/dkim";
+      defaults = {
+        keyLength = 2048;
+      };
+      domains = {
+        "wcbrpar.com".selectors = {
+          # "${config.mailserver.dkim.defaults.selector}" = { };
+          "rsa-202605" = {
+            keyType = "rsa";
+            keyLength = 2048;
+          };
+        };
+        "redcom.digital".selectors.mail = {};
+        "walcor.com.br".selectors.mail = {};
+        "wqueiroz.adv.br".selectors.mail = {};
+      };
+    };
 
     # Versão do estado
     stateVersion = 22;
