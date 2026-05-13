@@ -70,25 +70,25 @@
   services = {
 
     # Configuração OAuth2 do Kanidm para o NextCloud
-    # kanidm = lib.mkIf (hostName == "galactica") {
-    #   provision.systems.oauth2 = {
-    #     "nextcloud" = {
-    #       displayName = "NextCloud Office";
-    #       originUrl = [
-    #         "https://cloud.wcbrpar.com/apps/oidc_login/oidc"
-    #       ];
-    #       originLanding = "https://cloud.wcbrpar.com";
-    #       imageFile = ../../media-assets/iam-auth-badges/nextcloud-auth.svg;
-    #      public = true;
-    #       scopeMaps = {
-    #         "users" = [  "openid" "profile" "email" "groups" ];
-    #         "admins" = [ "openid" "profile" "email" "groups" ];
-    #         "admin-tools" = [ "openid" "profile" "email" "groups" ];
-    #       };
-    #       basicSecretFile = config.age.secrets.nextcloud-oauth-secret.path;
-    #     };
-    #   };
-    # };
+    kanidm = lib.mkIf (hostName == "galactica") {
+      provision.systems.oauth2 = {
+        "nextcloud" = {
+          displayName = "NextCloud Office";
+          originUrl = [
+            "https://cloud.wcbrpar.com/apps/oidc_login/oidc"
+          ];
+          originLanding = "https://cloud.wcbrpar.com";
+          imageFile = ../../media-assets/iam-auth-badges/nextcloud-auth.svg;
+         public = true;
+          scopeMaps = {
+            "users" = [  "openid" "profile" "email" "groups" ];
+            "admins" = [ "openid" "profile" "email" "groups" ];
+            # "admin-tools" = [ "openid" "profile" "email" "groups" ];
+          };
+          basicSecretFile = config.age.secrets.nextcloud-oauth-secret.path;
+        };
+      };
+    };
 
     # Configura os privilégios do NexCloud para a DB personalizada. 
     postgresql = lib.mkIf (hostName == "pegasus") {
@@ -156,6 +156,16 @@
         oidc_login_redir_fallback = true;
         oidc_login_tls_verify = true;
         oidc_login_disable_registration = false;
+
+        # Refinamento OIDC
+        oidc_login_button_text = "Logar com Kanidm";
+        oidc_login_hide_password_form = false; # Mantenha false até ter certeza que o OIDC funciona
+        oidc_login_use_id_token = true;
+        oidc_login_scope = "openid profile email groups";
+        
+        # Proxy e Segurança
+        "allow_user_to_change_display_name" = false;
+        "lost_password_link" = "disabled";
         
         # Secrets! 
         secrets = {

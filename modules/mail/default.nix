@@ -30,6 +30,11 @@
     fqdn = "wcbrpar.com";
     domains = [ "wcbrpar.com" "redcom.digital" "walcor.com.br" "wqueiroz.adv.br" ];
 
+    systemContact = "dev-ops@wcbrpar.com";
+    systemDomain = "wcbrpar.com";
+    systemName = "WCBRpar";
+
+
     # Certificados SSL via ACME (Gerenciados pelo Traefik e exportados pelo Dumper)
     x509 = { 
       # certificateFile = "/var/lib/acme/wcbrpar.com/fullchain.pem";
@@ -79,6 +84,13 @@
     # Hierarquia de pastas IMAP
     hierarchySeparator = "/"; 
 
+    # TLS Reporting
+    tlsrpt.enable = true;
+
+    dmarcReporting = {
+      enable = true;
+    };
+    
     # DKIM — SNM gera automaticamente em /var/dkim/
     dkim = { 
       enable = true;
@@ -126,6 +138,11 @@
         fts_autoindex = false;
         special_use = "\\Trash";
       };
+    };
+
+    monitoring = {
+      enable = true;
+      alertAddress = "dev-ops@wcbrpar.com";
     };
 
   };
