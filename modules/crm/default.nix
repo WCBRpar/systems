@@ -85,8 +85,7 @@
 
     odoo = lib.mkIf (config.networking.hostName == "pegasus") {
       enable = true;
-      package = pkgs.odoo19;
-      addons = config.services.odoo.addons;
+      package = pkgs.odoo19.override { addons = config.services.odoo.addons; };
       domain = "redcom.digital";
 
       settings = {
@@ -118,10 +117,6 @@
       };
       autoInit = true;
       addons = 
-        with python312; [
-          #odooAddons.l10n-br-base dependencie
-          phonenumbers
-        ]
         with pkgs.odooAddons; [
           # Módulos específicos PT/Política
           contacts-political-party-PT
@@ -206,6 +201,9 @@
           dms-user-role
           hr-dms-field
           web-editor-media-dialog-dms
+
+          # Módulos HR
+          hr-employee-relative
 
           # Módulos de localização brasileira (l10n_br)
           l10n-br-base
