@@ -24,7 +24,7 @@
     '';
   };
 
-  environment.systemPackages = with pkgs; [ kanidm_1_9 nginx ];
+  environment.systemPackages = with pkgs; [ kanidm_1_10 nginx ];
   
   # Declara o ldaps.<fqdn> para o host galactica! 
   networking = { 
@@ -127,7 +127,7 @@
   
   services.kanidm = {
     # package = pkgs.kanidm_1_10;
-    package = pkgs.kanidmWithSecretProvisioning_1_9;
+    package = pkgs.kanidmWithSecretProvisioning_1_10;
     
     client = {
       enable = true;
@@ -196,12 +196,26 @@
 
   # Garantir diretórios necessários
   systemd = {
+    services.kanidm = {
+      serviceConfig = {
+        # Isso fura o isolamento do Systemd e traz os arquivos para onde o Kanidm pode ver
+        BindReadOnlyPaths = [
+          "/var/lib/acme/iam.wcbrpar.com/fullchain.pem"
+          "/var/lib/acme/iam.wcbrpar.com/privatekey.pem"
+        ];
+        # Garante que o serviço tenha permissão de leitura mesmo com hardening
+        CapabilityBoundingSet = [ "~CAP_SYS_PTRACE" ]; 
+        ReadOnlyPaths = [ "/var/lib/acme/iam.wcbrpar.com" ];
+      };
+    };
+    
     # Garantir diretórios necessários
     tmpfiles.rules = lib.mkIf (hostName == "galactica") [
       "d /var/lib/kanidm 0750 kanidm kanidm -"
       # Garante acesso ao diretório base e subdiretórios
       "z /var/lib/acme 0751 traefik traefik -"
       "z /var/lib/acme/* 0750 traefik traefik -"
+      "z /var/lib/acme/iam.wcbrpar.com 0770 traefik traefik -"
       # Garante que o usuário kanidm possa ler os certificados do grupo traefik
       "z /var/lib/acme/*/fullchain.pem 0644 traefik traefik -"
       "z /var/lib/acme/*/privatekey.pem 0640 traefik traefik -"

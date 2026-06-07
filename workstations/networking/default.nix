@@ -58,12 +58,6 @@ in
         workstation = true;
       };
     };
-    
-    # Fix bug: PROKI Accessible-Erlang-Port-Mapper-Daemon
-    epmd = {
-      enable = true;
-      listenStream = "127.0.0.1:4369"; 
-    };
 
     # OpenSSH
     openssh = {

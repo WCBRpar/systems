@@ -79,7 +79,7 @@
           ];
           originLanding = "https://cloud.wcbrpar.com";
           imageFile = ../../media-assets/iam-auth-badges/nextcloud-auth.svg;
-         public = true;
+          public = false;
           scopeMaps = {
             "users" = [  "openid" "profile" "email" "groups" ];
             "admins" = [ "openid" "profile" "email" "groups" ];
@@ -121,8 +121,8 @@
       extraApps = with config.services.nextcloud.package.packages.apps; {
         # List of apps we want to install and are already packaged in
         # https://github.com/NixOS/nixpkgs/blob/master/pkgs/servers/nextcloud/packages/nextcloud-apps.json
-        inherit calendar contacts mail notes onlyoffice tasks oidc_login ;
-
+        inherit calendar collectives contacts mail notes onlyoffice tasks ; #oidc_login
+ 
       };
 
       settings = {
