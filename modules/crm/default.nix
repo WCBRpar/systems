@@ -85,7 +85,7 @@
 
     odoo = lib.mkIf (config.networking.hostName == "pegasus") {
       enable = true;
-      package = pkgs.odoo19.override { addons = config.services.odoo.addons; };
+      package = pkgs.odoo-latest.override { addons = config.services.odoo.addons; };
       domain = "redcom.digital";
 
       settings = {

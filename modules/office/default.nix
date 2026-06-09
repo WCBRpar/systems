@@ -121,7 +121,7 @@
       extraApps = with config.services.nextcloud.package.packages.apps; {
         # List of apps we want to install and are already packaged in
         # https://github.com/NixOS/nixpkgs/blob/master/pkgs/servers/nextcloud/packages/nextcloud-apps.json
-        inherit calendar collectives contacts mail notes onlyoffice tasks ; #oidc_login
+        inherit calendar collectives contacts mail notes tasks ; #onlyoffice oidc
  
       };
 

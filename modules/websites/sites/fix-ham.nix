@@ -37,7 +37,7 @@ in
       webserver = "nginx";
       sites = {
         "${domain}" = {
-          package = pkgs.wordpress_6_7;
+          package = pkgs.wordpress_6_9;
           database = {
             createLocally = true;
             name = "wpdb_${name}";
