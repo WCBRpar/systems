@@ -38,7 +38,7 @@
               middlewares = ["dbfilter-pt13ms"];
             };
             OD-LONGPOLLING = {
-              rule = "(Host(`crm.wcbrpar.com`) || Host(`crm.redcom.digital`) || Host(`novo.adufms.org.br`) || Host(`pt13ms.redcom.digital`)) && PathPrefix(`/longpolling`)";
+              rule = "(Host(`crm.wcbrpar.com`) || Host(`crm.redcom.digital`) || Host(`novo.adufms.org.br`) || Host(`pt13ms.redcom.digital`)) && PathPrefix(`/websocket`)";
               service = "odoo-longpolling-service";
               entrypoints = ["websecure"];
               tls.certResolver = "cloudflare";
@@ -100,9 +100,13 @@
           list_db = true;                # Habilita gerenciador web (opcional)
           proxy_mode = true;             # Necessário para confiar nos cabeçalhos
           dbfilter = ".*";               # Filtro global permissivo
-          server_wide_modules = "base, web, dbfilter_from_header";
+          server_wide_modules = "base, web, dbfilter_from_header, bus_alt_connection";
           # Evita banco padrão "odoo" que causa erros de tabela inexistente
           db_name = false;
+          
+          # Configurações bus_alt_connection
+          imdispatcher_db_host = "localhost";
+          imdispatcher_db_port = 5432;
 
           # Configurações de Performance
           limit_memory_hard = 1677721600;
@@ -127,8 +131,7 @@
           dbfilter-from-header
           module-auto-update
           sequence-python
-          # account-sequence-option
-          # purchase-sequence-option
+          account-sequence-option
 
           # Módulos multi‑empresa (inter‑company e multi‑company)
           account-invoice-inter-company
@@ -233,10 +236,13 @@
           l10n-br-resource
           l10n-br-sped-base
           l10n-br-zip
-
+          
           # Módulos website
-          # website-odoo-debranding
-          # website-whatsapp
+          website-odoo-debranding
+          website-whatsapp
+
+          # Product Attributes OCA
+          uom-alias
 
           # Outros módulos (diversos)
           base-fontawesome

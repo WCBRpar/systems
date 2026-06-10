@@ -22,6 +22,7 @@ in
   imports = [
     ./vpsadminos.nix
     ./modules
+    # ./memory
     ./networking
     ./storage
     ./users
