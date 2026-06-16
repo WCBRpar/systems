@@ -62,7 +62,7 @@
             dbfilter-lulinas = {
               headers = {
                 customRequestHeaders = {
-                  X-Odoo-dbfilter = "^oddb-lulinas$";
+                  X-Odoo-dbfilter = "^oddb-wcbrpar$";
                 };
               };
             };
@@ -133,6 +133,9 @@
           sequence-python
           account-sequence-option
 
+          # Módulos Contabilidade e pagamento (account-payment) 
+          account-due-list
+
           # Módulos multi‑empresa (inter‑company e multi‑company)
           account-invoice-inter-company
           account-multicompany-easy-creation
@@ -197,7 +200,7 @@
           subscription-oca 
 
           # Módulos DMS
-          dms
+          dms-odoo      # Nome original dms, utilizado dms-odoo pois existe pacote dms
           dms-auto-classification
           dms-field
           dms-field-auto-classification
@@ -236,6 +239,10 @@
           l10n-br-resource
           l10n-br-sped-base
           l10n-br-zip
+
+          # Modulo Social OCA
+          # mail-gateway
+          # mail-gateway-whatsapp
           
           # Módulos website
           website-odoo-debranding
@@ -256,11 +263,12 @@
 
   systemd.services."odoo.service" = {
     serviceConfig = {
-      Restart = "on-failure";
+      Restart = "always";
       RestartSec = "5s";
-      # StartLimitIntervalSec = "200s";
-      # StartLimitBurst = "5";
+      OOMPolicy = "continue";
     };
+    startLimitIntervalSec = 200;
+    startLimitBurst = 5;
   };
 
 }

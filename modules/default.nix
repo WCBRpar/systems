@@ -14,7 +14,7 @@
     ./llm
     ./mail
     # ./meeting
-    ./monitoring
+    # ./monitoring
     # ./n8n
     # ./office
     ./reverse-proxy

@@ -140,10 +140,10 @@
       };
     };
 
-    monitoring = {
-      enable = true;
-      alertAddress = "dev-ops@wcbrpar.com";
-    };
+    # monitoring = {
+    #   enable = true;
+    #   alertAddress = "dev-ops@wcbrpar.com";
+    # };
 
   };
 
