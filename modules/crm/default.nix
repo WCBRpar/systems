@@ -9,8 +9,15 @@
       dynamicConfigOptions = {
         http = {
           routers = {
+            OD-CRM-WCBR = {
+              rule = "Host(`crm.wcbrpar.com`)";
+              service = "odoo-service";
+              entrypoints = ["websecure"];
+              tls.certResolver = "cloudflare";
+              middlewares = ["dbfilter-all"];
+            };
             OD-WPR = {
-              rule = "Host(`crm.wcbrpar.com`) || Host(`crm.redcom.digital`) || Host(`redcom.digital`) || Host(`wcbrpar.com`)";
+              rule = "Host(`crm.redcom.digital`) || Host(`redcom.digital`) || Host(`wcbrpar.com`)";
               service = "odoo-service";
               entrypoints = ["websecure"];
               tls.certResolver = "cloudflare";
@@ -45,6 +52,13 @@
             };
           };
           middlewares = {
+            dbfilter-all = {
+              headers = {
+                customRequestHeaders = {
+                  X-Odoo-dbfilter = ".*";
+                };
+              };
+            };
             dbfilter-wcbrpar = {
               headers = {
                 customRequestHeaders = {
