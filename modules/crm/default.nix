@@ -38,7 +38,7 @@
               middlewares = ["dbfilter-pt13ms"];
             };
             OD-LONGPOLLING = {
-              rule = "(Host(`crm.wcbrpar.com`) || Host(`crm.redcom.digital`) || Host(`novo.adufms.org.br`) || Host(`pt13ms.redcom.digital`)) && PathPrefix(`/websocket`)";
+              rule = "(Host(`crm.wcbrpar.com`) || Host(`crm.redcom.digital`) || Host(`novo.adufms.org.br`) || Host(`pt13ms.redcom.digital`) || Host(`lulinas.redcom.digital`)) && PathPrefix(`/websocket`)";
               service = "odoo-longpolling-service";
               entrypoints = ["websecure"];
               tls.certResolver = "cloudflare";
@@ -48,7 +48,8 @@
             dbfilter-wcbrpar = {
               headers = {
                 customRequestHeaders = {
-                  X-Odoo-dbfilter = "^WCBRpar$";
+                  # X-Odoo-dbfilter = "^WCBRpar$";
+                  X-Odoo-dbfilter = ".*";
                 };
               };
             };
