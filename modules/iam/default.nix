@@ -212,13 +212,6 @@
     # Garantir diretórios necessários
     tmpfiles.rules = lib.mkIf (hostName == "galactica") [
       "d /var/lib/kanidm 0750 kanidm kanidm -"
-      # Garante acesso ao diretório base e subdiretórios
-      "z /var/lib/acme 0751 traefik traefik -"
-      "z /var/lib/acme/* 0750 traefik traefik -"
-      "z /var/lib/acme/iam.wcbrpar.com 0770 traefik traefik -"
-      # Garante que o usuário kanidm possa ler os certificados do grupo traefik
-      "z /var/lib/acme/*/fullchain.pem 0644 traefik traefik -"
-      "z /var/lib/acme/*/privatekey.pem 0640 traefik traefik -"
     ];
     services."kanidm.service".after = [ "traefik.service" "traefik-certs-dumper.service" "systemd-tmpfiles-resetup.service"];
     services."kanidm.service".requires = [ "traefik-certs-dumper.service" ];

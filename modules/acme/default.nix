@@ -81,11 +81,14 @@
     };
   };
 
-  # Ajuste de permissões para que outros serviços (como mail) possam ler os certificados
+    # Ajuste de permissões para que outros serviços (como mail) possam ler os certificados
   # Criamos um diretório com permissões de grupo para que postfix/dovecot acessem
   systemd = {
     tmpfiles.rules = lib.mkIf (hostName == "galactica") [
       "d /var/lib/traefik/certs 0755 traefik traefik -"
+      
+      # Garante que o traefik possa escrever no diretório /var/lib/acme
+      "d /var/lib/acme 0770 traefik traefik -"
     
       # Garante ao Kanidm, Mail e outros serviços acesso aos certificados
       "z /var/lib/acme/*/fullchain.pem 0644 traefik traefik -"
