@@ -2,7 +2,7 @@
 
 ## 📋 Visão Geral
 
-Este repositório contém a configuração completa de infraestrutura NixOS da WCBRpar, gerenciando servidores e workstations através de **Nix Flakes** com implantação automática via **Comin**.
+Este repositório contém a configuração completa de infraestrutura NixOS da WCBRpar, gerenciando servidores e workstations através de **Nix Flakes** com implantação automática via **Comin**. A infraestrutura atual é composta por três servidores hospedados na vpsfree.cz, além de estações de trabalho e dispositivos móveis.
 
 ### Arquitetura
 
@@ -19,49 +19,55 @@ systems/
 ├── workstations/          # Configurações de estações de trabalho
 │   ├── common.nix
 │   ├── default.nix
-│   └── t800.nix
+│   ├── t800.nix
+│   ├── t101.nix
+│   └── redpad002.nix      # Configuração Nix-on-Droid
 ├── modules/               # Módulos NixOS reutilizáveis
-│   ├── acme/              # Certificados SSL/TLS
+│   ├── acme/              # Certificados SSL/TLS (via Traefik)
 │   ├── agenix/            # Gerenciamento de secrets
 │   ├── crm/               # Sistema CRM (Odoo)
 │   ├── dns/               # Servidor DNS
 │   ├── editor/            # Editores de texto
+│   ├── filesharing/       # Compartilhamento NFS
 │   ├── home-manager/      # Gestão de ambientes usuário
 │   ├── iam/               # Identity & Access Management (Kanidm)
 │   ├── llm/               # Large Language Models
-│   ├── monitoring/        # Monitoramento (Grafana, Prometheus)
-│   ├── reverse-proxy/     # Proxy reverso (Caddy/Nginx)
+│   ├── mail/              # Servidor de e-mail e agenda (Radicale)
+│   ├── monitoring/        # Monitoramento (Grafana, Prometheus, Loki)
+│   ├── reverse-proxy/     # Proxy reverso (Traefik)
 │   ├── terminal/          # Configurações de terminal
-│   ├── webserving/        # Servidores web
-│   └── websites/          # Sites hospedados
-├── networking/            # Configurações de rede
-├── storage/               # Configurações de armazenamento
+│   ├── webserving/        # Servidores web (Nginx)
+│   └── websites/          # Sites hospedados e rotas Traefik
+├── networking/            # Configurações de rede (ZeroTier, Firewall, SSH)
+├── storage/               # Configurações de armazenamento (NFS)
 ├── users/                 # Gestão de usuários
 ├── secrets/               # Secrets criptografadas com age
 │   ├── secrets.nix        # Definição de recipients por secret
 │   ├── rekey.nix          # Configuração para rekey automático
 │   └── *.age              # Secrets criptografadas
 ├── npins/                 # Pinning de dependências externas
-│   ├── sources.json
-│   └── npins/
 └── rekey.sh               # Script de re-criptografia de secrets
 ```
 
 ## 🖥️ Hosts Configurados
 
-### Servidores
+Os nomes dos hosts seguem o esquema **Battlestar Galactica** [1].
 
-| Host | Função | IP Interno | Status |
-|------|--------|------------|--------|
-| **galactica** | Servidor principal | 192.168.13.10 | ✅ Ativo |
-| **pegasus** | Servidor secundário | 192.168.13.20 | ✅ Ativo |
-| **yashuman** | Servidor terciário | 192.168.13.130 | ✅ Ativo |
+### Servidores (vpsfree.cz)
 
-### Workstations
+| Host | Função | IP Interno (ZeroTier) | IP Externo | HostID | VPS ID |
+|------|--------|-----------------------|------------|--------|--------|
+| **galactica** | Servidor principal (IAM, Proxy, Mail, Monitoramento) | 192.168.13.10 | 37.205.8.86 | 13960a97 | 27116 |
+| **pegasus** | Servidor secundário (Websites, CRM) | 192.168.13.20 | 37.205.14.63 | 8bf0dda5 | 27447 |
+| **yashuman** | Servidor terciário (NFS Server) | 192.168.13.130 | 37.205.14.75 | e491eb5c | 27687 |
 
-| Host | Hardware | Usuário | Status |
-|------|----------|---------|--------|
-| **t800** | Lenovo IdeaPad S145-15API | caroles | ✅ Ativo |
+### Workstations e Dispositivos
+
+| Host | Tipo | Usuário | Status |
+|------|------|---------|--------|
+| **t800** | Workstation | caroles | ✅ Ativo |
+| **t101** | Workstation | - | ⏳ Em configuração |
+| **redpad002** | Nix-on-Droid | wjjunyor | ✅ Ativo |
 
 ## 🚀 Quick Start
 
@@ -83,7 +89,7 @@ sudo nixos-rebuild switch --flake .#<hostname> --impure
 
 # Build e deploy remoto
 sudo nixos-rebuild switch \
-  --target-host user@<hostname>.wcbrpar.com \
+  --target-host root@<hostname>.wcbrpar.com \
   --flake .#<hostname> \
   --impure
 ```
@@ -105,42 +111,19 @@ comin pull
 
 ## 🔐 Gerenciamento de Secrets
 
-### Estrutura de Secrets
+As secrets são criptografadas usando **age** e gerenciadas pelo **agenix** com suporte a rekey automático via **agenix-rekey**.
 
-As secrets são criptografadas usando **age** e gerenciadas pelo **agenix**:
+### Estrutura de Secrets
 
 ```
 secrets/
 ├── default.age                    # Secret padrão
-├── ssh-key.age                    # Chaves SSH
-├── onlyofficeDocumentServerKey.age
-├── odooDatabaseKey.age
-├── grafanaSecurityKey.age
-├── openrouterApiKey.age
-├── deepseekApiKey.age
-├── telegramBotKey.age
-└── host-{hostname}-key.age        # Chaves privadas de cada host
-```
-
-### Recipients
-
-As secrets são acessíveis por:
-
-- **Administradores**: `primary`, `devops`
-- **Deploy Key**: Usada para bootstrap inicial
-- **Hosts**: Cada host pode acessar suas próprias chaves
-
-### Adicionar Nova Secret
-
-```bash
-# 1. Criar arquivo de secret
-echo "valor-da-secret" > secrets/minha-secret.age
-
-# 2. Editar secrets/secrets.nix adicionando os recipients
-# "minha-secret.age".publicKeys = [ admin1 admin2 ];
-
-# 3. Criptografar com agenix
-nix run github:ryantm/agenix -- --secrets-file secrets/secrets.nix -e secrets/minha-secret.age
+├── cloudflareApiKey.age           # API Key para DNS Challenge (Traefik)
+├── kanidmIdmAdminPassword.age     # Senha admin do Kanidm
+├── grafanaSecurityKey.age         # Chave de segurança do Grafana
+├── odooDatabaseKey.age            # Chave do banco de dados Odoo
+├── mailWalterPassword.age         # Senha do e-mail principal
+└── host-{hostname}-key.age        # Chaves privadas SSH de cada host
 ```
 
 ### Rekey de Hosts
@@ -154,260 +137,62 @@ Quando um host é reinstalado ou sua chave SSH muda:
 # Rekey de todos os hosts
 ./rekey.sh
 
-# Verificar mudanças
-git diff secrets/*.age
-
 # Commit e deploy
 git add secrets/*.age
-git commit -m "chore: rekey secrets for pegasus"
+git commit -m "chore: rekey secrets"
 git push
 ```
 
-## 📦 Módulos Disponíveis
+## 📦 Módulos Ativos
 
-### Módulos Ativos
+A infraestrutura é composta por diversos módulos, sendo os principais:
 
 | Módulo | Descrição | Localização |
 |--------|-----------|-------------|
-| **acme** | Certificados SSL/TLS automáticos | `modules/acme/` |
-| **agenix** | Gerenciamento seguro de secrets | `modules/agenix/` |
+| **iam** | Identity & Access Management via Kanidm (SSO, LDAP) | `modules/iam/` |
+| **reverse-proxy** | Traefik com integração OIDC (Kanidm) e Cloudflare ACME | `modules/reverse-proxy/` |
+| **monitoring** | Grafana, Prometheus e Loki com SSO | `modules/monitoring/` |
+| **mail** | Servidor de e-mail completo (Postfix/Dovecot) e Agenda (Radicale) | `modules/mail/` |
+| **filesharing** | Servidor e cliente NFS | `modules/filesharing/` |
 | **crm** | Sistema CRM baseado em Odoo | `modules/crm/` |
-| **dns** | Servidor DNS | `modules/dns/` |
-| **editor** | Editores (Neovim, VSCode) | `modules/editor/` |
-| **home-manager** | Gestão de dotfiles por usuário | `modules/home-manager/` |
-| **iam** | Identity & Access Management (Kanidm) | `modules/iam/` |
-| **llm** | Integração com LLMs | `modules/llm/` |
-| **monitoring** | Grafana + Prometheus | `modules/monitoring/` |
-| **reverse-proxy** | Proxy reverso | `modules/reverse-proxy/` |
-| **terminal** | Configurações de terminal | `modules/terminal/` |
-| **webserving** | Servidores web | `modules/webserving/` |
-| **websites** | Sites e aplicações web | `modules/websites/` |
+| **websites** | Sites e aplicações web roteados via Traefik | `modules/websites/` |
 
-### Módulos Desativados (Comentados)
-
-- `filesharing` - Compartilhamento de arquivos
-- `gitsync` - Sincronização Git (precisa reformar)
-- `mail` - Servidor de e-mail
-- `meeting` - Sistema de videoconferência (Jitsi)
-- `n8n` - Automação de workflows
-- `office` - Suite Office (OnlyOffice)
-
-## 🔧 Comandos Úteis
-
-### Build e Deploy
-
-```bash
-# Verificar configuração sem aplicar
-nix flake check
-
-# Build local
-sudo nixos-rebuild build --flake .#<hostname>
-
-# Switch local
-sudo nixos-rebuild switch --flake .#<hostname> --impure
-
-# Switch remoto
-sudo nixos-rebuild switch \
-  --target-host user@host.wcbrpar.com \
-  --flake .#hostname \
-  --impure
-
-# Upgrade de pacotes
-sudo nixos-rebuild switch --upgrade --flake .#<hostname>
-```
-
-### Debugging
-
-```bash
-# Listar configurações disponíveis
-nix flake show
-
-# Ver árvore de dependências
-nix-store --query --tree $(which nixos-rebuild)
-
-# Verificar secrets
-nix run github:ryantm/agenix -- --secrets-file secrets/secrets.nix --check
-
-# Logs do agenix
-journalctl -u agenix -f
-
-# Status do serviço de bootstrap SSH
-systemctl status ssh-host-key-bootstrap
-journalctl -u ssh-host-key-bootstrap -f
-```
-
-### Gerenciamento de Dependências
-
-```bash
-# Atualizar pins com npins
-cd npins
-npins update
-
-# Atualizar inputs do flake
-nix flake update
-
-# Garbage collection
-sudo nix-collect-garbage -d
-```
+*Nota: Módulos como `gitsync`, `meeting`, `n8n` e `office` estão presentes no repositório, mas atualmente desativados.*
 
 ## 🌐 Rede e Armazenamento
 
 ### Networking
 
-Configurações de rede estão em `networking/default.nix`:
-
-- Interface de rede principal
-- Firewall (iptables/nftables)
-- SSH hardening
-- Bootstrap automático de chaves SSH
+Configurações de rede centralizadas em `networking/default.nix`:
+- **ZeroTier**: Rede privada virtual (192.168.13.0/24) interligando todos os hosts.
+- **Firewall**: Regras restritivas confiando na interface ZeroTier (`ztc25hlssg`) e `venet0`.
+- **SSH**: Escuta restrita ao IP interno ZeroTier, com chaves de host gerenciadas via agenix.
 
 ### Storage
 
-Configurações de armazenamento em `storage/default.nix`:
+Configurações de armazenamento em `storage/default.nix` e `modules/filesharing/default.nix`:
+- **NFS**: O host `yashuman` atua como servidor NFS, exportando `/nas-data/home` e `/nas-data/shared` para a rede ZeroTier.
 
-- Filesystems persistentes
-- Impermanence (opcional)
-- Backups automáticos
+## 👥 Usuários e Autenticação
 
-## 👥 Usuários
-
-Gestão de usuários em `users/default.nix`:
-
-- Usuários locais
-- Integração LDAP/Kanidm
-- Home-manager por usuário
+A gestão de usuários é híbrida:
+- **Local**: Definidos em `users/default.nix` (root, wjjunyor, caroles).
+- **Centralizada (IAM)**: O Kanidm (`galactica`) provê autenticação SSO (OIDC) para serviços web (Traefik Dashboard, Grafana, Radicale) e LDAP para o servidor de e-mail.
 
 ## 🔄 Fluxo de Trabalho CI/CD
 
-### Pipeline de Deploy
-
-1. **Desenvolvimento Local**
-   ```bash
-   # Testar mudanças
-   nix flake check
-   
-   # Build de teste
-   sudo nixos-rebuild build --flake .#<hostname>
-   ```
-
-2. **Commit e Push**
-   ```bash
-   git add .
-   git commit -m "feat: descrição da mudança"
-   git push origin main
-   ```
-
-3. **Sincronização Automática (Comin)**
-   - Comin detecta mudanças no GitHub (polling a cada 60s)
-   - Pull automático das mudanças
-   - Executa `nixos-rebuild switch`
-
-4. **Verificação**
-   ```bash
-   # Verificar status
-   systemctl status comin
-   
-   # Ver logs
-   journalctl -u comin -f
-   ```
-
-## 🛠️ Troubleshooting
-
-### Erros Comuns
-
-#### "Private key not found"
-
-```bash
-# Verificar se a secret foi descriptografada
-ls -la /etc/ssh/ssh_host_ed25519_key
-
-# Ver logs do agenix
-journalctl -u agenix -f
-
-# Verificar recipients
-cat secrets/secrets.nix | grep -A 5 "host-<hostname>"
-```
-
-#### "Public key mismatch"
-
-```bash
-# Comparar chaves
-cat /etc/ssh/ssh_host_ed25519_key.pub
-cat hosts/default.nix | grep sshPublicKey
-
-# Se diferente, executar rekey
-./rekey.sh <hostname>
-```
-
-#### Falha no Comin
-
-```bash
-# Reiniciar serviço
-sudo systemctl restart comin
-
-# Verificar permissões SSH
-sudo -u comin ssh -T git@github.com
-
-# Verificar configuração
-cat /etc/nixos/comin.toml
-```
-
-#### Build falha com "permittedInsecurePackages"
-
-```bash
-# Adicionar pacote em configuration.nix ou flake.nix:
-nixpkgs.config.permittedInsecurePackages = [
-  "nome-do-pacote-inseguro"
-];
-```
+1. **Desenvolvimento Local**: Teste mudanças com `nix flake check`.
+2. **Commit e Push**: Envie as alterações para a branch `main`.
+3. **Sincronização Automática**: O Comin detecta as mudanças e aplica via `nixos-rebuild switch` em cada host.
 
 ## 📚 Referências
 
-- [NixOS Manual](https://nixos.org/manual/nixos/stable/)
-- [Nix Flakes](https://wiki.nixos.org/wiki/Flakes)
-- [Agenix](https://github.com/ryantm/agenix) - Gerenciamento de secrets
-- [Agenix-Rekey](https://github.com/oddlama/agenix-rekey) - Re-criptografia automática
-- [Comin](https://github.com/nlewo/comin) - GitOps para NixOS
-- [Home Manager](https://github.com/nix-community/home-manager)
-- [vpsAdminOS](https://github.com/vpsfreecz/vpsadminos) - Containers NixOS
-
-## 📝 Convenções de Nomenclatura
-
-Os nomes dos hosts seguem o esquema **Battlestar Galactica**:
-
-- [Naming Schemes - Battlestar Galactica](https://namingschemes.com/Battlestar_Galactica)
-
-## 🔒 Segurança
-
-### Best Practices Implementadas
-
-1. **Secrets Criptografadas**: Todas as secrets usam age encryption
-2. **Múltiplos Recipients**: Redundância de acesso às secrets
-3. **SSH Hardening**: Configurações seguras de SSH
-4. **Firewall**: Regras de firewall restritivas
-5. **Auto Updates**: Atualizações automáticas de segurança habilitadas
-6. **Garbage Collection**: Limpeza semanal de pacotes antigos
-
-### Chaves SSH
-
-- Chaves de host gerenciadas via agenix
-- Bootstrap automático de chaves públicas
-- Rekey automatizado quando chaves mudam
-
-## 🤝 Contribuição
-
-1. Fork o repositório
-2. Crie uma branch para sua feature (`git checkout -b feature/nova-feature`)
-3. Teste localmente com `nix flake check`
-4. Commit suas mudanças (`git commit -m 'feat: nova feature'`)
-5. Push para a branch (`git push origin feature/nova-feature`)
-6. Abra um Pull Request
-
-## 📄 Licença
-
-Proprietário - WCBRpar
+1. [Naming Schemes - Battlestar Galactica](https://namingschemes.com/Battlestar_Galactica)
+2. [NixOS Manual](https://nixos.org/manual/nixos/stable/)
+3. [Agenix](https://github.com/ryantm/agenix)
+4. [Comin](https://github.com/nlewo/comin)
 
 ---
 
-**Última atualização**: 2024
-**Maintainers**: WCBRpar DevOps Team
+**Última atualização**: Junho de 2026
+**Maintainers**: WCBRpar DevOps Team (Walter Queiroz)
