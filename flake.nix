@@ -27,7 +27,8 @@
     };
 
     nixos-home-manager = {
-      url = "git+ssh://git@github.com/wjjunyor/nixos-home-manager";
+      url = "path:/nas-data/shared/DEV/nixOS/home-manager/wjjunyor";
+      # url = "git+ssh://git@github.com/wjjunyor/nixos-home-manager";
       flake = false;
     };
 

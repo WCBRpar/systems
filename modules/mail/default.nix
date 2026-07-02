@@ -19,7 +19,7 @@
             };
           };
         # Serviço dummy que não faz nada
-        # services.noop-service.loadBalancer.servers = [ { url = "http://localhost"; } ];
+        services.noop-service.loadBalancer.servers = [ { url = "http://localhost"; } ];
         };
       };
     };
