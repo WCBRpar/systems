@@ -130,27 +130,27 @@
     dynamicConfigOptions = {
       http = {
         routers = { 
-          # WC-WPR = {
-          #   rule = "Host(`wcbrpar.com`)"; # Apenas para ativar o router
-          #   service = "noop@internal"; # Um serviço qualquer ou real
-          #   tls = {
-          #     certResolver = "cloudflare";
-          #     domains = [
-          #       {
-          #         main = "wcbrpar.com";
-          #         sans = [ 
-          #           "*.wcbrpar.com" 
-          #           "redcom.digital" 
-          #           "*.redcom.digital" 
-          #           "walcor.com.br"
-          #           "*.walcor.com.br"
-          #           "wqueiroz.adv.br"
-          #           "*.wqueiroz.adv.br"
-          #         ];
-          #       }
-          #     ];
-          #   };
-          # };
+          WC-WPR = {
+            rule = "Host(`wcbrpar.com`)"; # Apenas para ativar o router
+            service = "noop@internal"; # Um serviço qualquer ou real
+            tls = {
+              certResolver = "cloudflare";
+              domains = [
+                {
+                  main = "wcbrpar.com";
+                  sans = [ 
+                    "*.wcbrpar.com" 
+                    "redcom.digital" 
+                    "*.redcom.digital" 
+                    "walcor.com.br"
+                    "*.walcor.com.br"
+                    "wqueiroz.adv.br"
+                    "*.wqueiroz.adv.br"
+                  ];
+                }
+              ];
+            };
+          };
           TK-WPR = {
             rule = "Host(`traefik.wcbrpar.com`)";
             service = "api@internal";

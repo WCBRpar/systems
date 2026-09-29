@@ -23,22 +23,50 @@
               tls.certResolver = "cloudflare";
               middlewares = ["dbfilter-adufms"];
             };
+            OD-BRT = {
+              rule = "Host(`brtintas.redcom.digital`) || Host(`brtintas.com.br`) || Host(`brtintas.eco.br`)";
+              service = "odoo-service";
+              entrypoints = ["websecure"];
+              tls.certResolver = "cloudflare";
+              middlewares = ["dbfilter-brtintas"];
+            };
+            OD-EBK = {
+              rule = "Host(`elielkaiowa.redcom.digital`) || Host(`elielkaiowa.com.br`)";
+              service = "odoo-service";
+              entrypoints = ["websecure"];
+              tls.certResolver = "cloudflare";
+              middlewares = ["dbfilter-elielkaiowa"];
+            };
+            OD-FTR = {
+              rule = "Host(`fabiotrad.redcom.digital`) || Host(`fabiotrad13.com.br`)";
+              service = "odoo-service";
+              entrypoints = ["websecure"];
+              tls.certResolver = "cloudflare";
+              middlewares = ["dbfilter-fabiotrad"];
+            };
+            OD-GMA = {
+              rule = "Host(`gisellemarques.redcom.digital`) || Host(`gisellemarques.com.br`)";
+              service = "odoo-service";
+              entrypoints = ["websecure"];
+              tls.certResolver = "cloudflare";
+              middlewares = ["dbfilter-gisellemarques"];
+            };
             OD-LUL = {
-              rule = "Host(`lulinas.redcom.digital`)";
+              rule = "Host(`lulinas.redcom.digital`) || Host(`festaslulinas.com.br`)";
               service = "odoo-service";
               entrypoints = ["websecure"];
               tls.certResolver = "cloudflare";
               middlewares = ["dbfilter-lulinas"];
             };
             OD-P13 = {
-              rule = "Host(`pt13ms.redcom.digital`)";
+              rule = "Host(`pt13ms.redcom.digital`) || Host `pt13ms.org.br`)";
               service = "odoo-service";
               entrypoints = ["websecure"];
               tls.certResolver = "cloudflare";
               middlewares = ["dbfilter-pt13ms"];
             };
             OD-LONGPOLLING = {
-              rule = "(Host(`crm.wcbrpar.com`) || Host(`crm.redcom.digital`) || Host(`novo.adufms.org.br`) || Host(`pt13ms.redcom.digital`) || Host(`lulinas.redcom.digital`)) && PathPrefix(`/websocket`)";
+              rule = "(Host(`crm.wcbrpar.com`) || Host(`crm.redcom.digital`) || Host(`brtintas.redcom.digital`) || Host(`brtintas.com.br`) || Host(`brtintas.eco.br`) || Host(`elielkaiowa.redcom.digital`) || Host(`elielkaiowa.com.br`) || Host(`fabiotrad.redcom.digital`) || Host(`fabiotrad13.com.br`) || Host(`gisellemarques.redcom.digital`) || Host(`gisellemarques.com.br`) || Host(`novo.adufms.org.br`) || Host(`pt13ms.redcom.digital`) || Host(`pt13ms.org.br`) || Host(`lulinas.redcom.digital`) || Host(`festaslulinas.com.br`)) && PathPrefix(`/websocket`)";
               service = "odoo-longpolling-service";
               entrypoints = ["websecure"];
               tls.certResolver = "cloudflare";
@@ -48,8 +76,8 @@
             dbfilter-wcbrpar = {
               headers = {
                 customRequestHeaders = {
-                  # X-Odoo-dbfilter = "^WCBRpar$";
-                  X-Odoo-dbfilter = ".*";
+                  X-Odoo-dbfilter = "^WCBRpar$";
+                  # X-Odoo-dbfilter = ".*";
                 };
               };
             };
@@ -57,6 +85,37 @@
               headers = {
                 customRequestHeaders = {
                   X-Odoo-dbfilter = "^oddb-adufms$";
+                };
+              };
+            };
+            dbfilter-brtintas = {
+              headers = {
+                customRequestHeaders = {
+                  X-Odoo-dbfilter = "^oddb-brtintas$";
+                };
+              };
+            };
+            dbfilter-elielkaiowa = {
+              headers = {
+                customRequestHeaders = {
+                  X-Odoo-dbfilter = "^oddb-elielkaiowa$";
+                };
+              };
+            };
+            dbfilter-fabiotrad = {
+              headers = {
+                customRequestHeaders = {
+                  X-Odoo-dbfilter = "^oddb-fabiotrad$";
+                };
+              };
+            };
+            dbfilter-gisellemarques = {
+              headers = {
+                customRequestHeaders = {
+                  X-Odoo-dbfilter = "^oddb-gisellemarques$";
+                  X-Forwarded-Host = "gisellemarques.redcom.digital";
+                  X-Forwarded-Proto = "https";
+                  X-Forwarded-For = "$remote_addr";
                 };
               };
             };
@@ -240,10 +299,18 @@
           l10n-br-resource
           l10n-br-sped-base
           l10n-br-zip
+          
+          # Módulo Server Brand OCA 
+          disable-odoo-online
+          mail-debranding
+          portal-debranding
+          remove-odoo-enterprise
+          sale-portal-debranding
+          website-debranding
 
           # Modulo Social OCA
-          # mail-gateway
-          # mail-gateway-whatsapp
+          mail-gateway
+          mail-gateway-whatsapp
           
           # Módulos website
           website-odoo-debranding

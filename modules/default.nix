@@ -11,7 +11,7 @@
     # ./gitsync = REFORMAR
     ./home-manager
     ./iam
-    ./llm
+    # ./llm
     ./mail
     # ./meeting
     # ./monitoring
