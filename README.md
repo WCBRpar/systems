@@ -35,6 +35,7 @@ systems/
 │   ├── mail/              # Servidor de e-mail e agenda (Radicale)
 │   ├── monitoring/        # Monitoramento (Grafana, Prometheus, Loki)
 │   ├── reverse-proxy/     # Proxy reverso (Traefik)
+│   ├── social/            # Mastodon federado (social.redcom.digital)
 │   ├── terminal/          # Configurações de terminal
 │   ├── webserving/        # Servidores web (Nginx)
 │   └── websites/          # Sites hospedados e rotas Traefik
@@ -155,6 +156,7 @@ A infraestrutura é composta por diversos módulos, sendo os principais:
 | **mail** | Servidor de e-mail completo (Postfix/Dovecot) e Agenda (Radicale) | `modules/mail/` |
 | **filesharing** | Servidor e cliente NFS | `modules/filesharing/` |
 | **crm** | Sistema CRM baseado em Odoo | `modules/crm/` |
+| **social** | Mastodon federado; `s.redcom.digital` redireciona ao domínio canônico | `modules/social/` |
 | **websites** | Sites e aplicações web roteados via Traefik | `modules/websites/` |
 
 *Nota: Módulos como `gitsync`, `meeting`, `n8n` e `office` estão presentes no repositório, mas atualmente desativados.*
