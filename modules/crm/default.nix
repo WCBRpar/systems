@@ -17,7 +17,7 @@
               middlewares = ["dbfilter-wcbrpar"];
             };
             OD-ADF = {
-              rule = "Host(`novo.adufms.org.br`)";
+              rule = "Host(`novo.adufms.org.br`) || Host(`adufms.redcom.digital`)";
               service = "odoo-service";
               entrypoints = ["websecure"];
               tls.certResolver = "cloudflare";
@@ -59,14 +59,14 @@
               middlewares = ["dbfilter-lulinas"];
             };
             OD-P13 = {
-              rule = "Host(`pt13ms.redcom.digital`) || Host `pt13ms.org.br`)";
+              rule = "Host(`pt13ms.redcom.digital`) || Host(`pt13ms.org.br`)";
               service = "odoo-service";
               entrypoints = ["websecure"];
               tls.certResolver = "cloudflare";
               middlewares = ["dbfilter-pt13ms"];
             };
             OD-LONGPOLLING = {
-              rule = "(Host(`crm.wcbrpar.com`) || Host(`crm.redcom.digital`) || Host(`brtintas.redcom.digital`) || Host(`brtintas.com.br`) || Host(`brtintas.eco.br`) || Host(`elielkaiowa.redcom.digital`) || Host(`elielkaiowa.com.br`) || Host(`fabiotrad.redcom.digital`) || Host(`fabiotrad13.com.br`) || Host(`gisellemarques.redcom.digital`) || Host(`gisellemarques.com.br`) || Host(`novo.adufms.org.br`) || Host(`pt13ms.redcom.digital`) || Host(`pt13ms.org.br`) || Host(`lulinas.redcom.digital`) || Host(`festaslulinas.com.br`)) && PathPrefix(`/websocket`)";
+              rule = "(Host(`crm.wcbrpar.com`) || Host(`crm.redcom.digital`) || Host(`brtintas.redcom.digital`) || Host(`brtintas.com.br`) || Host(`brtintas.eco.br`) || Host(`elielkaiowa.redcom.digital`) || Host(`elielkaiowa.com.br`) || Host(`fabiotrad.redcom.digital`) || Host(`fabiotrad13.com.br`) || Host(`gisellemarques.redcom.digital`) || Host(`gisellemarques.com.br`) || Host(`novo.adufms.org.br`) || Host(`adufms.redcom.digital`) || Host(`pt13ms.redcom.digital`) || Host(`pt13ms.org.br`) || Host(`lulinas.redcom.digital`) || Host(`festaslulinas.com.br`)) && PathPrefix(`/websocket`)";
               service = "odoo-longpolling-service";
               entrypoints = ["websecure"];
               tls.certResolver = "cloudflare";

@@ -5,7 +5,7 @@
   # Confugurções do Home-Manager
   home-manager = {
     backupFileExtension = "bkp";
-    useGlobalPkgs = true; 
+    useGlobalPkgs = false; 
   };
 
   # WQJ aka wjjunyor home-manager config import
