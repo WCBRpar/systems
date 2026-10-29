@@ -50,9 +50,9 @@ in
   system.autoUpgrade.enable = true;
 
   # Limpeza automática do sistema
-  services.journald.extraConfig = ''
-    SystemMaxUse=2G
-  '';
+  services.journald.settings.Journal = {
+    SystemMaxUse = "2G";
+  };
 
   nix = {
     extraOptions = ''
