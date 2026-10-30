@@ -38,6 +38,35 @@ in
     ];
     forceSSL = lib.mkForce false;
     enableACME = lib.mkForce false;
+
+    # O TLS termina no Traefik. O hop Traefik -> Nginx é HTTP; o snippet
+    # padrão do NixOS usaria $scheme=http e faria o Mastodon redirecionar
+    # continuamente para a mesma URL HTTPS. Preserve o esquema original.
+    locations = {
+      "@proxy" = {
+        recommendedProxySettings = false;
+        extraConfig = ''
+          proxy_set_header Host $host;
+          proxy_set_header X-Real-IP $remote_addr;
+          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+          proxy_set_header X-Forwarded-Proto $http_x_forwarded_proto;
+          proxy_set_header X-Forwarded-Host $host;
+          proxy_set_header X-Forwarded-Server $hostname;
+        '';
+      };
+
+      "/api/v1/streaming" = {
+        recommendedProxySettings = false;
+        extraConfig = ''
+          proxy_set_header Host $host;
+          proxy_set_header X-Real-IP $remote_addr;
+          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+          proxy_set_header X-Forwarded-Proto $http_x_forwarded_proto;
+          proxy_set_header X-Forwarded-Host $host;
+          proxy_set_header X-Forwarded-Server $hostname;
+        '';
+      };
+    };
   };
 
   # TLS termina no Traefik central, em Galactica. O nome social.redcom.digital
