@@ -80,10 +80,11 @@
           originLanding = "https://cloud.wcbrpar.com";
           imageFile = ../../media-assets/iam-auth-badges/nextcloud-auth.svg;
           public = false;
+          preferShortUsername = true;
           scopeMaps = {
-            "users" = [  "openid" "profile" "email" "groups" ];
-            "admins" = [ "openid" "profile" "email" "groups" ];
-            # "admin-tools" = [ "openid" "profile" "email" "groups" ];
+            "users" = [  "openid" "profile" "email" "groups_name" ];
+            "admins" = [ "openid" "profile" "email" "groups_name" ];
+            # "admin-tools" = [ "openid" "profile" "email" "groups_name" ];
           };
           basicSecretFile = config.age.secrets.nextcloud-oauth-secret.path;
         };
@@ -105,6 +106,9 @@
       # Need to manually increment with every major upgrade.
       package = pkgs.nextcloud35;
 
+      # Amplia o buffer de strings internadas do OPcache para 16 MiB.
+      phpOptions."opcache.interned_strings_buffer" = "16";
+
       # Let NixOS install and configure the database automatically.
       database.createLocally = true;
 
@@ -121,13 +125,21 @@
       extraApps = with config.services.nextcloud.package.packages.apps; {
         # List of apps we want to install and are already packaged in
         # https://github.com/NixOS/nixpkgs/blob/master/pkgs/servers/nextcloud/packages/nextcloud-apps.json
-        inherit calendar collectives contacts mail notes tasks ; #onlyoffice oidc
+        inherit calendar collectives contacts mail notes tasks oidc_login;
  
       };
 
+      # Injeta o segredo em config.php sem gravá-lo no Nix store.
+      secrets.oidc_login_client_secret = config.age.secrets.nextcloud-oauth-secret.path;
+
       settings = {
 
-        loglevel = 0;
+        loglevel = 2;
+        log_type = "file";
+        # Horário UTC: 06:00 UTC = 02:00 em Campo Grande.
+        maintenance_window_start = 6;
+        # Identificador estável desta instância única de Nextcloud.
+        serverid = 1;
 
         config_is_read_only = false;
         default_phone_region = "BR";
@@ -135,10 +147,20 @@
         default_locale = "pt_BR";
 
         overwriteprotocol = "https";
+        # Mantém o callback OIDC no domínio registrado no cliente Kanidm,
+        # mesmo quando o usuário acessa por um domínio alternativo.
+        overwritehost = "cloud.wcbrpar.com";
 
         trusted_proxies = [ "127.0.0.1" "::1" "192.168.13.10" ];
-        trusted_domains = [ "cloud.redcom.digital" "cloud.walcor.com.br" "cloud.wqueiroz.adv.br" ];
+        trusted_domains = [ "cloud.wcbrpar.com" "cloud.redcom.digital" "cloud.walcor.com.br" "cloud.wqueiroz.adv.br" ];
         
+        # Permite conexões locais ao servidor IDP caso estejam na mesma rede
+        allow_local_remote_servers = true;
+        
+        # Desativa ou mantém múltiplos backends de login
+        # Se quiser forçar APENAS o Kanidm, mude para false no futuro
+        allow_multiple_user_backends = true; 
+
         # Configurações OIDC
         oidc_login_client_id = "nextcloud";
         oidc_login_provider_url = "https://iam.wcbrpar.com/oauth2/openid/nextcloud";
@@ -148,7 +170,7 @@
         oidc_login_attributes = {
           id = "preferred_username";
           mail = "email";
-          display_name = "name";
+          name = "name";
           groups = "groups";
         };
         # Auto-criação de usuários e login automático (opcional )
@@ -161,16 +183,12 @@
         oidc_login_button_text = "Logar com Kanidm";
         oidc_login_hide_password_form = false; # Mantenha false até ter certeza que o OIDC funciona
         oidc_login_use_id_token = true;
-        oidc_login_scope = "openid profile email groups";
+        oidc_login_scope = "openid profile email groups_name";
         
         # Proxy e Segurança
         "allow_user_to_change_display_name" = false;
         "lost_password_link" = "disabled";
         
-        # Secrets! 
-        secrets = {
-          oidc_login_client_secret_file = config.age.secrets.nextcloud-oauth-secret.path;
-        };
       };
 
       config = {
@@ -204,6 +222,7 @@
               tls = {
                 certResolver = "cloudflare";
               };
+              middlewares = [ "nextcloud-hsts" ];
               # middlewares = ["onlyoffice-prefix"];
             };
             OO-ALL = {
@@ -236,6 +255,9 @@
             };
           };
           middlewares = {
+            nextcloud-hsts = {
+              headers.stsSeconds = 15552000;
+            };
             onlyoffice-prefix = {
               stripPrefix = {
                 prefixes = ["/"];
