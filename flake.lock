@@ -335,11 +335,11 @@
         "nixpkgs": "nixpkgs_2"
       },
       "locked": {
-        "lastModified": 1793236063,
-        "narHash": "sha256-jGFe4xdrCw6xpgH2zgKwslACyt/NGuPwGILPEMFxmcQ=",
+        "lastModified": 1793355509,
+        "narHash": "sha256-/Zs18x+IW4LuVH0rKxra0WPRgsk0DQsi0Bwkf8sOC5c=",
         "owner": "NixOS",
         "repo": "nixos-hardware",
-        "rev": "b6754c901c21478fd8450d62101e712b2a4f0d75",
+        "rev": "04c6b94fa104bc23650983a4513aea196794d321",
         "type": "github"
       },
       "original": {
@@ -449,8 +449,8 @@
     },
     "nixpkgs_3": {
       "locked": {
-        "lastModified": 1793286775,
-        "narHash": "sha256-Zp1VbgNXYnAM1IkRrYGh8ISpwW756wPSBs4yfGopz1I=",
+        "lastModified": 1793396122,
+        "narHash": "sha256-qK6Eu7sSvsS4P2CD48e4AcP3R7fCqAnyWDOWkAOXlcg=",
         "path": "/nas-data/shared/DEV/nixOS/nixpkgs",
         "type": "path"
       },
@@ -592,11 +592,11 @@
     "wp4nix": {
       "flake": false,
       "locked": {
-        "lastModified": 1793217522,
-        "narHash": "sha256-XSdl0aFnEL8NQpW/hRy0OnyoDcr3P+Dg7oHAKxiVz/I=",
+        "lastModified": 1793390198,
+        "narHash": "sha256-gjzgjzpLKlftZUHuizfRcf3X1CE22MAmt37VBWln/gc=",
         "ref": "refs/heads/master",
-        "rev": "ad4cdc3e859271683d762f3cb9a4f211291eb0a3",
-        "revCount": 1903,
+        "rev": "551781cdaf0824ed451c5006c7ae4d14ff40ecdf",
+        "revCount": 1905,
         "type": "git",
         "url": "https://git.helsinki.tools/helsinki-systems/wp4nix"
       },

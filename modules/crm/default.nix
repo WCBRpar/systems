@@ -10,7 +10,7 @@
         http = {
           routers = {
             OD-WPR = {
-              rule = "Host(`crm.wcbrpar.com`) || Host(`crm.redcom.digital`) || Host(`redcom.digital`) || Host(`wcbrpar.com`)";
+              rule = "Host(`crm.wcbrpar.com`) || Host(`crm.redcom.digital`) || Host(`redcom.digital`) || Host(`news.redcom.digital`) || Host(`n.redcom.digital`) || Host(`wcbrpar.com`)";
               service = "odoo-service";
               entrypoints = ["websecure"];
               tls.certResolver = "cloudflare";
@@ -205,7 +205,7 @@
           crm-lost-reason-multi-company
           crm-stage-multi-company
           crm-tag-multi-company
-          hr-employee-multi-company
+          # hr-employee-multi-company - sumiu do respositório
           ir-filters-multi-company
           ir-ui-view-multi-company
           login-all-company
