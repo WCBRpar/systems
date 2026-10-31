@@ -1,7 +1,5 @@
 { config, pkgs, lib, hostName, ... }:
 
-{ config, pkgs, lib, hostName, ... }:
-
 let
   kanidmCertHook = pkgs.writeShellScript "kanidm-cert-permissions" ''
     key=/var/lib/acme/iam.wcbrpar.com/privatekey.pem
