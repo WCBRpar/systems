@@ -1,5 +1,16 @@
 { config, pkgs, lib, hostName, ... }:
 
+{ config, pkgs, lib, hostName, ... }:
+
+let
+  kanidmCertHook = pkgs.writeShellScript "kanidm-cert-permissions" ''
+    key=/var/lib/acme/iam.wcbrpar.com/privatekey.pem
+    if [ -f "$key" ]; then
+      ${pkgs.coreutils}/bin/chmod 0640 "$key"
+    fi
+  '';
+in
+
 {
   # TLS using ACME
   security.acme = {
@@ -66,13 +77,15 @@
         ${pkgs.traefik-certs-dumper}/bin/traefik-certs-dumper file \
           --version v3 \
           --watch \
+          --clean=false \
           --source /var/lib/traefik/acme.json \
           --dest /var/lib/acme \
           --crt-name=fullchain \
           --crt-ext=.pem \
           --key-name=privatekey \
           --key-ext=.pem \
-          --domain-subdir=true
+          --domain-subdir=true \ 
+          --post-hook=${kanidmCertHook}
       '';
       Restart = "on-failure";
       # O dumper precisa ler o acme.json (propriedade do traefik)
@@ -89,6 +102,8 @@
       
       # Garante que o traefik possa escrever no diretório /var/lib/acme
       "d /var/lib/acme 0770 traefik traefik -"
+      "d /var/lib/acme/wcbrpar.com 0750 traefik traefik -"
+      "d /var/lib/acme/iam.wcbrpar.com 0750 traefik traefik -"  
     
       # Garante ao Kanidm, Mail e outros serviços acesso aos certificados
       "z /var/lib/acme/*/fullchain.pem 0644 traefik traefik -"

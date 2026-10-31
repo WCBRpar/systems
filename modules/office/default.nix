@@ -103,7 +103,7 @@
       hostName = "cloud.wcbrpar.com";
 
       # Need to manually increment with every major upgrade.
-      package = pkgs.nextcloud33;
+      package = pkgs.nextcloud35;
 
       # Let NixOS install and configure the database automatically.
       database.createLocally = true;
@@ -179,8 +179,8 @@
         dbuser = "nextcloud";
         # dbpassFile = config.age.secrets.nextcloud-admin-password.path;
         dbhost = "/run/postgresql";
-        adminuser = "admin";
-        adminpassFile = config.age.secrets.nextcloud-admin-password.path;
+        # adminuser = "admin";
+        # adminpassFile = config.age.secrets.nextcloud-admin-password.path;
       };
     };
 

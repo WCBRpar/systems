@@ -449,7 +449,7 @@
     },
     "nixpkgs_3": {
       "locked": {
-        "lastModified": 1793396122,
+        "lastModified": 1793414328,
         "narHash": "sha256-qK6Eu7sSvsS4P2CD48e4AcP3R7fCqAnyWDOWkAOXlcg=",
         "path": "/nas-data/shared/DEV/nixOS/nixpkgs",
         "type": "path"

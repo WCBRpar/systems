@@ -16,7 +16,7 @@
     # ./meeting
     # ./monitoring
     # ./n8n
-    # ./office
+    ./office
     ./reverse-proxy
     ./social
     ./terminal
