@@ -449,8 +449,8 @@
     },
     "nixpkgs_3": {
       "locked": {
-        "lastModified": 1793414328,
-        "narHash": "sha256-qK6Eu7sSvsS4P2CD48e4AcP3R7fCqAnyWDOWkAOXlcg=",
+        "lastModified": 1793483420,
+        "narHash": "sha256-ZnpJgbqoLiVULPDleGQ/20QopVpgHL5I13Y6qZnDPRk=",
         "path": "/nas-data/shared/DEV/nixOS/nixpkgs",
         "type": "path"
       },
@@ -592,11 +592,11 @@
     "wp4nix": {
       "flake": false,
       "locked": {
-        "lastModified": 1793390198,
-        "narHash": "sha256-gjzgjzpLKlftZUHuizfRcf3X1CE22MAmt37VBWln/gc=",
+        "lastModified": 1793476509,
+        "narHash": "sha256-o6sHuFMobxM2FePtaJ6CoqqKWuqJk41pbmjPM2pelWU=",
         "ref": "refs/heads/master",
-        "rev": "551781cdaf0824ed451c5006c7ae4d14ff40ecdf",
-        "revCount": 1905,
+        "rev": "5b4dd7778b2113ec63ee71ca3a82f15ffb3f6339",
+        "revCount": 1906,
         "type": "git",
         "url": "https://git.helsinki.tools/helsinki-systems/wp4nix"
       },

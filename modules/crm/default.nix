@@ -147,7 +147,7 @@
       enable = true;
       package = pkgs.odoo-latest.override { addons = config.services.odoo.addons; };
       domain = "redcom.digital";
-
+      
       settings = {
         options = {
           http_port = 8011; 
@@ -331,6 +331,9 @@
 
   systemd.services."odoo.service" = {
     serviceConfig = {
+      DynamicUser = lib.mkForce false;
+      User = "odoo";
+      Group = "odoo";
       Restart = "always";
       RestartSec = "5s";
       OOMPolicy = "continue";

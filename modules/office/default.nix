@@ -80,6 +80,7 @@
           originLanding = "https://cloud.wcbrpar.com";
           imageFile = ../../media-assets/iam-auth-badges/nextcloud-auth.svg;
           public = false;
+          enableLegacyCrypto = true;
           preferShortUsername = true;
           scopeMaps = {
             "users" = [  "openid" "profile" "email" "groups_name" ];
@@ -157,9 +158,8 @@
         # Permite conexões locais ao servidor IDP caso estejam na mesma rede
         allow_local_remote_servers = true;
         
-        # Desativa ou mantém múltiplos backends de login
-        # Se quiser forçar APENAS o Kanidm, mude para false no futuro
-        allow_multiple_user_backends = true; 
+        # Desativa ou mantém múltiplos backends de login false = APENAS o Kanidm
+        allow_multiple_user_backends = false; 
 
         # Configurações OIDC
         oidc_login_client_id = "nextcloud";
@@ -174,14 +174,15 @@
           groups = "groups";
         };
         # Auto-criação de usuários e login automático (opcional )
-        oidc_login_auto_redirect = false; # Mantenha false para testar o botão primeiro
-        oidc_login_redir_fallback = true;
+        oidc_login_auto_redirect = true; # Mantenha false para testar o botão primeiro
+        oidc_login_redir_fallback = false;
         oidc_login_tls_verify = true;
-        oidc_login_disable_registration = false;
+        oidc_login_disable_registration = true;
 
         # Refinamento OIDC
         oidc_login_button_text = "Logar com Kanidm";
-        oidc_login_hide_password_form = false; # Mantenha false até ter certeza que o OIDC funciona
+        oidc_login_hide_password_form = true; 
+        oidc_login_code_challenge_method = "S256";
         oidc_login_use_id_token = true;
         oidc_login_scope = "openid profile email groups_name";
         
@@ -197,10 +198,28 @@
         dbuser = "nextcloud";
         # dbpassFile = config.age.secrets.nextcloud-admin-password.path;
         dbhost = "/run/postgresql";
-        # adminuser = "admin";
-        # adminpassFile = config.age.secrets.nextcloud-admin-password.path;
       };
+
+      # Notificações
+      # notify_push = {
+      #   enable = true;
+      #   package = pkgs.nextcloud-notify_push;
+      # };
+
+      # Demais opções
+      imaginary.enable = true;
+      enableImagemagick = true;
+
     };
+
+     # nginx = lib.mkIf (hostName == "pegasus") {
+     #  virtualHosts."cloud.wcbrpar.com".serverAliases = [
+     #    "cloud.redcom.digital"
+     #    "cloud.walcor.com.br"
+     #    "cloud.wqueiroz.adv.br"
+     #  ];
+     # };
+
 
     onlyoffice = lib.mkIf ( hostName == "pegasus" ) {
 

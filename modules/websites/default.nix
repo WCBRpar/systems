@@ -13,7 +13,6 @@ in
 
 {
 
-  # imports = [ ./sites ];
   imports = [ ./sites ./sites/fix-adf.nix ./sites/fix-cms.nix ./sites/fix-ham.nix ./sites/fix-evm.nix ];
 
       services.traefik.dynamicConfigOptions = lib.mkIf (config.networking.hostName == "galactica") {
@@ -51,6 +50,18 @@ in
 
   environment.systemPackages = with pkgs; [ php wp-cli ];
   environment.variables.WP_VERSION = "6.9";
+
+  services.nginx.virtualHosts = {
+
+    "setra.com.br" = {
+      listen = [ { addr = "0.0.0.0"; port = 7780; ssl = false; } ];
+      root = "/var/lib/www/setra.com.br";
+      locations."/" = {
+        index = "index.html index.htm";
+        tryFiles = "$uri $uri/ =404";
+      };
+    };
+  };
 
 }
 
