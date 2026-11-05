@@ -20,6 +20,7 @@ in
     owner = "root";
     group = "root";
     mode = "600";
+    symlink = false;
   };
 
   age.secrets.default.file = ../../secrets/default.age;

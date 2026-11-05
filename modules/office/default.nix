@@ -126,7 +126,7 @@
       extraApps = with config.services.nextcloud.package.packages.apps; {
         # List of apps we want to install and are already packaged in
         # https://github.com/NixOS/nixpkgs/blob/master/pkgs/servers/nextcloud/packages/nextcloud-apps.json
-        inherit calendar collectives contacts mail notes tasks oidc_login;
+        inherit calendar collectives contacts mail notes tasks oidc_login ;
  
       };
 
@@ -185,6 +185,7 @@
         oidc_login_code_challenge_method = "S256";
         oidc_login_use_id_token = true;
         oidc_login_scope = "openid profile email groups_name";
+        oidc_login_admin_group = "admin-tools"; 
         
         # Proxy e Segurança
         "allow_user_to_change_display_name" = false;

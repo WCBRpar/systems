@@ -70,11 +70,11 @@
         "treefmt-nix": "treefmt-nix_2"
       },
       "locked": {
-        "lastModified": 1793083015,
-        "narHash": "sha256-0siydyIPahJJ38sKCHoRPVfHx+gbksUU55SEGL8Kk+A=",
+        "lastModified": 1793862729,
+        "narHash": "sha256-D+wmmPytpGiLOLKtDJKv3g1XYpguvv2Bz4NSg5XRgH4=",
         "owner": "nlewo",
         "repo": "comin",
-        "rev": "f95451172287f3cb36249a2cdef56efa9bbeef19",
+        "rev": "004a55ced41d72340373ebc6774e29a417512638",
         "type": "github"
       },
       "original": {
@@ -243,11 +243,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1793193205,
-        "narHash": "sha256-X6xa6sGA7RnJQuZGbFMC+K+KToWAlBDCCjJXfTwEPsw=",
+        "lastModified": 1793757180,
+        "narHash": "sha256-gyV7AtCwLnOImcrfSETP4J3Ie96bz19DY47B7m7Y3HM=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "095fef2f265c3c0da4fe315efba8f8a04495ab34",
+        "rev": "b787c48e2ec57a9d098f5c2721882a3bc1e16f97",
         "type": "github"
       },
       "original": {
@@ -335,11 +335,11 @@
         "nixpkgs": "nixpkgs_2"
       },
       "locked": {
-        "lastModified": 1793355509,
-        "narHash": "sha256-/Zs18x+IW4LuVH0rKxra0WPRgsk0DQsi0Bwkf8sOC5c=",
+        "lastModified": 1793871777,
+        "narHash": "sha256-DbFyxXHjP4SJDWVVIILkgrUZxj29cDusi8ULXoQGuZ8=",
         "owner": "NixOS",
         "repo": "nixos-hardware",
-        "rev": "04c6b94fa104bc23650983a4513aea196794d321",
+        "rev": "d645c71a58dbae3eb17ff551a07aea13a541cb1a",
         "type": "github"
       },
       "original": {
@@ -449,8 +449,8 @@
     },
     "nixpkgs_3": {
       "locked": {
-        "lastModified": 1793483420,
-        "narHash": "sha256-ZnpJgbqoLiVULPDleGQ/20QopVpgHL5I13Y6qZnDPRk=",
+        "lastModified": 1793904939,
+        "narHash": "sha256-ns6LZvRr2D3Gq7vsg9nnpRppt1VJiapJTl6VgLWKViA=",
         "path": "/nas-data/shared/DEV/nixOS/nixpkgs",
         "type": "path"
       },
@@ -592,11 +592,11 @@
     "wp4nix": {
       "flake": false,
       "locked": {
-        "lastModified": 1793476509,
-        "narHash": "sha256-o6sHuFMobxM2FePtaJ6CoqqKWuqJk41pbmjPM2pelWU=",
+        "lastModified": 1793822234,
+        "narHash": "sha256-KTtNZnTLAnrntcCv7jNG6pqDXkFs4l9MHqOmWCnQWsM=",
         "ref": "refs/heads/master",
-        "rev": "5b4dd7778b2113ec63ee71ca3a82f15ffb3f6339",
-        "revCount": 1906,
+        "rev": "b15f5018dc71543b2b7b5101dd34dbbb40adab04",
+        "revCount": 1910,
         "type": "git",
         "url": "https://git.helsinki.tools/helsinki-systems/wp4nix"
       },

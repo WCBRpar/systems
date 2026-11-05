@@ -329,14 +329,14 @@
     };
   };
 
-  systemd.services."odoo.service" = {
+  systemd.services.odoo = {
     serviceConfig = {
       DynamicUser = lib.mkForce false;
       User = "odoo";
       Group = "odoo";
-      Restart = "always";
+      Restart = "on-failure";
       RestartSec = "5s";
-      OOMPolicy = "continue";
+      OOMPolicy = "stop";
     };
     startLimitIntervalSec = 200;
     startLimitBurst = 5;
