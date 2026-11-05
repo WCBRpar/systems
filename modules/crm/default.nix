@@ -163,6 +163,8 @@
           server_wide_modules = "base, web, dbfilter_from_header, bus_alt_connection";
           # Evita banco padrão "odoo" que causa erros de tabela inexistente
           db_name = false;
+          data_dir = lib.mkForce "/var/lib/odoo/data";
+
           
           # Configurações bus_alt_connection
           imdispatcher_db_host = "localhost";
@@ -179,7 +181,7 @@
         };
 
       };
-      autoInit = true;
+      autoInit = false;
       addons = 
         with pkgs.odooAddons; [
           # Módulos específicos PT/Política

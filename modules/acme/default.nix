@@ -102,7 +102,8 @@ in
       "d /var/lib/acme 0770 traefik traefik -"
       "d /var/lib/acme/wcbrpar.com 0750 traefik traefik -"
       "d /var/lib/acme/iam.wcbrpar.com 0750 traefik traefik -"  
-    
+      "d /var/lib/acme/mail.wcbrpar.com 0750 traefik traefik -"
+
       # Garante ao Kanidm, Mail e outros serviços acesso aos certificados
       "z /var/lib/acme/*/fullchain.pem 0644 traefik traefik -"
       "z /var/lib/acme/*/privatekey.pem 0640 traefik traefik -"

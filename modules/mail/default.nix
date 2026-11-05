@@ -55,7 +55,7 @@
     # Integração LDAP (Dovecot + Postfix) — formato Kanidm
     ldap = {
       enable = true;
-      uris = [ "ldaps://iam.wcbrpar.com" ];
+      uris = [ "ldaps://ldap.wcbrpar.com" ];
       bind = { 
         dn = "spn=mail_bind@wcbrpar.com";
         passwordFile = config.age.secrets.ldap-mail-password.path;
