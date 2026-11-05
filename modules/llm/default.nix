@@ -4,9 +4,9 @@
 
   #Segredos
   age.secrets = {
-    deepseek-apikey.file = ../../secrets/deepseekApiKey.age;
-    openrouter-apikey.file = ../../secrets/openrouterApiKey.age;
-    telegram-botkey.file = ../../secrets/telegramBotKey.age;
+    deepseek-apikey.rekeyFile = ../../secrets/deepseekApiKey.age;
+    openrouter-apikey.rekeyFile = ../../secrets/openrouterApiKey.age;
+    telegram-botkey.rekeyFile = ../../secrets/telegramBotKey.age;
   };
 
   services = {

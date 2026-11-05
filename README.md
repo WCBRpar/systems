@@ -44,7 +44,6 @@ systems/
 ├── users/                 # Gestão de usuários
 ├── secrets/               # Secrets criptografadas com age
 │   ├── secrets.nix        # Definição de recipients por secret
-│   ├── rekey.nix          # Configuração para rekey automático
 │   └── *.age              # Secrets criptografadas
 ├── npins/                 # Pinning de dependências externas
 └── rekey.sh               # Script de re-criptografia de secrets
@@ -129,20 +128,21 @@ secrets/
 
 ### Rekey de Hosts
 
-Quando um host é reinstalado ou sua chave SSH muda:
+Secrets de aplicação usam `rekeyFile`; o flake rekeya os arquivos por host e grava os ciphertexts em `secrets/rekeyed/<host>/`. A chave SSH de host permanece um segredo Agenix clássico, persistido como arquivo regular.
+
+Quando for necessário rekeyar secrets de aplicação:
 
 ```bash
-# Rekey de um host específico
-./rekey.sh pegasus
-
-# Rekey de todos os hosts
+# Rekey de todos os hosts configurados
 ./rekey.sh
 
-# Commit e deploy
-git add secrets/*.age
+# Commit e deploy depois de revisar os ciphertexts
+git add secrets/*.age secrets/rekeyed/
 git commit -m "chore: rekey secrets"
 git push
 ```
+
+**Migração segura:** faça backup dos ciphertexts e confirme que a identidade mestra local corresponde a `primary` em `secrets/secrets.nix`. Re-encripte as secrets de origem com a nova lista de recipients, execute `./rekey.sh` e confirme que existem ciphertexts para todos os servidores antes do deploy. Nunca adicione plaintext de secrets/chaves privadas ao Git. Para a host key do Pegasus, mantenha um backup de recuperação seguro e valide o acesso fora de banda antes do reboot. `symlink = false` depende de `/etc` ser persistente no VPS/container.
 
 ## 📦 Módulos Ativos
 

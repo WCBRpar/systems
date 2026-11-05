@@ -71,7 +71,7 @@
   };
 
   age.secrets."ssh-key" = {
-    file = ../../secrets/ssh-key.age;
+    rekeyFile = ../../secrets/ssh-key.age;
     path = "/root/.ssh/id_ed25519";
     owner = "root";
     group = "root";

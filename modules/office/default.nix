@@ -25,26 +25,26 @@
   };
   age.secrets = {
     nextcloud-admin-password = {
-      file = ../../secrets/nextcloudAdminPassword.age;
+      rekeyFile = ../../secrets/nextcloudAdminPassword.age;
       # Se for o Galactica, o dono é o Kanidm. Se for o Pegasus, o dono é o Nextcloud.
       owner = if hostName == "galactica" then "kanidm" else "nextcloud";
       group = "office";
       mode = "440";
     };
     nextcloud-oauth-secret = {
-      file = ../../secrets/nextcloudOauthSecret.age;
+      rekeyFile = ../../secrets/nextcloudOauthSecret.age;
       owner = "kanidm";
       group = "office";
       mode = "440";
     };
     onlyoffice-jwt-secret = {
-      file = ../../secrets/onlyofficeJwtSecret.age;
+      rekeyFile = ../../secrets/onlyofficeJwtSecret.age;
       owner = "root";
       group = "office";
       mode = "440";
     };
     onlyoffice-security-nonce = {
-      file = ../../secrets/onlyofficeSecurityNonce.age;
+      rekeyFile = ../../secrets/onlyofficeSecurityNonce.age;
       owner = "root";
       group = "office";
       mode = "440";

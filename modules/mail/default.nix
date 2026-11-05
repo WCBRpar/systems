@@ -175,13 +175,13 @@
   # Segredos para o Mailserver
   age.secrets = lib.mkIf ( hostName == "galactica" ) {
     ldap-mail-password = {
-      file = ../../secrets/ldapMailPassword.age;
+      rekeyFile = ../../secrets/ldapMailPassword.age;
       owner = "root";
       group = "snm";
       mode = "440";
     };
     mail-walter-password = {
-      file = ../../secrets/mailWalterPassword.age;
+      rekeyFile = ../../secrets/mailWalterPassword.age;
       owner = "root";
       group = "root";
       mode = "440";

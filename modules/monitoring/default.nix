@@ -27,7 +27,7 @@ in
 
   # Segredos necessários ao módulo Grafana
   age.secrets.grafana-securitykey = {
-    file = ../../secrets/grafanaSecurityKey.age;
+    rekeyFile = ../../secrets/grafanaSecurityKey.age;
     owner = "grafana";
     group = "grafana";
     mode = "400";
