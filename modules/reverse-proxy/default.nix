@@ -18,7 +18,7 @@
     age.secrets = {
       # Client secret para API da Cloudflare
       cloudflare-api-key = {
-        file = ../../secrets/cloudflareApiKey.age;
+        rekeyFile = ../../secrets/cloudflareApiKey.age;
         mode = "600";
         owner = "traefik";
         group = "traefik";

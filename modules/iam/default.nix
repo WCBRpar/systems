@@ -5,7 +5,7 @@
   age.secrets = {
     # Configurar um password para a conta idm_admin do Traefik
     kanidm-idm-admin-password = {
-      file = ../../secrets/kanidmIdmAdminPassword.age;
+      rekeyFile = ../../secrets/kanidmIdmAdminPassword.age;
       mode = "600";
       owner = "kanidm";
       group = "kanidm";

@@ -95,18 +95,16 @@
       })
       # Adiciona o módulo agenix-rekey
       agenix-rekey.nixosModules.default
-      # Configuração do agenix-rekey
-      ({ config, pkgs, lib, hostName, ... }: {
-        age.rekey = {
-          masterIdentities = [
-            # Chave privada do administrador principal
-            "/home/wjjunyor/.ssh/id_ed25519"
-            # Chave privada do host (será instalada pelo agenix)
-            "/etc/ssh/ssh_host_ed25519_key"
-          ];  
-
-          # Diretório onde as secrets rekeyadas serão armazenadas em cache
-          cacheDir = "/var/lib/agenix-rekey";
+      # agenix-rekey por host, apenas para os servidores declarados em hosts/default.nix.
+      ({ lib, hostName, ... }: {
+        config = lib.mkIf (builtins.hasAttr hostName hostConfigs) {
+          age.rekey = {
+            hostPubkey = hostConfigs.${hostName}.sshPublicKey;
+            # A identidade mestra fica na estação administrativa, fora do Nix store.
+            masterIdentities = [ "/home/wjjunyor/.ssh/id_ed25519" ];
+            storageMode = "local";
+            localStorageDir = ./. + "/secrets/rekeyed/${hostName}";
+          };
         };
       })
     ];
@@ -237,11 +235,11 @@
       redpad002 = mkNixOnDroid "redpad002";
     };
 
-    apps.${system}.agenix-rekey = {
-      agenix-rekey = {
-        type = "app";
-        program = "${agenix-rekey.packages.${system}.default}/bin/agenix-rekey";
-      };
+    # Outputs CLI do agenix-rekey para as configurações declaradas acima.
+    agenix-rekey = agenix-rekey.configure {
+      userFlake = self;
+      nixosConfigurations = builtins.intersectAttrs hostConfigs self.nixosConfigurations;
+      systems = [ system ];
     };
   };
 }
