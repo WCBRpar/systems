@@ -10,11 +10,17 @@
         http = {
           routers = {
             MS-WPR = {
-              rule = "Host(`mail.wcbrpar.com`) || Host(`mail.redcom.digital`) || Host(`mail.walcor.com.br`) || Host(`mail.wqueiroz.adv.br`) || Host(`wcbrpar.com`) ";
+              # rule = "Host(`mail.wcbrpar.com`) || Host(`mail.redcom.digital`) || Host(`mail.walcor.com.br`) || Host(`mail.wqueiroz.adv.br`) || Host(`wcbrpar.com`) ";
+              rule = "Host(`mail.wcbrpar.com`)";
               service = "noop@internal"; 
               entrypoints = ["websecure"];
               tls = {
                 certResolver = "cloudflare";
+                domains = [
+                  { 
+                    main = "mail.wcbrpar.com";
+                  }
+                ];
               };
             };
           };
@@ -27,7 +33,7 @@
 
   mailserver = lib.mkIf ( hostName == "galactica" ) {
     enable = true;
-    fqdn = "wcbrpar.com";
+    fqdn = "mail.wcbrpar.com";
     domains = [ "wcbrpar.com" "redcom.digital" "walcor.com.br" "wqueiroz.adv.br" ];
 
     systemContact = "dev-ops@wcbrpar.com";
@@ -137,6 +143,11 @@
         auto = "no";
         fts_autoindex = false;
         special_use = "\\Trash";
+      };
+      Archive = {
+        auto = "subscribe";
+        special_use = "\\Archive";
+        fts_autoindex = true;
       };
     };
 

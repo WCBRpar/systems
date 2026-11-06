@@ -129,6 +129,8 @@
         inherit calendar collectives contacts mail notes tasks oidc_login ;
  
       };
+      # Habilita a instalação de aplicativos via appstore - mesmo havendo extra-apps definidos
+      appstoreEnable = true;
 
       # Injeta o segredo em config.php sem gravá-lo no Nix store.
       secrets.oidc_login_client_secret = config.age.secrets.nextcloud-oauth-secret.path;
@@ -159,7 +161,30 @@
         allow_local_remote_servers = true;
         
         # Desativa ou mantém múltiplos backends de login false = APENAS o Kanidm
-        allow_multiple_user_backends = false; 
+        allow_multiple_user_backends = false;
+
+        # Garante que o painel de perfis esteja ativado na raiz do sistema
+        "profile.enabled" = true;
+
+        # Altera declarativamente as regras de controle do gerenciador de contas do Nextcloud.
+        # Ao definir o escopo como "local", o Nextcloud libera a edição desses dados na interface
+        # pessoal do proprietário, tratando o próprio banco local como autoridade de escrita.
+        "account_manager.default_property_scope" = {
+          "displayname" = "local";
+          "email" = "local";
+          "phone" = "local";
+          "avatar" = "local";
+        };
+
+        # Configuração declarativa de mapeamento para as pastas especiais IMAP
+        "app.mail.accounts.default" = {
+          sentFolder = "Sent";       # Modifique para "Enviados" se o servidor exigir em português
+          trashFolder = "Trash";     # Modifique para "Lixeira" ou "Trash" se necessário
+          draftsFolder = "Drafts";   # Modifique para "Rascunhos" ou "Drafts" se necessário
+        };        
+
+        # Habilita o arquivamento global e define o nome padrão da pasta (ex: "Archive" ou "Arquivo")
+        "app.mail.archive.folder" = "Archive";
 
         # Configurações OIDC
         oidc_login_client_id = "nextcloud";
