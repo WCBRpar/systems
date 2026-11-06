@@ -62,28 +62,7 @@
           };
           middlewares = ["kanidm-headers"];
         };
-
-        LD-WPR = {
-          rule = "Host(`ldap.wcbrpar.com`) || Host(`ldap.redcom.digital`) || Host(`ldap.walcor.com.br`) || Host(`ldap.wqueiroz.adv.br`)";
-          service = "ldap-service";
-          entrypoints = ["websecure"];
-          tls = {
-            certResolver = "cloudflare";
-            domains = [
-              {
-                main = "iam.wcbrpar.com";
-                sans = [ 
-                  "ldap.wcbrpar.com" 
-                  "iam.redcom.digital" "ldap.redcom.digital"
-                  "iam.walcor.com.br" "ldap.walcor.com.br"
-                  "iam.wqueiroz.adv.br" "ldap.wqueiroz.adv.br"
-                ];
-              }
-            ];
-          };
-          middlewares = [ "intranet" ];
-        };
-      };      
+      };
 
       services = {
         kanidm-service = {
@@ -95,16 +74,6 @@
         };
       };
 
-      services = {
-        ldap-service = {
-          loadBalancer = {
-            servers = [{ url = "ldaps://galactica.wcbrpar.com:636"; }];
-            passHostHeader = true;
-          };
-        };
-      };
- 
-      
       middlewares = {
         "kanidm-headers" = {
           headers = {
@@ -121,9 +90,57 @@
             stsPreload = true;
           };
         };
+      };   
+    };
+
+    tcp = {
+      middlewares = {
+        "intranet" = {
+          ipAllowList = {
+            sourceRange = [
+              "127.0.0.1/32"
+              "192.168.13.0/24"
+            ];
+          };
+        };
+      };
+
+      routers = {
+        LD-WPR = {
+          rule = "HostSNI(`ldap.wcbrpar.com`) || HostSNI(`ldap.redcom.digital`) || HostSNI(`ldap.walcor.com.br`) || HostSNI(`ldap.wqueiroz.adv.br`)";
+          service = "ldap-service";
+          entrypoints = ["ldaps"];
+          tls = {
+            passthrough = true;
+
+          #   certResolver = "cloudflare";
+          #   domains = [
+          #     {
+          #       main = "iam.wcbrpar.com";
+          #       sans = [ 
+          #         "ldap.wcbrpar.com" 
+          #         "iam.redcom.digital" "ldap.redcom.digital"
+          #         "iam.walcor.com.br" "ldap.walcor.com.br"
+          #         "iam.wqueiroz.adv.br" "ldap.wqueiroz.adv.br"
+          #       ];
+          #     }
+          #   ];
+          # };
+          middlewares = [ "intranet" ];
+        };
+      };   
+
+      services = {
+        ldap-service = {
+          loadBalancer = {
+            servers = [{ url = "galactica.wcbrpar.com:636"; }];
+            passHostHeader = true;
+          };
+        };
       };
     };
-  };
+ 
+      
   
   services.kanidm = {
     # package = pkgs.kanidm_1_10;

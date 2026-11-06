@@ -82,10 +82,17 @@
           public = false;
           enableLegacyCrypto = true;
           preferShortUsername = true;
+          claimMaps = {
+            is_admin = {
+              valuesByGroup = {
+                "admin-tools" = [ "1" ];
+              };
+            };
+          };
           scopeMaps = {
             "users" = [  "openid" "profile" "email" "groups_name" ];
             "admins" = [ "openid" "profile" "email" "groups_name" ];
-            # "admin-tools" = [ "openid" "profile" "email" "groups_name" ];
+            "admin-tools" = [ "openid" "profile" "email" "groups_name" ];
           };
           basicSecretFile = config.age.secrets.nextcloud-oauth-secret.path;
         };
@@ -197,6 +204,7 @@
           mail = "email";
           name = "name";
           groups = "groups";
+          is_admin = "is_admin";
         };
         # Auto-criação de usuários e login automático (opcional )
         oidc_login_auto_redirect = true; # Mantenha false para testar o botão primeiro
@@ -210,7 +218,7 @@
         oidc_login_code_challenge_method = "S256";
         oidc_login_use_id_token = true;
         oidc_login_scope = "openid profile email groups_name";
-        oidc_login_admin_group = "admin-tools"; 
+        # oidc_login_admin_group = "admin-tools"; 
         
         # Proxy e Segurança
         "allow_user_to_change_display_name" = false;
@@ -219,6 +227,7 @@
       };
 
       config = {
+        #  defaultTimezone = "America/Campo_Grande";
         dbtype = "pgsql";
         # dbname = "ncdb-wcbrpar";
         dbuser = "nextcloud";
