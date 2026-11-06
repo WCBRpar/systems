@@ -93,52 +93,52 @@
       };   
     };
 
-    tcp = {
-      middlewares = {
-        "intranet" = {
-          ipAllowList = {
-            sourceRange = [
-              "127.0.0.1/32"
-              "192.168.13.0/24"
-            ];
-          };
-        };
-      };
-
-      routers = {
-        LD-WPR = {
-          rule = "HostSNI(`ldap.wcbrpar.com`) || HostSNI(`ldap.redcom.digital`) || HostSNI(`ldap.walcor.com.br`) || HostSNI(`ldap.wqueiroz.adv.br`)";
-          service = "ldap-service";
-          entrypoints = ["ldaps"];
-          tls = {
-            passthrough = true;
-
-          #   certResolver = "cloudflare";
-          #   domains = [
-          #     {
-          #       main = "iam.wcbrpar.com";
-          #       sans = [ 
-          #         "ldap.wcbrpar.com" 
-          #         "iam.redcom.digital" "ldap.redcom.digital"
-          #         "iam.walcor.com.br" "ldap.walcor.com.br"
-          #         "iam.wqueiroz.adv.br" "ldap.wqueiroz.adv.br"
-          #       ];
-          #     }
-          #   ];
-          # };
-          middlewares = [ "intranet" ];
-        };
-      };   
-
-      services = {
-        ldap-service = {
-          loadBalancer = {
-            servers = [{ url = "galactica.wcbrpar.com:636"; }];
-            passHostHeader = true;
-          };
-        };
-      };
-    };
+    # tcp = {
+    #   middlewares = {
+    #     "intranet" = {
+    #       ipAllowList = {
+    #         sourceRange = [
+    #           "127.0.0.1/32"
+    #           "192.168.13.0/24"
+    #         ];
+    #       };
+    #     };
+    #   };
+    #
+    #   routers = {
+    #     LD-WPR = {
+    #       rule = "HostSNI(`ldap.wcbrpar.com`) || HostSNI(`ldap.redcom.digital`) || HostSNI(`ldap.walcor.com.br`) || HostSNI(`ldap.wqueiroz.adv.br`)";
+    #       service = "ldap-service";
+    #       entrypoints = ["ldaps"];
+    #       middlewares = [ "intranet" ];
+    #       tls = {
+    #         passthrough = true;
+    #
+    #       #   certResolver = "cloudflare";
+    #       #   domains = [
+    #       #     {
+    #       #       main = "iam.wcbrpar.com";
+    #       #       sans = [ 
+    #       #         "ldap.wcbrpar.com" 
+    #       #         "iam.redcom.digital" "ldap.redcom.digital"
+    #       #         "iam.walcor.com.br" "ldap.walcor.com.br"
+    #       #         "iam.wqueiroz.adv.br" "ldap.wqueiroz.adv.br"
+    #       #       ];
+    #       #     }
+    #       #   ];
+    #       };
+    #     };
+    #   };   
+    #
+    #   services = {
+    #     ldap-service = {
+    #       loadBalancer = {
+    #         servers = [{ url = "galactica.wcbrpar.com:636"; }];
+    #         passHostHeader = true;
+    #       };
+    #     };
+    #   };
+    # };
  
       
   
