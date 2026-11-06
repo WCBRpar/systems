@@ -131,8 +131,10 @@
       http = {
         routers = { 
           WC-WPR = {
-            rule = "Host(`wcbrpar.com`)"; # Apenas para ativar o router
-            service = "noop@internal"; # Um serviço qualquer ou real
+            rule = "Host(`wcbrpar.com`) || Host(`redcom.digital`) || Host(`walcor.com.br`) || Host(`wqueiroz.adv.br`)"; 
+            service = "odoo-service";
+            priority = 1000;
+            middlewares = [ "dbfilter-wcbrpar" ];
             tls = {
               certResolver = "cloudflare";
               domains = [

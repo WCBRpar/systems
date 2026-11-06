@@ -82,7 +82,7 @@ in
           --crt-ext=.pem \
           --key-name=privatekey \
           --key-ext=.pem \
-          --domain-subdir=true \ 
+          --domain-subdir=true \
           --post-hook=${kanidmCertHook}
       '';
       Restart = "on-failure";

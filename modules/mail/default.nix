@@ -63,7 +63,7 @@
       searchBase = "dc=wcbrpar,dc=com";
       
       attributes = {
-        password = "null";
+        password = null;
       };
 
       dovecot = {
