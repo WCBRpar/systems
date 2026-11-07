@@ -14,7 +14,7 @@
 
   groups = {
     # IDs reservados e verificados livres nos três servidores em 2026-11-07.
-    admins = 65536;
-    unixUsers = 65537;
+    admins = 100010;
+    unixUsers = 100020;
   };
 }

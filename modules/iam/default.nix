@@ -74,9 +74,9 @@ in
                 main = "iam.wcbrpar.com";
                 sans = [ 
                   "ldap.wcbrpar.com" 
-                  # "iam.redcom.digital" "ldap.redcom.digital"
-                  # "iam.walcor.com.br" "ldap.walcor.com.br"
-                  # "iam.wqueiroz.adv.br" "ldap.wqueiroz.adv.br"
+                  "iam.redcom.digital" "ldap.redcom.digital"
+                  "iam.walcor.com.br" "ldap.walcor.com.br"
+                  "iam.wqueiroz.adv.br" "ldap.wqueiroz.adv.br"
                 ];
               }
             ];
