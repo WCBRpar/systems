@@ -40,8 +40,8 @@
     home = "/home/caroles";
     description = "Carolina Queiroz";
     uid = 2000;
-    group = "users";
-    extraGroups = ["wheel" "disk" "audio" "video" "networkmanager" "systemd-journal" "adbusers"];
+    group = "admins";
+    extraGroups = [ "users" "wheel" "disk" "audio" "video" "networkmanager" "systemd-journal" "adbusers"];
     useDefaultShell = true;
   };
 

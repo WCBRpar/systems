@@ -33,6 +33,7 @@
 
   mailserver = lib.mkIf ( hostName == "galactica" ) {
     enable = true;
+    enableNixpkgsReleaseCheck = true;
     fqdn = "mail.wcbrpar.com";
     domains = [ "wcbrpar.com" "redcom.digital" "walcor.com.br" "wqueiroz.adv.br" ];
 
@@ -63,7 +64,8 @@
       enable = true;
       uris = [ "ldaps://ldap.wcbrpar.com" ];
       bind = { 
-        dn = "spn=mail_bind@wcbrpar.com";
+        # dn = "spn=mail_bind@wcbrpar.com";
+        dn = "dn=token";
         passwordFile = config.age.secrets.ldap-mail-password.path;
       };
       searchBase = "dc=wcbrpar,dc=com";

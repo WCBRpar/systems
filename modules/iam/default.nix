@@ -53,9 +53,9 @@
                 main = "iam.wcbrpar.com";
                 sans = [ 
                   "ldap.wcbrpar.com" 
-                  "iam.redcom.digital" "ldap.redcom.digital"
-                  "iam.walcor.com.br" "ldap.walcor.com.br"
-                  "iam.wqueiroz.adv.br" "ldap.wqueiroz.adv.br"
+                  # "iam.redcom.digital" "ldap.redcom.digital"
+                  # "iam.walcor.com.br" "ldap.walcor.com.br"
+                  # "iam.wqueiroz.adv.br" "ldap.wqueiroz.adv.br"
                 ];
               }
             ];
@@ -139,8 +139,8 @@
     #     };
     #   };
     # };
- 
-      
+  };
+  
   
   services.kanidm = {
     # package = pkgs.kanidm_1_10;
@@ -177,8 +177,8 @@
         # Manter 0.0.0.0 pois mesmo o traefik fazendo o  proxy, os hosts se cumunicam internamente sem proxy-reverso
         bindaddress = "0.0.0.0:8443";
         ldapbindaddress = "0.0.0.0:636";
-        tls_chain = "/var/lib/acme/iam.wcbrpar.com/fullchain.pem";
-        tls_key = "/var/lib/acme/iam.wcbrpar.com/privatekey.pem";
+        tls_chain = "/var/lib/acme/wcbrpar.com/fullchain.pem";
+        tls_key = "/var/lib/acme/wcbrpar.com/privatekey.pem";
       };
     };
     
@@ -196,6 +196,14 @@
           displayName = "WQJ";
           legalName = "Walter Queiroz Jr";
           mailAddresses = [ "walter@wcbrpar.com" "walter@redcom.digital" "walter@walcor.com.br" ];
+          groups = [ "admins" "users" "admin-tools" ];
+          
+
+        };
+        "caroles" = {
+          displayName = "CMQ";
+          legalName = "Carolina Queiroz";
+          mailAdresses = [ "carolina@wcbrpar.com" " carolina@redcom.digital" "carolina@walcor.com.br" ];
           groups = [ "admins" "users" "admin-tools" ];
         };
       };

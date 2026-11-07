@@ -107,8 +107,8 @@
           };
         };
 
-        ldap = { address = ":389"; };
-        ldaps = { address = ":636"; };
+        # ldap = { address = ":389"; };
+        # ldaps = { address = ":636"; };
 
         metrics = {
           address = ":8082";
