@@ -1,5 +1,26 @@
 { config, lib, pkgs, hostName, ... }:
 
+let
+  identityIds = import ../../users/identity-ids.nix;
+  posixProvision = pkgs.writeText "kanidm-posix-provision.json" (
+    builtins.toJSON {
+      groups = {
+        admins = {
+          enableUnix = true;
+          gidNumber = identityIds.groups.admins;
+        };
+        "unix-users" = {
+          enableUnix = true;
+          gidNumber = identityIds.groups.unixUsers;
+        };
+      };
+      persons = builtins.mapAttrs (_: person: {
+        enableUnix = true;
+        gidNumber = person.gidNumber;
+      }) identityIds.persons;
+    }
+  );
+in
 {
   
   age.secrets = {
@@ -162,7 +183,7 @@
         default_shell = "/bin/zsh";
         home_attr = "uuid";
         home_prefix = "/home/";
-        kanidm.pam_allowed_login_groups = [ "users" "admins" ];
+        kanidm.pam_allowed_login_groups = [ "unix-users" "admins" ];
         enablePam = true;
       };
     };    
@@ -186,9 +207,12 @@
       enable = true;
       autoRemove = true;
       idmAdminPasswordFile = config.age.secrets.kanidm-idm-admin-password.path;
+      # O submódulo NixOS não tipa os atributos POSIX; o JSON é mesclado ao estado normal.
+      extraJsonFile = posixProvision;
       groups = {
         "admins" = { };
         "users" = { };
+        "unix-users" = { };
         "admin-tools" = { }; # Grupo para controle de acesso
       };
       persons = {
@@ -196,15 +220,15 @@
           displayName = "WQJ";
           legalName = "Walter Queiroz Jr";
           mailAddresses = [ "walter@wcbrpar.com" "walter@redcom.digital" "walter@walcor.com.br" ];
-          groups = [ "admins" "users" "admin-tools" ];
+          groups = [ "admins" "users" "unix-users" "admin-tools" ];
           
 
         };
         "caroles" = {
           displayName = "CMQ";
           legalName = "Carolina Queiroz";
-          mailAdresses = [ "carolina@wcbrpar.com" " carolina@redcom.digital" "carolina@walcor.com.br" ];
-          groups = [ "admins" "users" "admin-tools" ];
+          mailAddresses = [ "carolina@wcbrpar.com" "carolina@redcom.digital" "carolina@walcor.com.br" ];
+          groups = [ "admins" "users" "unix-users" "admin-tools" ];
         };
       };
       
