@@ -31,6 +31,14 @@ in
       owner = "kanidm";
       group = "kanidm";
     };
+
+    # Token oken do mail-sender
+    kanidm-mail-sender-token = {
+      file = ../../secrets/kanidmMailSenderToken.age;
+      mode = "600";
+      owner = "kanidm";
+      group = "kanidm";
+    };
  
   };
 
@@ -245,19 +253,48 @@ in
 
   # Garantir diretórios necessários
   systemd = {
-    services.kanidm = {
-      serviceConfig = {
-        # Isso fura o isolamento do Systemd e traz os arquivos para onde o Kanidm pode ver
-        BindReadOnlyPaths = [
-          "/var/lib/acme/iam.wcbrpar.com/fullchain.pem"
-          "/var/lib/acme/iam.wcbrpar.com/privatekey.pem"
-        ];
-        # Garante que o serviço tenha permissão de leitura mesmo com hardening
-        CapabilityBoundingSet = [ "~CAP_SYS_PTRACE" ]; 
-        ReadOnlyPaths = [ "/var/lib/acme/iam.wcbrpar.com" ];
+    services = {
+      kanidm = {
+        serviceConfig = {
+          # Isso fura o isolamento do Systemd e traz os arquivos para onde o Kanidm pode ver
+          BindReadOnlyPaths = [
+            "/var/lib/acme/iam.wcbrpar.com/fullchain.pem"
+            "/var/lib/acme/iam.wcbrpar.com/privatekey.pem"
+          ];
+          # Garante que o serviço tenha permissão de leitura mesmo com hardening
+          CapabilityBoundingSet = [ "~CAP_SYS_PTRACE" ]; 
+          ReadOnlyPaths = [ "/var/lib/acme/iam.wcbrpar.com" ];
+        };
+      };
+      kanidm-mail-sender = {
+        description = "Kanidm Mail Sender";
+        after = [ "network.target" "kanidm.service" ];
+        wantedBy = [ "multi-user.target" ];
+        
+        # Arquivo TOML - Configuração do KanIDM Mail Sender
+        preStart = ''
+          mkdir -p /etc/kanidm
+          cat > /etc/kanidm/mail-sender.toml << 'EOF'
+          token = "$(cat ${config.age.secrets.kanidm-mail-sender-token.path})"
+          instance_display_name = "WCBRpar IAM"
+          instance_url = "https://iam.wcbrpar.com"
+          mail_from_address = "noreply@wcbrpar.com"
+          mail_reply_to_address = "noreply@wcbrpar.com"
+          mail_relay = "smtp://mail.wcbrpar.com"
+          EOF
+          chown kanidm:kanidm /etc/kanidm/mail-sender.toml
+          chmod 600 /etc/kanidm/mail-sender.toml
+        '';
+
+        serviceConfig = {
+          ExecStart = "${pkgs.kanidm_1_10}/bin/kanidm-mail-sender -c /etc/kanidm/mail-sender.toml";
+          User = "kanidm";
+          Group = "kanidm";
+          Restart = "on-failure";
+        };
       };
     };
-    
+
     # Garantir diretórios necessários
     tmpfiles.rules = lib.mkIf (hostName == "galactica") [
       "d /var/lib/kanidm 0750 kanidm kanidm -"
@@ -265,4 +302,5 @@ in
     services."kanidm.service".after = [ "traefik.service" "traefik-certs-dumper.service" "systemd-tmpfiles-resetup.service"];
     services."kanidm.service".requires = [ "traefik-certs-dumper.service" ];
   };
+
 }

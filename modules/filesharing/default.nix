@@ -1,10 +1,23 @@
 { config, lib, pkgs, ... }:
 
 {
-  fileSystems."/nas-data/home" = {
-    device = "172.16.129.26:/nas/6116/users";
+  # fileSystems."/nas-data/home" = {
+  #   device = "172.16.129.26:/nas/6116/users";
+  #   fsType = "nfs";
+  #   options = [ "nofail" ];
+  # };
+
+  # Export raiz 6116, compartilhado pelos hosts NixOS.
+  fileSystems."/nas-data" = {
+    device = "172.16.131.37:/nas/6116";
     fsType = "nfs";
-    options = [ "nofail" ];
+    options = [
+      "_netdev"
+      "nofail"
+      "hard"
+      "x-systemd.automount"
+      "x-systemd.mount-timeout=30s"
+    ];
   };
 
   services.nfs.server = lib.mkIf (config.networking.hostName == "yashuman") {

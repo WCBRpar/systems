@@ -18,7 +18,7 @@
     # ./n8n
     ./office
     ./reverse-proxy
-    ./social
+    # ./social
     ./terminal
     ./webserving
     ./websites
