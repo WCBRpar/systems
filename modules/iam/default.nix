@@ -36,8 +36,9 @@ let
         'instance_url = "https://iam.wcbrpar.com"' \
         'mail_from_address = "no-reply@wcbrpar.com"' \
         'mail_reply_to_address = "dev-ops@wcbrpar.com"' \
-        'mail_relay = "smtp://mail.wcbrpar.com"' \
-        'mail_sender = "mail-sender@wcbrpar.com"'
+        'mail_relay = "mail.wcbrpar.com"' \
+        'mail_username = "mail-sender@wcbrpar.com"' \
+        'mail_password = ""' 
     } > /etc/kanidm/mail-sender.toml
 
     ${pkgs.coreutils}/bin/chown root:kanidm /etc/kanidm/mail-sender.toml
@@ -204,8 +205,8 @@ in
       enable = true;
       settings = {
         uri = "https://iam.wcbrpar.com:8443";
-        verify_ca = false;
-        verify_hostnames = false;
+        verify_ca = true;
+        verify_hostnames = true;
       };
     };
 
