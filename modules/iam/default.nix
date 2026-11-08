@@ -20,7 +20,32 @@ let
       }) identityIds.persons;
     }
   );
+
+  mailSenderConfigScript = pkgs.writeShellScript "kanidm-mail-sender-config" ''
+    set -euo pipefail
+
+    ${pkgs.coreutils}/bin/install -d -o root -g kanidm -m 0750 /etc/kanidm
+
+    token="$(${pkgs.coreutils}/bin/cat ${config.age.secrets.kanidm-mail-sender-token.path})"
+    tokenToml="$(printf '%s' "$token" | ${pkgs.jq}/bin/jq -Rs .)"
+
+    {
+      printf 'token = %s\n' "$tokenToml"
+      cat <<'TOML'
+      instance_display_name = "WCBRpar IAM"
+      instance_url = "https://iam.wcbrpar.com"
+      mail_from_address = "noreply@wcbrpar.com"
+      mail_reply_to_address = "noreply@wcbrpar.com"
+      mail_relay = "smtp://mail.wcbrpar.com"
+      TOML
+    } > /etc/kanidm/mail-sender.toml
+
+    ${pkgs.coreutils}/bin/chown root:kanidm /etc/kanidm/mail-sender.toml
+    ${pkgs.coreutils}/bin/chmod 0640 /etc/kanidm/mail-sender.toml
+  '';
+
 in
+
 {
   
   age.secrets = {
@@ -271,22 +296,8 @@ in
         after = [ "network.target" "kanidm.service" ];
         wantedBy = [ "multi-user.target" ];
         
-        # Arquivo TOML - Configuração do KanIDM Mail Sender
-        preStart = ''
-          mkdir -p /etc/kanidm
-          cat > /etc/kanidm/mail-sender.toml << 'EOF'
-          token = "$(cat ${config.age.secrets.kanidm-mail-sender-token.path})"
-          instance_display_name = "WCBRpar IAM"
-          instance_url = "https://iam.wcbrpar.com"
-          mail_from_address = "noreply@wcbrpar.com"
-          mail_reply_to_address = "noreply@wcbrpar.com"
-          mail_relay = "smtp://mail.wcbrpar.com"
-          EOF
-          chown kanidm:kanidm /etc/kanidm/mail-sender.toml
-          chmod 600 /etc/kanidm/mail-sender.toml
-        '';
-
         serviceConfig = {
+          ExecStartPre = [ "+${mailSenderConfigScript}" ];
           ExecStart = "${pkgs.kanidm_1_10}/bin/kanidm-mail-sender -c /etc/kanidm/mail-sender.toml";
           User = "kanidm";
           Group = "kanidm";
