@@ -34,6 +34,7 @@ in
   # Secrets do Módulo Kanidm 
   "kanidmIdmAdminPassword.age".publicKeys = all;
   "kanidmMailSenderToken.age".publicKeys = all;
+  "kanidmMailSenderPassword.age".publicKeys = all;
 
 
   # Secrets do Módulo Office (NextCloud + OnlyOffice)

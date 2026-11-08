@@ -24,10 +24,11 @@ let
   mailSenderConfigScript = pkgs.writeShellScript "kanidm-mail-sender-config" ''
     set -euo pipefail
 
-    ${pkgs.coreutils}/bin/install -d -o root -g kanidm -m 0750 /etc/kanidm
-
     token="$(${pkgs.coreutils}/bin/cat ${config.age.secrets.kanidm-mail-sender-token.path})"
     tokenToml="$(printf '%s' "$token" | ${pkgs.jq}/bin/jq -Rs .)"
+
+    password="$(${pkgs.coreutils}/bin/cat ${config.age.secrets.kanidm-mail-sender-password.path})"
+    passwordToml="$(printf '%s' "$password" | ${pkgs.jq}/bin/jq -Rs .)"
 
     {
       printf 'token = %s\n' "$tokenToml"
@@ -37,8 +38,9 @@ let
         'mail_from_address = "no-reply@wcbrpar.com"' \
         'mail_reply_to_address = "dev-ops@wcbrpar.com"' \
         'mail_relay = "mail.wcbrpar.com"' \
-        'mail_username = "mail-sender@wcbrpar.com"' \
-        'mail_password = ""' 
+        'mail_username = "mail-sender@wcbrpar.com"'
+      printf 'mail_password = %s\n' "$passwordToml"
+
     } > /etc/kanidm/mail-sender.toml
 
     ${pkgs.coreutils}/bin/chown root:kanidm /etc/kanidm/mail-sender.toml
@@ -58,9 +60,17 @@ in
       group = "kanidm";
     };
 
-    # Token oken do mail-sender
+    # Token do Kanidm do mail-sender
     kanidm-mail-sender-token = {
       file = ../../secrets/kanidmMailSenderToken.age;
+      mode = "600";
+      owner = "kanidm";
+      group = "kanidm";
+    };
+
+    #  Pasword do Kanidm do mail-sender
+    kanidm-mail-sender-password = {
+      file = ../../secrets/kanidmMailSenderPassword.age;
       mode = "600";
       owner = "kanidm";
       group = "kanidm";

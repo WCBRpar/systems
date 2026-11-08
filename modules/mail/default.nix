@@ -29,12 +29,31 @@
         };
       };
     };
+    
+    # Opção não disponível em services.mailserver
+    postfix.settings.main = lib.mkIf (hostName == "galactica") {
+      mynetworks = [
+        # Endereços que sudo postconf -h mynetworks mostrou na Galactica
+        "127.0.0.1/32"
+        "37.205.8.86/32"
+        "192.168.13.10/32"
+        "[::1]/128"
+        "[2a03:3b40:fe:410::1]/128"
+        "[fe80::d873:e9ff:fe79:dff2]/128"
+        "[fe80::73:a0ff:fe6c:1869]/128"
+
+        # Pegasus e Yashuman: endereços ZeroTier específicos
+        "192.168.13.20/32"
+        "192.168.13.130/32"
+      ];
+    };
   };
 
   mailserver = lib.mkIf ( hostName == "galactica" ) {
     enable = true;
     enableNixpkgsReleaseCheck = true;
     fqdn = "mail.wcbrpar.com";
+    sendingFqdn = "wcbrpar.com";
     domains = [ "wcbrpar.com" "redcom.digital" "walcor.com.br" "wqueiroz.adv.br" ];
 
     systemContact = "dev-ops@wcbrpar.com";
@@ -62,7 +81,7 @@
     # Integração LDAP (Dovecot + Postfix) — formato Kanidm
     ldap = {
       enable = true;
-      uris = [ "ldaps://ldap.wcbrpar.com" ];
+      uris = [ "ldaps://ldap.wcbrpar.com" "ldaps://ldap.redcom.digital" "ldaps://ldap.walcor.com.br" "ldaps://ldap.wqueiroz.adv.br" ];
       bind = { 
         # dn = "spn=mail_bind@wcbrpar.com";
         dn = "dn=token";
