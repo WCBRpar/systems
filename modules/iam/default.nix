@@ -31,13 +31,13 @@ let
 
     {
       printf 'token = %s\n' "$tokenToml"
-      cat <<'TOML'
-      instance_display_name = "WCBRpar IAM"
-      instance_url = "https://iam.wcbrpar.com"
-      mail_from_address = "noreply@wcbrpar.com"
-      mail_reply_to_address = "noreply@wcbrpar.com"
-      mail_relay = "smtp://mail.wcbrpar.com"
-      TOML
+      printf '%s\n' \
+        'instance_display_name = "WCBRpar IAM"' \
+        'instance_url = "https://iam.wcbrpar.com"' \
+        'mail_from_address = "no-reply@wcbrpar.com"' \
+        'mail_reply_to_address = "dev-ops@wcbrpar.com"' \
+        'mail_relay = "smtp://mail.wcbrpar.com"' \
+        'mail_sender = "mail-sender@wcbrpar.com"'
     } > /etc/kanidm/mail-sender.toml
 
     ${pkgs.coreutils}/bin/chown root:kanidm /etc/kanidm/mail-sender.toml
@@ -298,7 +298,7 @@ in
         
         serviceConfig = {
           ExecStartPre = [ "+${mailSenderConfigScript}" ];
-          ExecStart = "${pkgs.kanidm_1_10}/bin/kanidm-mail-sender -c /etc/kanidm/mail-sender.toml";
+          ExecStart = "${pkgs.kanidm_1_10}/bin/kanidm-mail-sender --client-config /etc/kanidm/config --mail-sender-config /etc/kanidm/mail-sender.toml";
           User = "kanidm";
           Group = "kanidm";
           Restart = "on-failure";
