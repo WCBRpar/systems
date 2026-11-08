@@ -32,7 +32,9 @@ in
   "telegramBotKey.age".publicKeys = all;
 
   # Secrets do Módulo Kanidm 
-  "kanidmIdmAdminPassword.age".publicKeys = all; 
+  "kanidmIdmAdminPassword.age".publicKeys = all;
+  "kanidmMailSenderToken.age".publicKeys = all;
+
 
   # Secrets do Módulo Office (NextCloud + OnlyOffice)
   "nextcloudAdminPassword.age".publicKeys = all;
