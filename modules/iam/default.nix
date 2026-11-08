@@ -37,7 +37,7 @@ let
         'instance_url = "https://iam.wcbrpar.com"' \
         'mail_from_address = "no-reply@wcbrpar.com"' \
         'mail_reply_to_address = "dev-ops@wcbrpar.com"' \
-        'mail_relay = "mail.wcbrpar.com"' \
+        'mail_relay = "192.168.13.10:25"' \
         'mail_username = "mail-sender@wcbrpar.com"'
       printf 'mail_password = %s\n' "$passwordToml"
 
@@ -78,21 +78,20 @@ in
  
   };
 
-  networking.firewall = lib.mkIf (hostName == "galactica") {
-    enable = true;
-    allowedTCPPorts = [ 80 443 636 8443 ];
-    extraCommands = ''
-      # Remove qualq/uer regra DROP existente na porta 8443 (ignora se não existir)
-      # iptables -D INPUT -p tcp --dport 8443 -j DROP 2>/dev/null || true
-      # Garante acesso irrestrito à porta 8443 (já incluída no allowedTCPPorts, mas por segurança)
-      # iptables -A INPUT -p tcp --dport 8443 -j ACCEPT
-    '';
-  };
-
   environment.systemPackages = with pkgs; [ kanidm_1_10 nginx ];
-  
-  # Declara o ldaps.<fqdn> para o host galactica! 
-  networking = { 
+
+  networking = {
+    firewall = lib.mkIf (hostName == "galactica") {
+      enable = true;
+      allowedTCPPorts = [ 80 443 636 8443 ];
+      extraCommands = ''
+        # Remove qualq/uer regra DROP existente na porta 8443 (ignora se não existir)
+        # iptables -D INPUT -p tcp --dport 8443 -j DROP 2>/dev/null || true
+        # Garante acesso irrestrito à porta 8443 (já incluída no allowedTCPPorts, mas por segurança)
+        # iptables -A INPUT -p tcp --dport 8443 -j ACCEPT
+      '';
+    };
+    # Declara o ldaps.<fqdn> para o host galactica! 
     hosts = {
       "192.168.13.10" = [ "ldap.wcbrpar.com" "ldap.redcom.digital" "ldap.walcor.com.br" "ldap.wqueiroz.adv.br" ];
     };

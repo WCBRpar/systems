@@ -1,5 +1,12 @@
 { config, lib, pkgs, hostName, ... }: 
 
+let 
+
+  # Importa as configurações de todos os hosts
+  allHosts = import ../hosts/default.nix;
+
+in
+
 {
 
   services = {
@@ -195,14 +202,21 @@
     };
   };
 
-  # Firewall: portas de email
-  networking.firewall.allowedTCPPorts = lib.mkIf ( hostName == "galactica" ) [ 
-    25    # SMTP
-    465   # SMTPS
-    587   # Submission
-    993   # IMAPS
-    4190  # ManageSieve
-  ];
+  networking = {
+   # Declara o mail.<fqdn> para o host galactica! 
+    hosts = { # impmlementar variável ip // base role no host - 
+      "192.168.13.10" = [ "mail.wcbrpar.com" "mail.redcom.digital" "mail.walcor.com.br" "mail.wqueiroz.adv.br" ];
+    };
+
+    # Firewall: portas de email
+    firewall.allowedTCPPorts = lib.mkIf ( hostName == "galactica" ) [ 
+      25    # SMTP
+      465   # SMTPS
+      587   # Submission
+      993   # IMAPS
+      4190  # ManageSieve
+    ];
+  };
 
   # Segredos para o Mailserver
   age.secrets = lib.mkIf ( hostName == "galactica" ) {
