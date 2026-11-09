@@ -145,8 +145,11 @@
       settings = {
 
         loglevel = 2;
-        log_type = "file";
+        log_type = "systemd";
+        logtimezone = "America/Campo_Grande";
+        
         # Horário UTC: 06:00 UTC = 02:00 em Campo Grande.
+        default_timezone = "America/Campo_Grande";
         maintenance_window_start = 6;
         # Identificador estável desta instância única de Nextcloud.
         serverid = 1;
@@ -193,10 +196,15 @@
         # Habilita o arquivamento global e define o nome padrão da pasta (ex: "Archive" ou "Arquivo")
         "app.mail.archive.folder" = "Archive";
 
+        #Configutação Padrões SMTP/IMAP
+        # mail_smtphost = "mail.wcbrpar.com";
+        # mail_smtpmode = "smtp";
+        # mail_smtpsecure = "ssl";
+
         # Configurações OIDC
         oidc_login_client_id = "nextcloud";
         oidc_login_provider_url = "https://iam.wcbrpar.com/oauth2/openid/nextcloud";
-        oidc_login_end_session_redirect = true;
+        oidc_login_end_session_redirect = false;
         oidc_login_logout_url = "https://iam.wcbrpar.com/ui/logout";
 
         # Mapeamentos e Comportamento

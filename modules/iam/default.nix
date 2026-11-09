@@ -205,76 +205,88 @@ in
     # };
   };
   
-  
-  services.kanidm = {
-    # package = pkgs.kanidm_1_10;
-    package = pkgs.kanidmWithSecretProvisioning_1_10;
-    
-    client = {
-      enable = true;
-      settings = {
-        uri = "https://iam.wcbrpar.com:8443";
-        verify_ca = true;
-        verify_hostnames = true;
+  # Cria a conta mail-sender para o Kanidm Mail Sender  
+  mailserver = lib.mkIf ( hostName == "galactica" ) {
+    accounts = {
+      "mail-sender@wcbrpar.com" = {
+        passwordFile = config.age.secrets.kanidm-mail-sender-password.path;
+        aliases = [ "no-reply@wcbrpar.com"];
+        sendOnly = true;
       };
     };
+  };
 
-    unix = {
-      enable = true;
-      settings = {
-        hsm_type = "soft";
-        default_shell = "/bin/zsh";
-        home_attr = "uuid";
-        home_prefix = "/home/";
-        kanidm.pam_allowed_login_groups = [ "unix-users" "admins" ];
-        enablePam = true;
-      };
-    };    
+  services = {
 
-    server = lib.mkIf (hostName == "galactica") {
-      enable = true;
-
-      settings = {
-        log_level = "debug";
-        domain = "wcbrpar.com";
-        origin = "https://iam.wcbrpar.com";
-        # Manter 0.0.0.0 pois mesmo o traefik fazendo o  proxy, os hosts se cumunicam internamente sem proxy-reverso
-        bindaddress = "0.0.0.0:8443";
-        ldapbindaddress = "0.0.0.0:636";
-        tls_chain = "/var/lib/acme/wcbrpar.com/fullchain.pem";
-        tls_key = "/var/lib/acme/wcbrpar.com/privatekey.pem";
-      };
-    };
-    
-    provision = lib.mkIf (hostName == "galactica") {
-      enable = true;
-      autoRemove = true;
-      idmAdminPasswordFile = config.age.secrets.kanidm-idm-admin-password.path;
-      # O submódulo NixOS não tipa os atributos POSIX; o JSON é mesclado ao estado normal.
-      extraJsonFile = posixProvision;
-      groups = {
-        "admins" = { };
-        "users" = { };
-        "unix-users" = { };
-        "admin-tools" = { }; # Grupo para controle de acesso
-      };
-      persons = {
-        "wjjunyor" = {
-          displayName = "WQJ";
-          legalName = "Walter Queiroz Jr";
-          mailAddresses = [ "walter@wcbrpar.com" "walter@redcom.digital" "walter@walcor.com.br" ];
-          groups = [ "admins" "users" "unix-users" "admin-tools" ];
-          
-
+    kanidm = {
+      # package = pkgs.kanidm_1_10;
+      package = pkgs.kanidmWithSecretProvisioning_1_10;
+      
+      client = {
+        enable = true;
+        settings = {
+          uri = "https://iam.wcbrpar.com:8443";
+          verify_ca = true;
+          verify_hostnames = true;
         };
-        "caroles" = {
-          displayName = "CMQ";
-          legalName = "Carolina Queiroz";
-          mailAddresses = [ "carolina@wcbrpar.com" "carolina@redcom.digital" "carolina@walcor.com.br" ];
-          groups = [ "admins" "users" "unix-users" "admin-tools" ];
+      };
+
+      unix = {
+        enable = true;
+        settings = {
+          hsm_type = "soft";
+          default_shell = "/bin/zsh";
+          home_attr = "uuid";
+          home_prefix = "/home/";
+          kanidm.pam_allowed_login_groups = [ "unix-users" "admins" ];
+          enablePam = true;
+        };
+      };    
+
+      server = lib.mkIf (hostName == "galactica") {
+        enable = true;
+
+        settings = {
+          log_level = "debug";
+          domain = "wcbrpar.com";
+          origin = "https://iam.wcbrpar.com";
+          # Manter 0.0.0.0 pois mesmo o traefik fazendo o  proxy, os hosts se cumunicam internamente sem proxy-reverso
+          bindaddress = "0.0.0.0:8443";
+          ldapbindaddress = "0.0.0.0:636";
+          tls_chain = "/var/lib/acme/wcbrpar.com/fullchain.pem";
+          tls_key = "/var/lib/acme/wcbrpar.com/privatekey.pem";
         };
       };
       
+      provision = lib.mkIf (hostName == "galactica") {
+        enable = true;
+        autoRemove = true;
+        idmAdminPasswordFile = config.age.secrets.kanidm-idm-admin-password.path;
+        # O submódulo NixOS não tipa os atributos POSIX; o JSON é mesclado ao estado normal.
+        extraJsonFile = posixProvision;
+        groups = {
+          "admins" = { };
+          "users" = { };
+          "unix-users" = { };
+          "admin-tools" = { }; # Grupo para controle de acesso
+        };
+        persons = {
+          "wjjunyor" = {
+            displayName = "WQJ";
+            legalName = "Walter Queiroz Jr";
+            mailAddresses = [ "walter@wcbrpar.com" "walter@redcom.digital" "walter@walcor.com.br" ];
+            groups = [ "admins" "users" "unix-users" "admin-tools" ];
+
+          };
+          "caroles" = {
+            displayName = "CMQ";
+            legalName = "Carolina Queiroz";
+            mailAddresses = [ "carolina@wcbrpar.com" "carolina@redcom.digital" "carolina@walcor.com.br" ];
+            groups = [ "admins" "users" "unix-users" "admin-tools" ];
+          };
+        };
+        
+      };
     };
   };
   

@@ -58,6 +58,9 @@ in
 
   mailserver = lib.mkIf ( hostName == "galactica" ) {
     enable = true;
+
+    debug.all = true;
+
     enableNixpkgsReleaseCheck = true;
     fqdn = "mail.wcbrpar.com";
     sendingFqdn = "wcbrpar.com";
@@ -82,10 +85,6 @@ in
         hashedPasswordFile = config.age.secrets.mail-walter-password.path;
         aliases = [ "postmaster@wcbrpar.com" "admin@wcbrpar.com" "abuse@wcbrpar.com" "dev-ops@wcbrpar.com" ];
         catchAll = [ "wcbrpar.com" "redcom.digital" "walcor.com.br" "wqueiroz.adv.br" ]; 
-      };
-      "mail-sender@wcbrpar.com" = {
-        passwordFile = config.age.secrets.kanidm-mail-sender-password.path;
-        sendOnly = true;
       };
     };
 
