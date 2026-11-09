@@ -196,6 +196,7 @@
         # Configurações OIDC
         oidc_login_client_id = "nextcloud";
         oidc_login_provider_url = "https://iam.wcbrpar.com/oauth2/openid/nextcloud";
+        oidc_login_end_session_redirect = true;
         oidc_login_logout_url = "https://iam.wcbrpar.com/ui/logout";
 
         # Mapeamentos e Comportamento
@@ -206,11 +207,12 @@
           groups = "groups";
           is_admin = "is_admin";
         };
-        # Auto-criação de usuários e login automático (opcional )
-        oidc_login_auto_redirect = true; # Mantenha false para testar o botão primeiro
+
+        oidc_login_auto_redirect = true; 
         oidc_login_redir_fallback = false;
         oidc_login_tls_verify = true;
-        oidc_login_disable_registration = true;
+        # Auto-criação de usuários e login automático (opcional )
+        oidc_login_disable_registration = false;
 
         # Refinamento OIDC
         oidc_login_button_text = "Logar com Kanidm";

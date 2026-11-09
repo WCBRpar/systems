@@ -37,7 +37,7 @@ let
         'instance_url = "https://iam.wcbrpar.com"' \
         'mail_from_address = "no-reply@wcbrpar.com"' \
         'mail_reply_to_address = "dev-ops@wcbrpar.com"' \
-        'mail_relay = "192.168.13.10:25"' \
+        'mail_relay = "mail.wcbrpar.com"' \
         'mail_username = "mail-sender@wcbrpar.com"'
       printf 'mail_password = %s\n' "$passwordToml"
 
