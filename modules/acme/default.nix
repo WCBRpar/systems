@@ -96,18 +96,7 @@ in
   # Criamos um diretório com permissões de grupo para que postfix/dovecot acessem
   systemd = {
     tmpfiles.rules = lib.mkIf (hostName == "galactica") [
-      "d /var/lib/traefik/certs 0755 traefik traefik -"
-      
-      # Garante que o traefik possa escrever no diretório /var/lib/acme
-      "d /var/lib/acme 0770 traefik traefik -"
-      "d /var/lib/acme/wcbrpar.com 0750 traefik traefik -"
-      "d /var/lib/acme/iam.wcbrpar.com 0750 traefik traefik -"  
-      "d /var/lib/acme/mail.wcbrpar.com 0750 traefik traefik -"
 
-      # Garante ao Kanidm, Mail e outros serviços acesso aos certificados
-      "z /var/lib/acme/*/fullchain.pem 0644 traefik traefik -"
-      "z /var/lib/acme/*/privatekey.pem 0640 traefik traefik -"
-  
       # Garante que o diretório de challenges exista
       "d /var/lib/acme/.challenges 0755 acme acme -"
     ];

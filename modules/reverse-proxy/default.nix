@@ -271,11 +271,19 @@
   networking.firewall.allowedTCPPorts = [80 443];
 
   # Garante que os diretórios existam
-  systemd.tmpfiles.rules = lib.mkIf (hostName == "galactica") [
+  systemd.tmpfiles.rules = [
     "d /var/lib/traefik 0750 traefik traefik -"
     "f /var/lib/traefik/acme.json 0600 traefik traefik -"
     "d /var/log/traefik 0750 traefik traefik -"
     "f /var/log/traefik/access.log 0750 traefik traefik -"
+    "d /var/lib/traefik/certs 0755 traefik traefik -"
+      
+    # Garante que o traefik possa escrever no diretório /var/lib/acme
+    "d /var/lib/acme 0770 traefik traefik -"
+    "d /var/lib/acme/wcbrpar.com 0750 traefik traefik -"
+    "d /var/lib/acme/iam.wcbrpar.com 0750 traefik traefik -"  
+    "d /var/lib/acme/mail.wcbrpar.com 0750 traefik traefik -"
+
   ];
 
   # Configuração de rotação de logs

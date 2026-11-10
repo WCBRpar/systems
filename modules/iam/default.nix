@@ -312,6 +312,8 @@ in
           CapabilityBoundingSet = [ "~CAP_SYS_PTRACE" ]; 
           ReadOnlyPaths = [ "/var/lib/acme/iam.wcbrpar.com" ];
         };
+        after = [ "traefik.service" "traefik-certs-dumper.service" "systemd-tmpfiles-resetup.service" ];
+        requires = [ "traefik-certs-dumper.service" ];
       };
       kanidm-mail-sender = {
         description = "Kanidm Mail Sender";
@@ -326,14 +328,34 @@ in
           Restart = "on-failure";
         };
       };
+      kanidm-unixd = {
+        serviceConfig = {
+          BindReadOnlyPaths = [ "/etc/kanidm" ];
+        };
+        after = [ "systemd-tmpfiles-resetup.service" ];
+      };
+      kanidm-unixd-tasks = {
+        serviceConfig = {
+          BindReadOnlyPaths = [ "/etc/kanidm" ];
+        };
+      };
     };
 
     # Garantir diretórios necessários
-    tmpfiles.rules = lib.mkIf (hostName == "galactica") [
+    tmpfiles.rules = [
       "d /var/lib/kanidm 0750 kanidm kanidm -"
+      "d /etc/kanidm 0755 root root -"
+      
+      # Garante ao Kanidm, Mail e outros serviços acesso aos certificados
+      "z /var/lib/acme/*/fullchain.pem 0644 traefik traefik -"
+      "z /var/lib/acme/*/privatekey.pem 0640 traefik traefik -"
+  
+
+
+      
     ];
-    services."kanidm.service".after = [ "traefik.service" "traefik-certs-dumper.service" "systemd-tmpfiles-resetup.service"];
-    services."kanidm.service".requires = [ "traefik-certs-dumper.service" ];
+
+
   };
 
 }
