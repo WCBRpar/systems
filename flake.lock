@@ -243,11 +243,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1793979366,
-        "narHash": "sha256-7OoWDsYO9teiPxl0QdlS5lYE20Pue8/5mpscSL32FUA=",
+        "lastModified": 1794278858,
+        "narHash": "sha256-rkrJwLgLSHBnXfgoSKIDa+2LLGdTqynsV3GAxOTGhUU=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "2c0c1f01521469cf0271180c453c79782d53c2f6",
+        "rev": "82ce401aa350502897c3f2e85f384d61cd3b0b6d",
         "type": "github"
       },
       "original": {
@@ -335,11 +335,11 @@
         "nixpkgs": "nixpkgs_2"
       },
       "locked": {
-        "lastModified": 1794051415,
-        "narHash": "sha256-mJok3uMK0awq2MPKdSnvTxm3UD89KD3LclQzASgtY1s=",
+        "lastModified": 1794222723,
+        "narHash": "sha256-jehPADpSIsWnyNHw/s44OHF9l6Y75QmW74sqO9cEe0A=",
         "owner": "NixOS",
         "repo": "nixos-hardware",
-        "rev": "1a8ff4f57ffe1f732beaa1db842247a381ea471d",
+        "rev": "919c16cf46a7acf9b44b2c2444bc39aa094eaa85",
         "type": "github"
       },
       "original": {
@@ -449,8 +449,8 @@
     },
     "nixpkgs_3": {
       "locked": {
-        "lastModified": 1794095652,
-        "narHash": "sha256-VNC5g/7GFd9bEb8/vy+UIKwiFa199q3aIibdLMQ7+cY=",
+        "lastModified": 1794279127,
+        "narHash": "sha256-A4P2ippjAhwzUw2LQLxHPgNN7K0pJHSeW/zxqyw23FM=",
         "path": "/nas-data/shared/DEV/nixOS/nixpkgs",
         "type": "path"
       },
@@ -592,11 +592,11 @@
     "wp4nix": {
       "flake": false,
       "locked": {
-        "lastModified": 1794081547,
-        "narHash": "sha256-+dIDjTko8I6C9QgBMUVg+DKGalp7ZaEoYYmLDiqfycE=",
+        "lastModified": 1794258642,
+        "narHash": "sha256-3AeTSGuz+Tpkx0H3ow87uaL6v61amINtIlaKmaX4Hzs=",
         "ref": "refs/heads/master",
-        "rev": "64135ec54900f88b27d4b781d723bff329470fab",
-        "revCount": 1913,
+        "rev": "f2c71245de76e2ed052c8b0227f16d0187371d8f",
+        "revCount": 1915,
         "type": "git",
         "url": "https://git.helsinki.tools/helsinki-systems/wp4nix"
       },

@@ -133,7 +133,7 @@
       extraApps = with config.services.nextcloud.package.packages.apps; {
         # List of apps we want to install and are already packaged in
         # https://github.com/NixOS/nixpkgs/blob/master/pkgs/servers/nextcloud/packages/nextcloud-apps.json
-        inherit calendar collectives contacts mail notes recognize tasks oidc_login ;
+        inherit calendar contacts mail memories notes oidc_login onlyoffice recognize tasks ; # +external --collectives +socialsharing_whatsapp 
  
       };
       # Habilita a instalação de aplicativos via appstore - mesmo havendo extra-apps definidos
