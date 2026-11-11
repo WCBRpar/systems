@@ -16,9 +16,8 @@ in
       dynamicConfigOptions = {
         http = {
           routers = {
-            MS-WPR = {
-              # rule = "Host(`mail.wcbrpar.com`) || Host(`mail.redcom.digital`) || Host(`mail.walcor.com.br`) || Host(`mail.wqueiroz.adv.br`) || Host(`wcbrpar.com`) ";
-              rule = "Host(`mail.wcbrpar.com`)";
+             MS-ALL = {
+              rule = "Host(`mail.wcbrpar.com`) || Host(`mail.redcom.digital`) || Host(`mail.walcor.com.br`) || Host(`mail.wqueiroz.adv.br`) || Host(`wcbrpar.com`) ";
               service = "noop@internal"; 
               entrypoints = ["websecure"];
               tls = {
@@ -29,6 +28,16 @@ in
                   }
                 ];
               };
+            };
+            # RSpamd Interface
+            RS-ALL = {
+              rule = "Host(`rspamd.wcbrpar.com`) || Host(`rspamd.redcom.digital`) || Host(`rspamd.walcor.com.br`) || Host(`rspamd.wqueiroz.adv.br`) || Host(`wcbrpar.com`) ";
+              service = "rspamd-service"; 
+              entrypoints = ["websecure"];
+              tls = {
+                certResolver = "cloudflare";
+              };
+              middlewares = [ "dashboard-redirect" "oidc-auth" ];
             };
           };
         # Serviço dummy que não faz nada
@@ -60,8 +69,10 @@ in
     enable = true;
 
     debug.all = true;
-
+    
+    stateVersion = 22;
     enableNixpkgsReleaseCheck = true;
+    
     fqdn = "mail.wcbrpar.com";
     sendingFqdn = "wcbrpar.com";
     domains = [ "wcbrpar.com" "redcom.digital" "walcor.com.br" "wqueiroz.adv.br" ];
@@ -115,7 +126,15 @@ in
     # Anti-spam via rspamd (integrado ao SNM)
     fullTextSearch = {
       enable = true;
+      autoIndex = true;
       fallback = true;
+      headerExcludes = [
+        "Received"
+        "DKIM-*"
+        "X-*"
+        "Comments"
+      ];
+      languages = [ "pt_BR" "en" ];
     };
 
     # Hierarquia de pastas IMAP
@@ -149,9 +168,6 @@ in
       };
     };
 
-    # Versão do estado
-    stateVersion = 22;
-
     # Configurações de armazenamento
     mailDirectory = "/var/mail/vhosts";
 
@@ -181,6 +197,9 @@ in
         fts_autoindex = true;
       };
     };
+    
+    # Redis # Todas as configurações default 
+    # redis = {};
 
     # monitoring = {
     #   enable = true;
