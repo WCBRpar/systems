@@ -9,6 +9,8 @@ in
 
 {
 
+  imports = [ ./antispam.nix ];
+
   services = {
 
     # Gerar os certificados pelo Traefik! 
@@ -28,16 +30,6 @@ in
                   }
                 ];
               };
-            };
-            # RSpamd Interface
-            RS-ALL = {
-              rule = "Host(`rspamd.wcbrpar.com`) || Host(`rspamd.redcom.digital`) || Host(`rspamd.walcor.com.br`) || Host(`rspamd.wqueiroz.adv.br`) || Host(`wcbrpar.com`) ";
-              service = "rspamd-service"; 
-              entrypoints = ["websecure"];
-              tls = {
-                certResolver = "cloudflare";
-              };
-              middlewares = [ "dashboard-redirect" "oidc-auth" ];
             };
           };
         # Serviço dummy que não faz nada
@@ -81,6 +73,8 @@ in
     systemDomain = "wcbrpar.com";
     systemName = "WCBRpar";
 
+    # enableSubmission = true;
+    enableImap = true;  
 
     # Certificados SSL via ACME (Gerenciados pelo Traefik e exportados pelo Dumper)
     x509 = { 
@@ -134,7 +128,8 @@ in
         "X-*"
         "Comments"
       ];
-      languages = [ "pt_BR" "en" ];
+      languages = [ "pt" "en" ];
+
     };
 
     # Hierarquia de pastas IMAP
@@ -199,7 +194,7 @@ in
     };
     
     # Redis # Todas as configurações default 
-    # redis = {};
+    # submódulo antispam.nix
 
     # monitoring = {
     #   enable = true;

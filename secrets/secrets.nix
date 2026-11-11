@@ -46,6 +46,7 @@ in
   # Secrets do Simple NixOS Mailserver (SNM)
   "ldapMailPassword.age".publicKeys = all;
   "mailWalterPassword.age".publicKeys = all;
+  "rspamdToken.age".publicKeys = all;
 
   # Secrets das chaves privadas dos hosts
 } // builtins.listToAttrs (map (name: {
