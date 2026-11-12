@@ -262,7 +262,9 @@
         # Proxy e Segurança
         "allow_user_to_change_display_name" = false;
         "lost_password_link" = "disabled";
-        
+       
+        extraOptions.memories.exiftool = "${pkgs.exiftool}/bin/exiftool";
+ 
       };
 
       config = {
@@ -299,6 +301,12 @@
 
       enable = true;
       hostname = "office.wcbrpar.com";
+      port = 8008;
+
+      loglevel = "DEBUG";
+
+      allowLocalConnections = true;
+      rabbitmqUrl = "amqp://guest:guest@cloud.wcbrpar.com:5672";
       jwtSecretFile = config.age.secrets.onlyoffice-jwt-secret.path;
       securityNonceFile = config.age.secrets.onlyoffice-security-nonce.path;
 

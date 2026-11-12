@@ -13,7 +13,7 @@ in
 
 {
 
-  imports = [ ./sites ./sites/fix-adf.nix ./sites/fix-cms.nix ./sites/fix-ham.nix ./sites/fix-evm.nix ];
+  imports = [ ./sites ./sites/fix-adf.nix ./sites/fix-cms.nix ./sites/fix-ham.nix ];
 
       services.traefik.dynamicConfigOptions = lib.mkIf (config.networking.hostName == "galactica") {
         http = {

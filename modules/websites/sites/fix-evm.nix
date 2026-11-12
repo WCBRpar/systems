@@ -16,13 +16,13 @@ in
 
   services = {
 
-  # security.acme = {
-  #   certs."${domain}" = {
+  security.acme = {
+    certs."${domain}" = {
   #     extraDomainNames = [ "*.${domain}" ];
   #     webroot = "/var/lib/acme/${domain}";
-  #     group = "nginx";
-  #   };
-  # };
+      group = "nginx";
+    };
+  };
 
   
     phpfpm.pools = lib.mkIf (config.networking.hostName == "pegasus") {
