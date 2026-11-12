@@ -37,8 +37,17 @@ in
         };
       };
     };
-    
-    # Opção não disponível em services.mailserver
+   
+    # # Opção não disponivel em mailserver
+    # dovecot2.settings = lib.mkIf (hostName == "galactica") {
+    #   "passdb ldap" = {
+    #     fields = {
+    #     user = "%{ldap:mail}";
+    #     };
+    #   };
+    # };
+
+    # Opção não disponível em mailserver
     postfix.settings.main = lib.mkIf (hostName == "galactica") {
       mynetworks = [
         # Endereços que sudo postconf -h mynetworks mostrou na Galactica
@@ -98,13 +107,15 @@ in
       enable = true;
       uris = [ "ldaps://ldap.wcbrpar.com" "ldaps://ldap.redcom.digital" "ldaps://ldap.walcor.com.br" "ldaps://ldap.wqueiroz.adv.br" ];
       bind = { 
-        # dn = "spn=mail_bind@wcbrpar.com";
         dn = "dn=token";
         passwordFile = config.age.secrets.ldap-mail-password.path;
       };
       searchBase = "dc=wcbrpar,dc=com";
       
       attributes = {
+        username = "spn";
+        uuid = "uuid";
+        mail = "mail";
         password = null;
       };
 
@@ -129,7 +140,11 @@ in
         "Comments"
       ];
       languages = [ "pt" "en" ];
-
+      filters = [
+        "normalizer-icu"
+        "snowball"
+        "stopwords"
+      ];
     };
 
     # Hierarquia de pastas IMAP

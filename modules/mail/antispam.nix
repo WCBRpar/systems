@@ -27,8 +27,9 @@
           }
         ];
         extraConfig = ''
-          password = config.age.secrets.rspamd-token.path;
-          enable_password = config.age.secrets.rspamd-token.path;
+          secure_ip = ["0.0.0.0/0", "::/0"];
+          # password = config.age.secrets.rspamd-token.path;
+          # enable_password = config.age.secrets.rspamd-token.path;
         '';
       };
     };
