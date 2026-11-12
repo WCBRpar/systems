@@ -37,7 +37,7 @@ let
         'instance_url = "https://iam.wcbrpar.com"' \
         'mail_from_address = "no-reply@wcbrpar.com"' \
         'mail_reply_to_address = "dev-ops@wcbrpar.com"' \
-        'mail_relay = "mail.wcbrpar.com"' \
+        'mail_relay = "smtps://mail.wcbrpar.com"' \
         'mail_username = "mail-sender@wcbrpar.com"'
       printf 'mail_password = %s\n' "$passwordToml"
 
@@ -78,7 +78,7 @@ in
  
   };
 
-  environment.systemPackages = with pkgs; [ kanidm_1_10 nginx ];
+  environment.systemPackages = with pkgs; [ kanidm_1_12 nginx ];
 
   networking = {
     firewall = lib.mkIf (hostName == "galactica") {
@@ -219,8 +219,8 @@ in
   services = {
 
     kanidm = {
-      # package = pkgs.kanidm_1_10;
-      package = pkgs.kanidmWithSecretProvisioning_1_10;
+      # package = pkgs.kanidm_1_12;
+      package = pkgs.kanidmWithSecretProvisioning_1_12;
       
       client = {
         enable = true;
@@ -322,7 +322,7 @@ in
         
         serviceConfig = {
           ExecStartPre = [ "+${mailSenderConfigScript}" ];
-          ExecStart = "${pkgs.kanidm_1_10}/bin/kanidm-mail-sender --client-config /etc/kanidm/config --mail-sender-config /etc/kanidm/mail-sender.toml";
+          ExecStart = "${pkgs.kanidm_1_12}/bin/kanidm-mail-sender --client-config /etc/kanidm/config --mail-sender-config /etc/kanidm/mail-sender.toml";
           User = "kanidm";
           Group = "kanidm";
           Restart = "on-failure";
@@ -349,12 +349,7 @@ in
       # Garante ao Kanidm, Mail e outros serviços acesso aos certificados
       "z /var/lib/acme/*/fullchain.pem 0644 traefik traefik -"
       "z /var/lib/acme/*/privatekey.pem 0640 traefik traefik -"
-  
-
-
-      
     ];
-
 
   };
 

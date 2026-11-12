@@ -9,10 +9,10 @@ in
 
 {
 
+  # Sub-Módulos
   imports = [ ./antispam.nix ];
 
   services = {
-
     # Gerar os certificados pelo Traefik! 
     traefik = lib.mkIf (hostName == "galactica") {
       dynamicConfigOptions = {
@@ -87,8 +87,6 @@ in
 
     # Certificados SSL via ACME (Gerenciados pelo Traefik e exportados pelo Dumper)
     x509 = { 
-      # certificateFile = "/var/lib/acme/wcbrpar.com/fullchain.pem";
-      # privateKeyFile = "/var/lib/acme/wcbrpar.com/privatekey.pem";
       certificateFile = "/var/lib/acme/${config.mailserver.fqdn}/fullchain.pem";
       privateKeyFile = "/var/lib/acme/${config.mailserver.fqdn}/privatekey.pem";
     };
@@ -110,7 +108,7 @@ in
         dn = "dn=token";
         passwordFile = config.age.secrets.ldap-mail-password.path;
       };
-      searchBase = "dc=wcbrpar,dc=com";
+      base = "dc=wcbrpar,dc=com";
       
       attributes = {
         username = "spn";
@@ -143,7 +141,7 @@ in
       filters = [
         "normalizer-icu"
         "snowball"
-        "stopwords"
+        # "stopwords"
       ];
     };
 
@@ -179,7 +177,7 @@ in
     };
 
     # Configurações de armazenamento
-    mailDirectory = "/var/mail/vhosts";
+    storage.path = "/var/mail/vhosts";
 
     # Configuração do Dovecot
     mailboxes = {

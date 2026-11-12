@@ -16,6 +16,11 @@
 
     rspamd = lib.mkIf (hostName == "galactica") {
       enable = true;
+      locals = {
+        "redis.conf".text = ''
+          servers = "127.0.0.1:6379";
+        '';
+      };
       workers.controller = {
         bindSockets = [
           {

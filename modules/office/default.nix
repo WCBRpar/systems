@@ -155,7 +155,7 @@
           oidc_login 
           onlyoffice
           phonetrack
-          pools
+          polls
           previewgenerator
           quota_warning
           recognize 

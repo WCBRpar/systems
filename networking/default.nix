@@ -48,14 +48,17 @@ in
   services = {
     avahi = {
       enable = true;
-      allowInterfaces = [ "ztc25hlssg" ];
       nssmdns4 = true;
-      publish = {
-        addresses = true;
-        domain = true;
-        enable = true;
-        userServices = true;
-        workstation = true;
+      settings = {
+        server = {
+          allow-interfaces = [ "ztc25hlssg" ];
+        };
+        publish = {
+          publish-domain = true;
+          publish-workstation = true;
+          publish-addresses = true;
+
+        };
       };
     };
     
