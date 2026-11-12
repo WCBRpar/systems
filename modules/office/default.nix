@@ -145,7 +145,7 @@
           files_mindmap
           files_retention
           forms
-          goupfolders
+          groupfolders
           impersonate
           mail 
           maps
