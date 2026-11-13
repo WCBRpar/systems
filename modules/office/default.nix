@@ -16,11 +16,14 @@
     groups = {
       nextcloud = {};
       office = {};
+      kanidm = {};
+      onlyoffice = {};
     };
     users = {
       nextcloud = { isSystemUser = true; group = "nextcloud"; extraGroups = [ "office" ]; };
       nginx = { isSystemUser = true; group = "nginx"; extraGroups = [ "office" ]; };
       kanidm = { isSystemUser = true; group = "kanidm"; extraGroups = [ "office" ]; };
+      onlyoffice = { isSystemUser = true; group = "onlyoffice"; extraGroups = [ "office" ]; };
     };
   };
   age.secrets = {
@@ -53,14 +56,39 @@
   };
 
   systemd = lib.mkIf (hostName == "pegasus") {
-    services.nextcloud-setup ={
-      requires = [ "postgresql.service" ];
-      after = [ "postgresql.service" ];
-      unitConfig.JoinsNamespaceOf = "postgresql.service"; 
-    };
+    services = {
+      nextcloud-setup ={
+        requires = [ "postgresql.service" ];
+        after = [ "postgresql.service" ];
+        unitConfig.JoinsNamespaceOf = "postgresql.service"; 
+      };
+      
+      # Patche para JWT Secrets do OnlyOffice
+      onlyoffice-docservice = {
+        preStart = lib.mkAfter ''
+          umask 077
+          mkdir -p /run/onlyoffice/config/
+      
+          JWT_SECRET=$(cat ${config.age.secrets.onlyoffice-jwt-secret.path})
+      
+          cat > /run/onlyoffice/config/local.json <<EOF
+          {
+            "services": {
+              "CoAuthoring": {
+                "secret": {
+                  "inbox": { "string": "$JWT_SECRET" },
+                  "outbox": { "string": "$JWT_SECRET" },
+                  "session": { "string": "$JWT_SECRET" }
+                }
+              }
+            }
+          }
+          EOF
+        '';
+      };
+    }; 
+
     tmpfiles.rules = [
-      # d: diretório, modo 0750, usuário nextcloud, grupo nextcloud
-      # Z: aplica recursivamente o dono e permissões (importante para o diretório config)
       "d /var/lib/nextcloud 0750 nextcloud nextcloud -"
       "Z /var/lib/nextcloud 0750 nextcloud nextcloud -"
       "d /var/lib/nextcloud/config 0750 nextcloud nextcloud -"
@@ -225,10 +253,14 @@
         # Habilita o arquivamento global e define o nome padrão da pasta (ex: "Archive" ou "Arquivo")
         "app.mail.archive.folder" = "Archive";
 
-        #Configutação Padrões SMTP/IMAP
-        # mail_smtphost = "mail.wcbrpar.com";
-        # mail_smtpmode = "smtp";
-        # mail_smtpsecure = "ssl";
+        # Configutação Padrões SMTP/IMAP do nextcloud
+        mail_smtphost = "mail.wcbrpar.com";
+        mail_smtpmode = "smtp";
+        mail_smtpsecure = "ssl";
+        mail_smtpport = 465;
+        mail_smtpauth = false;
+        mail_from_address = "cloud";
+        mail_domain = "wcbrpar.com";
 
         # Configurações OIDC
         oidc_login_client_id = "nextcloud";
@@ -302,15 +334,14 @@
       enable = true;
       hostname = "office.wcbrpar.com";
       port = 8008;
-
       loglevel = "DEBUG";
 
       allowLocalConnections = true;
       rabbitmqUrl = "amqp://guest:guest@cloud.wcbrpar.com:5672";
       jwtSecretFile = config.age.secrets.onlyoffice-jwt-secret.path;
       securityNonceFile = config.age.secrets.onlyoffice-security-nonce.path;
-
     };
+
 
     traefik = lib.mkIf (config.networking.hostName == "galactica") {
       dynamicConfigOptions = {
@@ -333,7 +364,7 @@
               tls = {
                 certResolver = "cloudflare";
               };
-              middlewares = ["onlyoffice-prefix"];
+             middlewares = [ "onlyoffice-prefix" "onlyoffice-headers" ];
             };
           };
           services = {
@@ -363,6 +394,18 @@
               stripPrefix = {
                 prefixes = ["/"];
                 forceSlash = true;
+              };
+            };
+            onlyoffice-headers = {
+              headers = {
+                customRequestHeaders = {
+                  Connection = "$proxy_connection";
+                  X-Forwarded-Proto = "https";
+                  X-Forwarded-Host = "{host}";
+                  X-Real-IP = "$remote_addr";
+                  X-Forwarded-For = "$proxy_add_x_forwarded_for";
+                };
+                sslRedirect = false;
               };
             };
           };
