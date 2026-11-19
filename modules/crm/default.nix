@@ -167,7 +167,8 @@
       
       settings = {
         options = {
-          http_port = 8011; 
+          http_port = 8011;
+          gevent_port = 8072;
           listen_addresses = "localhost, 192.168.13.20";
           db_host = "localhost";
           db_port = 5432;
@@ -177,15 +178,15 @@
           list_db = true;                # Habilita gerenciador web (opcional)
           proxy_mode = true;             # Necessário para confiar nos cabeçalhos
           dbfilter = ".*";               # Filtro global permissivo
-          server_wide_modules = "base, web, dbfilter_from_header, bus_alt_connection";
+          server_wide_modules = "base, web, dbfilter_from_header"; # bus_alt_connection
           # Evita banco padrão "odoo" que causa erros de tabela inexistente
           db_name = false;
           data_dir = lib.mkForce "/var/lib/odoo/data";
 
           
           # Configurações bus_alt_connection
-          imdispatcher_db_host = "localhost";
-          imdispatcher_db_port = 5432;
+          # imdispatcher_db_host = "localhost";
+          # imdispatcher_db_port = 5432;
 
           # Configurações de Performance
           limit_memory_hard = 1677721600;
@@ -206,7 +207,7 @@
 
           # Módulos base / infraestrutura / sequencias
           base-sequence-option
-          bus-alt-connection
+          # bus-alt-connection
           dbfilter-from-header
           module-auto-update
           sequence-python
