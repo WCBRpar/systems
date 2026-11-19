@@ -65,8 +65,15 @@
               tls.certResolver = "cloudflare";
               middlewares = ["dbfilter-pt13ms"];
             };
+            OD-RBO = {
+              rule = "Host(`crbioceanica.redcom.digital`) || Host(`vozesdarotabioceanica.com.br`)";
+              service = "odoo-service";
+              entrypoints = ["websecure"];
+              tls.certResolver = "cloudflare";
+              middlewares = ["dbfilter-crbioceanica"];
+            };
             OD-LONGPOLLING = {
-              rule = "(Host(`crm.wcbrpar.com`) || Host(`crm.redcom.digital`) || Host(`brtintas.redcom.digital`) || Host(`brtintas.com.br`) || Host(`brtintas.eco.br`) || Host(`elielkaiowa.redcom.digital`) || Host(`elielkaiowa.com.br`) || Host(`fabiotrad.redcom.digital`) || Host(`fabiotrad13.com.br`) || Host(`gisellemarques.redcom.digital`) || Host(`gisellemarques.com.br`) || Host(`novo.adufms.org.br`) || Host(`adufms.redcom.digital`) || Host(`pt13ms.redcom.digital`) || Host(`pt13ms.org.br`) || Host(`lulinas.redcom.digital`) || Host(`festaslulinas.com.br`)) && PathPrefix(`/websocket`)";
+              rule = "(Host(`crm.wcbrpar.com`) || Host(`crm.redcom.digital`) || Host(`brtintas.redcom.digital`) || Host(`brtintas.com.br`) || Host(`brtintas.eco.br`) || Host(`elielkaiowa.redcom.digital`) || Host(`elielkaiowa.com.br`) || Host(`fabiotrad.redcom.digital`) || Host(`fabiotrad13.com.br`) || Host(`gisellemarques.redcom.digital`) || Host(`gisellemarques.com.br`) || Host(`novo.adufms.org.br`) || Host(`adufms.redcom.digital`) || Host(`pt13ms.redcom.digital`) || Host(`pt13ms.org.br`) || Host(`lulinas.redcom.digital`) || Host(`festaslulinas.com.br`) || Host(`crbioceanica.redcom.digital`) || Host(`vozesdarotabioceanica.com.br`)) && PathPrefix(`/websocket`)";
               service = "odoo-longpolling-service";
               entrypoints = ["websecure"];
               tls.certResolver = "cloudflare";
@@ -133,7 +140,17 @@
                 };
               };
             };
- 
+            dbfilter-crbioceanica = {
+              headers = {
+                customRequestHeaders = {
+                  X-Odoo-dbfilter = "^oddb-crbioceanica$";
+                  X-Forwarded-Host = "crbioceanica.redcom.digital";
+                  X-Forwarded-Proto = "https";
+                  X-Forwarded-For = "$remote_addr";
+                };
+              };
+            };
+
           };
           services = {
             odoo-service.loadBalancer.servers = [{ url = "http://pegasus.wcbrpar.com:8011"; }];
@@ -326,6 +343,7 @@
           base-fontawesome-web-editor
           base-name-search-improved
           partner-statement
+          web-company-color
         ]
       ;
     };

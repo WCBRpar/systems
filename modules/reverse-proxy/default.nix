@@ -98,9 +98,17 @@
 
         websecure = {
           address = ":443";
-          http.tls = {
-            certResolver = "cloudflare";
-            options = "mytls";
+          transport = {
+            respondingTimeouts = {
+              readTimeout = "300s";
+              idleTimeout = "300s";
+            };
+          };
+          http = {
+            tls = {
+              certResolver = "cloudflare";
+              options = "mytls";
+            };
           };
           forwardedHeaders = {
             trustedIPs = [ "127.0.0.1/32" "192.168.13.0/24" ];
@@ -114,6 +122,14 @@
           address = ":8082";
         };
       };
+
+      serversTransport = { 
+        forwardingTimeouts = {
+          dialTimeout = "30s";
+          responseHeaderTimeout = "300s";
+          idleConnTimeout = "90s";
+        };
+      };     
 
       certificatesResolvers = {
         cloudflare = {

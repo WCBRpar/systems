@@ -243,15 +243,26 @@
           "avatar" = "local";
         };
 
-        # Configuração declarativa de mapeamento para as pastas especiais IMAP
-        "app.mail.accounts.default" = {
-          sentFolder = "Sent";       # Modifique para "Enviados" se o servidor exigir em português
-          trashFolder = "Trash";     # Modifique para "Lixeira" ou "Trash" se necessário
-          draftsFolder = "Drafts";   # Modifique para "Rascunhos" ou "Drafts" se necessário
-        };        
+        app = {
+          # Configurações de APP Mail no NextCloud
+          mail = {
+            # Configuração declarativa de mapeamento para as pastas especiais IMAP
+            accounts.default = {
+              sentFolder = "Sent";       # Modifique para "Enviados" se o servidor exigir em português
+              trashFolder = "Trash";     # Modifique para "Lixeira" ou "Trash" se necessário
+              draftsFolder = "Drafts";   # Modifique para "Rascunhos" ou "Drafts" se necessário
+            };        
 
-        # Habilita o arquivamento global e define o nome padrão da pasta (ex: "Archive" ou "Arquivo")
-        "app.mail.archive.folder" = "Archive";
+            # Habilita o arquivamento global e define o nome padrão da pasta (ex: "Archive" ou "Arquivo")
+            archive.folder = "Archive";
+          };
+        };
+
+        onlyoffice = {
+          "documentserver_url" = "https://office.wcbrpar.com/"; # URL pública acessível pelo navegador
+          "documentserver_internal_url" = "http://localhost:8008/"; # URL interna para validação server-to-server
+          "jwt_secret" = config.age.secrets.onlyoffice-jwt-secret.path;
+        };
 
         # Configutação Padrões SMTP/IMAP do nextcloud
         mail_smtphost = "mail.wcbrpar.com";
@@ -261,6 +272,7 @@
         mail_smtpauth = false;
         mail_from_address = "cloud";
         mail_domain = "wcbrpar.com";
+
 
         # Configurações OIDC
         oidc_login_client_id = "nextcloud";
@@ -296,7 +308,6 @@
         "lost_password_link" = "disabled";
        
         extraOptions.memories.exiftool = "${pkgs.exiftool}/bin/exiftool";
- 
       };
 
       config = {
@@ -364,7 +375,7 @@
               tls = {
                 certResolver = "cloudflare";
               };
-             middlewares = [ "onlyoffice-prefix" "onlyoffice-headers" ];
+             # middlewares = [ "onlyoffice-headers" ];
             };
           };
           services = {
@@ -399,11 +410,11 @@
             onlyoffice-headers = {
               headers = {
                 customRequestHeaders = {
-                  Connection = "$proxy_connection";
                   X-Forwarded-Proto = "https";
-                  X-Forwarded-Host = "{host}";
-                  X-Real-IP = "$remote_addr";
-                  X-Forwarded-For = "$proxy_add_x_forwarded_for";
+                  X-Forwarded-Host = "office.wcbrpar.com";
+                  X-Forwarded-Prefix = "";
+                  X-Real-IP = "";
+                  X-Forwarded-For = "";
                 };
                 sslRedirect = false;
               };
