@@ -83,8 +83,8 @@
             dbfilter-wcbrpar = {
               headers = {
                 customRequestHeaders = {
-                  X-Odoo-dbfilter = "^WCBRpar$";
-                  # X-Odoo-dbfilter = ".*";
+                  # X-Odoo-dbfilter = "^WCBRpar$";
+                  X-Odoo-dbfilter = ".*";
                 };
               };
             };
@@ -277,7 +277,7 @@
           product-contract 
           product-contract-recurrence-in-price 
           product-contract-variable-quantity 
-          subscription-oca 
+          # subscription-oca 
 
           # Módulos DMS
           dms-odoo      # Nome original dms, utilizado dms-odoo pois existe pacote dms

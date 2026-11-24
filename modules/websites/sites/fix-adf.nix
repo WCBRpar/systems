@@ -67,6 +67,7 @@ in
               wp-user-avatars
 	            wp-rss-aggregator
               wp-swiper
+              wp-all-export
 	            ;
           };
           themes = {

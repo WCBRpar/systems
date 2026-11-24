@@ -5,9 +5,13 @@
   hostName, 
   ...
 }: {
-  environment.systemPackages = [
+
+  environment.systemPackages = lib.mkIf (hostName == "galactica") [
     # pkgs.onlyoffice-workspace.communityServer
     # pkgs.onlyoffice-workspace.documentServer
+    pkgs.ffmpeg
+    pkgs.imagemagick
+    pkgs.exiftool
   ];
 
   # Segredos para o NextCloud e para o OnlyOffice
@@ -149,6 +153,7 @@
       database.createLocally = true;
 
       # Let NixOS install and configure Redis caching automatically.
+      caching.redis = true;
       configureRedis = true;
 
       # Increase the maximum file upload size to avoid problems uploading videos.
@@ -207,7 +212,7 @@
         
         # Horário UTC: 06:00 UTC = 02:00 em Campo Grande.
         default_timezone = "America/Campo_Grande";
-        maintenance_window_start = 6;
+        maintenance_window_start = 2; # 2h am
         # Identificador estável desta instância única de Nextcloud.
         serverid = 1;
 
@@ -248,9 +253,9 @@
           mail = {
             # Configuração declarativa de mapeamento para as pastas especiais IMAP
             accounts.default = {
-              sentFolder = "Sent";       # Modifique para "Enviados" se o servidor exigir em português
-              trashFolder = "Trash";     # Modifique para "Lixeira" ou "Trash" se necessário
-              draftsFolder = "Drafts";   # Modifique para "Rascunhos" ou "Drafts" se necessário
+              sentFolder = "Sent";       
+              trashFolder = "Trash";     
+              draftsFolder = "Drafts";   
             };        
 
             # Habilita o arquivamento global e define o nome padrão da pasta (ex: "Archive" ou "Arquivo")
@@ -307,7 +312,13 @@
         "allow_user_to_change_display_name" = false;
         "lost_password_link" = "disabled";
        
-        extraOptions.memories.exiftool = "${pkgs.exiftool}/bin/exiftool";
+        extraOptions = {
+          memories = {
+            exiftool = "${lib.getExe pkgs.exiftool}";
+            vod.ffmpeg = "${lib.getExe pkgs.ffmpeg-headless}";
+            vod.ffprobe = "${pkgs.ffmpeg-headless}/bin/ffprobe";
+          };
+        };
       };
 
       config = {
@@ -320,10 +331,11 @@
       };
 
       # Notificações
-      # notify_push = {
-      #   enable = true;
-      #   package = pkgs.nextcloud-notify_push;
-      # };
+      notify_push = {
+        enable = true;
+        package = pkgs.nextcloud-notify_push;
+        nextcloudUrl = "https://cloud.wcbrpar.com";
+      };
 
       # Demais opções
       imaginary.enable = true;
@@ -351,6 +363,8 @@
       rabbitmqUrl = "amqp://guest:guest@cloud.wcbrpar.com:5672";
       jwtSecretFile = config.age.secrets.onlyoffice-jwt-secret.path;
       securityNonceFile = config.age.secrets.onlyoffice-security-nonce.path;
+
+      wopi = true;
     };
 
 
