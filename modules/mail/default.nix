@@ -10,7 +10,7 @@ in
 {
 
   # Sub-Módulos
-  imports = [ ./antispam.nix ];
+  imports = [ ./antispam.nix ./talk.nix];
 
   services = {
     # Gerar os certificados pelo Traefik! 
@@ -195,7 +195,7 @@ in
         special_use = "\\Sent";
       };
       Trash = {
-        auto = "no";
+        auto = "subscribe";
         fts_autoindex = false;
         special_use = "\\Trash";
       };

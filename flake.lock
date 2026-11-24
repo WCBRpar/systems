@@ -335,11 +335,11 @@
         "nixpkgs": "nixpkgs_2"
       },
       "locked": {
-        "lastModified": 1795018746,
-        "narHash": "sha256-glQAHvZGgBVjzGIWgIZYSf3X10gvtO2LPR4rtyP/Soc=",
+        "lastModified": 1795505195,
+        "narHash": "sha256-HoBMYHQYxai9NTe3ED6MrZwo2S56ocxgMwTgwmybjJM=",
         "owner": "NixOS",
         "repo": "nixos-hardware",
-        "rev": "33475966110df258f52d05ec4d4cd6394637cbb9",
+        "rev": "ff49dbf39553717ac8e0f4d5085fa0ca10c1031f",
         "type": "github"
       },
       "original": {
@@ -449,8 +449,8 @@
     },
     "nixpkgs_3": {
       "locked": {
-        "lastModified": 1795488256,
-        "narHash": "sha256-yJtFIR+6vMNXXS5wXbJqjI7W4Ke2+r3aE6wb6AATIpQ=",
+        "lastModified": 1795528226,
+        "narHash": "sha256-Se9aMZio0wqVqEpUHUlpKKD/r3k4PXaMzlmXf6sg/eI=",
         "path": "/nas-data/shared/DEV/nixOS/nixpkgs",
         "type": "path"
       },
