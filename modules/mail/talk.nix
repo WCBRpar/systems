@@ -10,7 +10,7 @@ in
 {
   services.nextcloud-spreed-signaling = lib.mkIf (hostName == "galactica") {
     enable = true;
-    hostname = "talk.wcbrpar.com";
+    hostName = "talk.wcbrpar.com";
     # backends = {     };
   };
 }

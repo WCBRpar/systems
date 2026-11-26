@@ -319,7 +319,13 @@
           l10n-br-resource
           l10n-br-sped-base
           l10n-br-zip
+         
+          # Módulo MIS Builder OCA
+          mis-builder
           
+          # Móduo Reporting Engine OCA
+          report-xlsx
+
           # Módulo Server Brand OCA 
           disable-odoo-online
           mail-debranding
@@ -327,6 +333,9 @@
           remove-odoo-enterprise
           sale-portal-debranding
           website-debranding
+
+          # Module Server OCA/Server-UX
+          date-range
 
           # Modulo Social OCA
           mail-gateway
@@ -344,6 +353,7 @@
           base-fontawesome-web-editor
           base-name-search-improved
           partner-statement
+          base-location
           web-company-color
         ]
       ;
