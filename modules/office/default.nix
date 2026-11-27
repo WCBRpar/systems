@@ -6,6 +6,9 @@
   ...
 }: {
 
+  # Sub-Módulos
+  imports = [ ./talk.nix ];
+
   environment.systemPackages = lib.mkIf (hostName == "galactica") [
     # pkgs.onlyoffice-workspace.communityServer
     # pkgs.onlyoffice-workspace.documentServer

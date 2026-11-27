@@ -10,7 +10,7 @@ in
 {
 
   # Sub-Módulos
-  imports = [ ./antispam.nix ./talk.nix ];
+  imports = [ ./antispam.nix ];
 
   services = {
     # Gerar os certificados pelo Traefik! 
