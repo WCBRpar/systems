@@ -42,6 +42,12 @@ in
   "nextcloudOauthSecret.age".publicKeys = all;
   "onlyofficeJwtSecret.age".publicKeys = all;
   "onlyofficeSecurityNonce.age".publicKeys = all;
+  "nextcloudSignalingBackendsSecret.age".publicKeys = all;
+  "nextcloudSignalingSessionsHashkey.age".publicKeys = all;
+  "nextcloudSignalingSessionsBlockkey.age".publicKeys = all;
+  "nextcloudSignalingClientsSecret.age".publicKeys = all;
+  "nextcloudSignalingTurnApikey.age".publicKeys = all;
+  "nextcloudSignalingTurnSecret.age".publicKeys = all;
 
   # Secrets do Simple NixOS Mailserver (SNM)
   "ldapMailPassword.age".publicKeys = all;
