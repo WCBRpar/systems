@@ -389,7 +389,7 @@
               tls = {
                 certResolver = "cloudflare";
               };
-             # middlewares = [ "onlyoffice-headers" ];
+              middlewares = [ "onlyoffice-headers" ];
             };
           };
           services = {
@@ -425,11 +425,12 @@
               headers = {
                 customRequestHeaders = {
                   X-Forwarded-Proto = "https";
-                  X-Forwarded-Host = "office.wcbrpar.com";
-                  X-Forwarded-Prefix = "";
-                  X-Real-IP = "";
-                  X-Forwarded-For = "";
+                  # X-Forwarded-Host = "office.wcbrpar.com";
+                  # X-Forwarded-Prefix = "";
+                  # X-Real-IP = "";
+                  # X-Forwarded-For = "";
                 };
+                hostsProxyHeaders = [ "X-Forwarded-Host" ];
                 sslRedirect = false;
               };
             };
