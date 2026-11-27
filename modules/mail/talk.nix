@@ -43,42 +43,42 @@ in
 
   age.secrets = {
     nextcloud-signaling-backends-secret = {
-      file = ../../secrets/nextcloudSignaligBackendsSecret.age;
+      file = ../../secrets/nextcloudSignalingBackendsSecret.age;
       owner = "nextcloud";
       group = "office";
       mode = "440";
     };
 
     nextcloud-signaling-sessions-hashkey = {
-      file = ../../secrets/nextcloudSignaligSessionsHashkey.age;
+      file = ../../secrets/nextcloudSignalingSessionsHashkey.age;
       owner = "nextcloud";
       group = "office";
       mode = "440";
     };
 
     nextcloud-signaling-sessions-blockkey = {
-      file = ../../secrets/nextcloudSignaligSessionsBlockkey.age;
+      file = ../../secrets/nextcloudSignalingSessionsBlockkey.age;
       owner = "nextcloud";
       group = "office";
       mode = "440";
     };
 
     nextcloud-signaling-clients-secret = {
-      file = ../../secrets/nextcloudSignaligClientsSecret.age;
+      file = ../../secrets/nextcloudSignalingClientsSecret.age;
       owner = "nextcloud";
       group = "office";
       mode = "440";
     };
 
     nextcloud-signaling-turn-apikey = {
-      file = ../../secrets/nextcloudSignaligTurnApikey.age;
+      file = ../../secrets/nextcloudSignalingTurnApikey.age;
       owner = "nextcloud";
       group = "office";
       mode = "440";
     };
 
     nextcloud-signaling-turn-secret = {
-      file = ../../secrets/nextcloudSignaligTurnSecret.age;
+      file = ../../secrets/nextcloudSignalingTurnSecret.age;
       owner = "nextcloud";
       group = "office";
       mode = "440";
